@@ -1,4 +1,4 @@
-import {Machine} from "./classes/machine.js"
+import {Machine} from "./classes/machine"
 
 const canvas = <HTMLCanvasElement> document.getElementById("canvas");
 const ctx = canvas.getContext("2d")!;
