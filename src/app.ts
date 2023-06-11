@@ -17,7 +17,13 @@ function render(){
     index += 1;
 }
 
-setInterval(render, 1000/60);
-
 let machine = new Machine("chungus");
-console.log(machine.format())
+
+function wtf(){
+    machine.getFrame();
+}
+
+wtf();
+
+setInterval(render, 1000/60);
+setInterval(wtf, 1000/60);

@@ -1,30 +1,48 @@
-export class Machine {
-    constructor(
-        readonly name: string
-    ){}
+import {CPU} from "./cpu"
+import {GPU} from "./gpu"
+import {MMU} from "./mmu"
 
-    format(){
-        return '${this.name}';
+export class Machine {
+    private m_cpu: CPU;
+    private m_mmu: MMU;
+    private m_gpu: GPU;
+    private m_inVBLANK: boolean;
+    private m_frame: number[];
+
+    constructor(
+        readonly m_path: string,
+    ){
+        this.m_frame = [144 * 160];
+
+        this.m_mmu = new MMU();
+        this.m_cpu = new CPU(this.m_mmu);
+        this.m_gpu = new GPU(this.m_mmu, this.m_frame);
+
+        this.m_inVBLANK = false;
+        this.m_cpu;
+        this.m_gpu;
+        this.m_inVBLANK;
     }
 
     getFrame() {
-        
+        // while(this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK){
+        //     this.m_cpu.step();
+        //     this.m_gpu.step();
+        // }
 
-        // while (*mmu->addrBus(0xFF44) >= 0x90 && inVBLANK_) {
-        //     cpu->step();
-        //     gpu->step();
+        // this.m_inVBLANK = false;
+
+        // while(this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK){
+        //     this.m_cpu.step();
+        //     this.m_gpu.step();
         // }
-    
-        // inVBLANK_ = false;
-    
-        // //addressBus_[0xFF40] = 0x91;
-        // while (*mmu->addrBus(0xFF44) < 0x90 && !inVBLANK_) {
-        //     cpu->step();
-        //     gpu->step();
-        // }
-    
-        // inVBLANK_ = true;
-    
-        // return frame_;
+
+        // this.m_inVBLANK = true;
+        for(let i = 0; i < 100; i++){
+            this.m_cpu.step();
+            this.m_gpu.step();
+        }
+
+        return this.m_frame;
     }
 }
