@@ -17,13 +17,11 @@ function render(){
     index += 1;
 }
 
-let machine = new Machine("chungus");
+let machine = new Machine("TBD");
 
-function wtf(){
+function wrapper(){
     machine.getFrame();
 }
 
-wtf();
-
 setInterval(render, 1000/60);
-setInterval(wtf, 1000/60);
+setInterval(wrapper, 1000/60);

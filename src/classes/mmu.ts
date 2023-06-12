@@ -2,11 +2,11 @@ export class MMU {
     public m_addrBus: number[];
 
     constructor(){
-        this.m_addrBus = [0xFFFF];
+        this.m_addrBus = Array(0xFFFF).fill(0)
     }
 
-    read(addr: number){
-        return this.m_addrBus[addr & 0xFFFF];
+    read(addr: number) : number{
+        return this.m_addrBus[addr & 0xFFFF]!;
     }
 
     write(addr: number, val: number){

@@ -12,7 +12,7 @@ export class Machine {
     constructor(
         readonly m_path: string,
     ){
-        this.m_frame = [144 * 160];
+        this.m_frame = [144 * 160].fill(0);
 
         this.m_mmu = new MMU();
         this.m_cpu = new CPU(this.m_mmu);
