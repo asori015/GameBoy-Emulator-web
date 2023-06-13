@@ -1,6 +1,17 @@
 import {MMU} from "./mmu"
 
 export class CPU {
+    private m_registers = [8].fill(0);
+
+    private m_instructionMethods1 = [
+        this.LD_R_to_R,
+        this.LD_8_Bit
+    ]
+
+    // private m_instructionMethods2 = [
+    //     this.LD_R_to_R
+    // ]
+
     public m_jstate1: number;
     public m_jstate2: number;
     public m_BIOSMapped: boolean;
@@ -83,13 +94,6 @@ export class CPU {
         let register2 = (instruction & 0b00000111);
         this.m_instructionMethods1[instruction]!(opcode, register1, register2);
         this.m_PC += 1; 
-    
-        // uint8_t opcode = (instruction & 0b11000000) >> 6;
-        // uint8_t register1 = (instruction & 0b00111000) >> 3;
-        // uint8_t register2 = (instruction & 0b00000111);
-        // (this->*instructionMethods1_[instruction])(opcode, register1, register2);
-        // if (debug_) { printf("Instruction: 0x%x\n", instruction); printRegs(); }
-        // PC_ += 1;
 
         this.IME;
         this.m_SP;
@@ -107,14 +111,144 @@ export class CPU {
 
     private LD_R_to_R(op: number, reg1: number, reg2: number): void{
         if(reg2 == 0x06){
-            op;
+            this.m_registers[reg1] = this.m_mmu.read(this.getHL());
+            this.m_clock = 8;
         }
         else{
-            reg1;
+            if(reg1 == 0x06){
+                this.m_mmu.write(this.getHL(), this.m_registers[reg2]!);
+                this.m_clock = 8;
+            }
+            else{
+                this.m_registers[reg1] = this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+        op;
+    }
+
+    private LD_8_Bit(op: number, reg1: number, reg2: number): void{
+        if(op == 0x03){
+            let address = 0;
+            if(reg2 == 0x00){
+                switch(reg1){
+                    case 0x04:
+                        address = 0xFF00 + this.m_mmu.read(++this.m_PC);
+                        if(address == 0xFF00){
+                            this.m_mmu.write(address, this.m_registers[7]! & 0x30);
+                        }
+                        else{
+                            this.m_mmu.write(address, this.m_registers[7]!);
+                        }
+                        this.m_clock = 12;
+                        break;
+                    case 0x06:
+                        address = 0xFF00 + this.m_mmu.read(++this.m_PC);
+                        this.m_registers[7] = this.m_mmu.read(address);
+                        this.m_clock = 12;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if(reg2 == 0x02){
+                switch(reg1){
+                    case 0x04:
+                        address = 0xFF00 + this.m_registers[1]!;
+                        this.m_mmu.write(address, this.m_registers[7]!);
+                        this.m_clock = 8;
+                        break;
+                    case 0x05:
+                        address = this.m_mmu.read(++this.m_PC) + (this.m_mmu.read(++this.m_PC) << 8);
+                        this.m_mmu.write(address, this.m_registers[7]!);
+                        this.m_clock = 16;
+                        break;
+                    case 0x06:
+                        address = 0xFF00 + this.m_registers[1]!;
+                        this.m_registers[7] = this.m_mmu.read(address);
+                        this.m_clock = 8;
+                        break;
+                    case 0x07:
+                        address = this.m_mmu.read(++this.m_PC) + (this.m_mmu.read(++this.m_PC) << 8);
+                        this.m_registers[7] = this.m_mmu.read(address);
+                        this.m_clock = 16;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else{
+            if(reg2 == 0x02){
+                let hl = this.getHL();
+                switch(reg1){
+                    case 0x00:
+                        this.m_mmu.write(this.getBC(), this.m_registers[7]!);
+                        this.m_clock = 8;
+                        break;
+                    case 0x01:
+                        this.m_registers[7] = this.m_mmu.read(this.getBC());
+                        this.m_clock = 8;
+                        break;
+                    case 0x02:
+                        this.m_mmu.write(this.getDE(), this.m_registers[7]!);
+                        this.m_clock = 8;
+                        break;
+                    case 0x03:
+                        this.m_registers[7] = this.m_mmu.read(this.getDE());
+                        this.m_clock = 8;
+                        break;
+                    case 0x04:
+                        this.m_mmu.write(hl, this.m_registers[7]!);
+                        //setHL(hl + 1);
+                        this.m_clock = 8;
+                        break;
+                    case 0x05:
+                        this.m_registers[7] = this.m_mmu.read(hl);
+                        //setHL(hl + 1);
+                        this.m_clock = 8;
+                        break;
+                    case 0x06:
+                        this.m_mmu.write(hl, this.m_registers[7]!);
+                        //setHL(hl - 1);
+                        this.m_clock = 8;
+                        break;
+                    case 0x07:
+                        this.m_registers[7] = this.m_mmu.read(hl);
+                        //setHL(hl - 1);
+                        this.m_clock = 8;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if(reg2 == 0x06){
+                let val = this.m_mmu.read(++this.m_PC);
+                if(reg1 == 0x06){
+                    this.m_mmu.write(this.getHL(), val);
+                    this.m_clock = 12
+                }
+                else{
+                    this.m_registers[reg1] = val;
+                    this.m_clock = 8;
+                }
+            }
         }
     }
 
-    private m_instructionMethods1 = [
-        this.LD_R_to_R
-    ]
+    getAF(){
+        return (this.m_registers[7]!) << 8 + this.m_registers[6]!;
+    }
+
+    private getBC(){
+        return (this.m_registers[0]!) << 8 + this.m_registers[1]!;
+    }
+
+    private getDE(){
+        return (this.m_registers[2]!) << 8 + this.m_registers[3]!;
+    }
+
+    private getHL(){
+        return (this.m_registers[4]!) << 8 + this.m_registers[5]!;
+    }
 }

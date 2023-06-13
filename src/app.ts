@@ -24,4 +24,7 @@ function wrapper(){
 }
 
 setInterval(render, 1000/60);
-setInterval(wrapper, 1000/60);
+//setInterval(wrapper, 1000/60);
+wrapper();
+wrapper();
+wrapper();
