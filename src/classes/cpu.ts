@@ -4,8 +4,262 @@ export class CPU {
     private m_registers = [8].fill(0);
 
     private m_instructionMethods1 = [
+        this.opcode00,
+        this.opcode01,
+        this.opcode02,
+        this.INC_16_BIT,
+        this.INC,
+        this.DEC,
+        this.LD_8_Bit,
+        this.RLC,
+        this.JP,
+        this.opcode00,
+        this.opcode00,
+        this.DEC_16_BIT,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.JR,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
+        this.JR,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.INC,
+        this.DEC,
+        this.opcode00,
+        this.opcode00,
         this.LD_R_to_R,
-        this.LD_8_Bit
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.LD_R_to_R,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.ADD,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.SUB,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.AND,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.XOR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.OR,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.CP,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
     ]
 
     // private m_instructionMethods2 = [
@@ -59,6 +313,13 @@ export class CPU {
         this.m_cbPrefix = false;
         this.m_isHalted = false;
         this.m_falligEdgeDelay = false;
+
+        this.DIV;
+        this.TIMA;
+        this.TMA;
+        this.TAC;
+        this.IF;
+        this.IE;
     }
 
     public step(){
@@ -559,9 +820,115 @@ export class CPU {
         this.setN(true);
     }
 
-    private getAF(){
-        return (this.m_registers[this.R.A]!) << 8 + this.m_registers[this.R.F]!;
+    private INC_16_BIT(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+
+        switch(reg1){
+            case 0x00:
+                this.setBC(this.getBC() + 1);
+                break;
+            case 0x02:
+                this.setDE(this.getDE() + 1);
+                break;
+            case 0x04:
+                this.setHL(this.getHL() + 1);
+                break;
+            case 0x06:
+                this.m_SP = (this.m_SP + 1) & 0xFFFF;
+                break;
+            default:
+                break;
+        }
+
+        this.m_clock = 8;
     }
+
+    private DEC_16_BIT(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+
+        switch(reg1){
+            case 0x00:
+                this.setBC(this.getBC() - 1);
+                break;
+            case 0x02:
+                this.setDE(this.getDE() - 1);
+                break;
+            case 0x04:
+                this.setHL(this.getHL() - 1);
+                break;
+            case 0x06:
+                this.m_SP = (this.m_SP - 1) & 0xFFFF;
+                break;
+            default:
+                break;
+        }
+
+        this.m_clock = 8;
+    }
+
+    private RLC(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg2 = instruction & 0b00000111;
+
+        if(reg2 == 0x06){
+            let rVal = this.m_mmu.read(this.getHL());
+
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 0b10000000);
+            this.m_mmu.write(this.getHL(), ((rVal << 1) + Number(this.getC())) & 0xFF)
+
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else{
+            let rVal = this.m_registers[reg2]!;
+
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 0b10000000);
+            this.m_registers[reg2] = ((rVal << 1) + Number(this.getC())) & 0xFF
+
+            // Calculate if Zero flag needs to be set
+            if(this.m_cbPrefix){
+                this.setZ(this.m_registers[reg2] == 0);
+                this.m_clock = 8
+            }
+            else{
+                this.setZ(false);
+                this.m_clock = 4;
+            }
+        }
+
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+    }
+
+    // NOP
+    private opcode00(): void{
+        this.m_clock = 4;
+    }
+
+    // LD BC, d16
+    private opcode01(): void{
+        let lVal = this.m_mmu.read(++this.m_PC);
+        let hVal = this.m_mmu.read(++this.m_PC);
+        this.m_registers[this.R.B] = hVal;
+        this.m_registers[this.R.C] = lVal;
+        this.m_clock = 12;
+    }
+
+    // LD (BC), A
+    private opcode02(): void{
+        this.m_mmu.write(this.getBC(), this.m_registers[this.R.A]!);
+        this.m_clock = 8;
+    }
+
+    // private getAF(){
+    //     return (this.m_registers[this.R.A]!) << 8 + this.m_registers[this.R.F]!;
+    // }
 
     private getBC(){
         return (this.m_registers[this.R.B]!) << 8 + this.m_registers[this.R.C]!;
@@ -575,17 +942,45 @@ export class CPU {
         return (this.m_registers[this.R.E]!) << 8 + this.m_registers[this.R.L]!;
     }
 
+    private setAF(value: number): void{
+        let hVal = (value >> 8) & 0x00FF;
+        let lVal = value & 0x00FF;
+        this.m_registers[this.R.A] = hVal;
+        this.m_registers[this.R.F] = lVal;
+    }
+
+    private setBC(value: number): void{
+        let hVal = (value >> 8) & 0x00FF;
+        let lVal = value & 0x00FF;
+        this.m_registers[this.R.B] = hVal;
+        this.m_registers[this.R.C] = lVal;
+    }
+
+    private setDE(value: number): void{
+        let hVal = (value >> 8) & 0x00FF;
+        let lVal = value & 0x00FF;
+        this.m_registers[this.R.D] = hVal;
+        this.m_registers[this.R.E] = lVal;
+    }
+
+    private setHL(value: number): void{
+        let hVal = (value >> 8) & 0x00FF;
+        let lVal = value & 0x00FF;
+        this.m_registers[this.R.H] = hVal;
+        this.m_registers[this.R.L] = lVal;
+    }
+
     private getC(){
         return (this.m_registers[this.R.F]! & 0b00010000) > 0;
     }
 
-    private getH(){
-        return (this.m_registers[this.R.F]! & 0b00100000) > 0;
-    }
+    // private getH(){
+    //     return (this.m_registers[this.R.F]! & 0b00100000) > 0;
+    // }
 
-    private getN(){
-        return (this.m_registers[this.R.F]! & 0b01000000) > 0;
-    }
+    // private getN(){
+    //     return (this.m_registers[this.R.F]! & 0b01000000) > 0;
+    // }
 
     private getZ(){
         return (this.m_registers[this.R.F]! & 0b10000000) > 0;
