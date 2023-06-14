@@ -25,13 +25,24 @@ export class CPU {
     private m_isHalted: boolean;
     private m_falligEdgeDelay: boolean;
 
-    readonly P1 = 0xFF00;
-    readonly DIV = 0xFF03;
-    readonly TIMA = 0xFF05;
-    readonly TMA = 0xFF06;
-    readonly TAC = 0xFF07;
-    readonly IF = 0xFF0F;
-    readonly IE = 0xFFFF;
+    private readonly P1 = 0xFF00;
+    private readonly DIV = 0xFF03;
+    private readonly TIMA = 0xFF05;
+    private readonly TMA = 0xFF06;
+    private readonly TAC = 0xFF07;
+    private readonly IF = 0xFF0F;
+    private readonly IE = 0xFFFF;
+
+    private readonly R = {
+        A: 7,
+        B: 0,
+        C: 1,
+        D: 2,
+        E: 3,
+        F: 6,
+        H: 4,
+        L: 5
+    }
     
     constructor(
         private m_mmu: MMU
@@ -236,19 +247,383 @@ export class CPU {
         }
     }
 
-    getAF(){
-        return (this.m_registers[7]!) << 8 + this.m_registers[6]!;
+    private JP(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+        let reg2 = instruction & 0b00000111;
+
+        if(reg2 == 0x01){
+            this.m_PC = this.getHL() - 1;
+            this.m_clock = 4;
+        }
+        else{
+            let lVal = this.m_mmu.read(++this.m_PC);
+            let hVal = this.m_mmu.read(++this.m_PC);
+            let addr = (hVal << 8) + lVal;
+            this.m_clock = 12;
+
+            if(reg2 == 0x02){
+                switch(reg1){
+                    case 0x00:
+                        if(this.getZ()){return;}
+                        break;
+                    case 0x01:
+                        if(!this.getZ()){return;}
+                        break;
+                    case 0x02:
+                        if(this.getC()){return;}
+                        break;
+                    case 0x03:
+                        if(!this.getC()){return;}
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            this.m_PC = addr - 1;
+            this.m_clock = 16;
+        }
+    }
+
+    private JR(): void{
+        let nVal = this.m_mmu.read(++this.m_PC)
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+
+        if(reg1 != 0x03){
+            this.m_clock = 8;
+            switch(reg1){
+                case 0x04:
+                    if(this.getZ()){return;}
+                    break;
+                case 0x05:
+                    if(!this.getZ()){return;}
+                    break;
+                case 0x06:
+                    if(this.getC()){return;}
+                    break;
+                case 0x07:
+                    if(!this.getC()){return;}
+                    break;
+            }
+        }
+
+        this.m_PC += nVal;
+        this.m_clock = 12;
+    }
+
+    private ADD():void{
+        let rVal = this.m_registers[this.R.A]!;
+        let nVal = 0;
+        let carry = 0;
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg1 = instruction & 0b00111000;
+        let reg2 = instruction & 0b00000111;
+
+        // Check if carry bit will be used
+        if(reg1 == 0x01){
+            carry = Number(this.getC());
+        }
+
+        // Get the value being used for the calculation with Register A
+        if(op == 0x03){
+            nVal = this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                nVal = this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Perform addition to A register
+        this.m_registers[this.R.A] = (rVal + nVal + carry) & 0xFF;
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set N flag to 0
+        this.setN(false);
+        // Calculate if Half-Carry flag needs to be set
+        this.setH(((rVal & 0x0F) + (nVal & 0x0F) + carry) > 0x0F);
+        // Calculate if Full-Carry flag needs to be set
+        this.setC((rVal + nVal + carry) > 0xFF);
+    }
+
+    private SUB(): void{
+        let rVal = this.m_registers[this.R.A]!;
+        let nVal = 0;
+        let carry = 0;
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg1 = instruction & 0b00111000;
+        let reg2 = instruction & 0b00000111;
+
+        if(reg1 == 0x03){
+            carry = Number(this.getC());
+        }
+
+        if(op == 0x03){
+            nVal = this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                nVal = this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Calculate if Half-Carry flag needs to be set
+        this.setH((rVal & 0x0F) < (nVal & 0x0F) + carry);
+        // Perform subtraction to A register
+        this.m_registers[this.R.A] = (rVal - nVal - carry) & 0xFF;
+        // Calculate if Full-Carry flag needs to be set
+        this.setC(nVal + carry > rVal);
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set N flag to 1
+        this.setN(true);
+    }
+
+    private AND(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg2 = instruction & 0b00000111;
+
+        if(op == 0x03){
+            this.m_registers[this.R.A] &= this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                this.m_registers[this.R.A] &= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                this.m_registers[this.R.A] &= this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C and N flags to 0, H flag to 1
+        this.setC(false);
+        this.setH(true);
+        this.setN(false);
+    }
+
+    private XOR(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg2 = instruction & 0b00000111;
+
+        if(op == 0x03){
+            this.m_registers[this.R.A] ^= this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                this.m_registers[this.R.A] ^= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                this.m_registers[this.R.A] ^= this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C, H, and N flags to 0
+        this.setC(false);
+        this.setH(false);
+        this.setN(false);
+    }
+
+    private OR(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg2 = instruction & 0b00000111;
+
+        if(op == 0x03){
+            this.m_registers[this.R.A] |= this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                this.m_registers[this.R.A] |= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                this.m_registers[this.R.A] |= this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C, H, and N flags to 0
+        this.setC(false);
+        this.setH(false);
+        this.setN(false);
+    }
+
+    private CP(): void{
+        let rVal = this.m_registers[this.R.A]!;
+        let nVal = 0;
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = instruction & 0b11000000;
+        let reg2 = instruction & 0b00000111;
+
+        if(op == 0x03){
+            nVal = this.m_mmu.read(++this.m_PC);
+            this.m_clock = 8;
+        }
+        else{
+            if(reg2 == 0x06){
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else{
+                nVal = this.m_registers[reg2]!;
+                this.m_clock = 4;
+            }
+        }
+
+        // Calculate if Half-Carry flag needs to be set
+        this.setH(((rVal - nVal) & 0x0F) > (rVal & 0x0F));
+        // Calculate if Full-Carry flag needs to be set
+        this.setC(nVal > rVal);
+        // Calculate if Zero flag needs to be set
+        this.setZ(nVal == rVal);
+        // Set N flag to 1
+        this.setN(true);
+    }
+
+    private INC(): void{
+        let result = 0;
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+    
+        if (reg1 == 0x06) {
+            this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) + 1);
+            result = this.m_mmu.read(this.getHL())
+            this.m_clock = 12;
+        }
+        else {
+            this.m_registers[reg1] = (this.m_registers[reg1]! + 1) & 0xFF;
+            result = this.m_registers[reg1]!;
+            this.m_clock = 4;
+        }
+    
+        // Calculate if Zero flag needs to be set
+        this.setZ(result == 0x00);
+        // Calculate if Half-Carry flag needs to be set
+        this.setH((result & 0x0F) == 0x00);
+        // Set N flag to 0
+        this.setN(false);
+    }
+
+    private DEC(): void{
+        let result = 0;
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+    
+        if (reg1 == 0x06) {
+            this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) - 1);
+            result = this.m_mmu.read(this.getHL())
+            this.m_clock = 12;
+        }
+        else {
+            this.m_registers[reg1] = (this.m_registers[reg1]! - 1) & 0xFF;
+            result = this.m_registers[reg1]!;
+            this.m_clock = 4;
+        }
+    
+        // Calculate if Zero flag needs to be set
+        this.setZ(result == 0x00);
+        // Calculate if Half-Carry flag needs to be set
+        this.setH((result & 0x0F) == 0x0F);
+        // Set N flag to 1
+        this.setN(true);
+    }
+
+    private getAF(){
+        return (this.m_registers[this.R.A]!) << 8 + this.m_registers[this.R.F]!;
     }
 
     private getBC(){
-        return (this.m_registers[0]!) << 8 + this.m_registers[1]!;
+        return (this.m_registers[this.R.B]!) << 8 + this.m_registers[this.R.C]!;
     }
 
     private getDE(){
-        return (this.m_registers[2]!) << 8 + this.m_registers[3]!;
+        return (this.m_registers[this.R.D]!) << 8 + this.m_registers[this.R.E]!;
     }
 
     private getHL(){
-        return (this.m_registers[4]!) << 8 + this.m_registers[5]!;
+        return (this.m_registers[this.R.E]!) << 8 + this.m_registers[this.R.L]!;
+    }
+
+    private getC(){
+        return (this.m_registers[this.R.F]! & 0b00010000) > 0;
+    }
+
+    private getH(){
+        return (this.m_registers[this.R.F]! & 0b00100000) > 0;
+    }
+
+    private getN(){
+        return (this.m_registers[this.R.F]! & 0b01000000) > 0;
+    }
+
+    private getZ(){
+        return (this.m_registers[this.R.F]! & 0b10000000) > 0;
+    }
+
+    private setC(val: boolean){
+        if(val){
+            this.m_registers[this.R.F] |= 0b00010000;
+        }
+        else{
+            this.m_registers[this.R.F] &= 0b11101111;
+        }
+    }
+
+    private setH(val: boolean){
+        if(val){
+            this.m_registers[this.R.F] |= 0b00100000;
+        }
+        else{
+            this.m_registers[this.R.F] &= 0b11011111;
+        }
+    }
+
+    private setN(val: boolean){
+        if(val){
+            this.m_registers[this.R.F] |= 0b01000000;
+        }
+        else{
+            this.m_registers[this.R.F] &= 0b10111111;
+        }
+    }
+
+    private setZ(val: boolean){
+        if(val){
+            this.m_registers[this.R.F] |= 0b10000000;
+        }
+        else{
+            this.m_registers[this.R.F] &= 0b01111111;
+        }
     }
 }
