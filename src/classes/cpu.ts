@@ -942,12 +942,12 @@ export class CPU {
         return (this.m_registers[this.R.E]!) << 8 + this.m_registers[this.R.L]!;
     }
 
-    private setAF(value: number): void{
-        let hVal = (value >> 8) & 0x00FF;
-        let lVal = value & 0x00FF;
-        this.m_registers[this.R.A] = hVal;
-        this.m_registers[this.R.F] = lVal;
-    }
+    // private setAF(value: number): void{
+    //     let hVal = (value >> 8) & 0x00FF;
+    //     let lVal = value & 0x00FF;
+    //     this.m_registers[this.R.A] = hVal;
+    //     this.m_registers[this.R.F] = lVal;
+    // }
 
     private setBC(value: number): void{
         let hVal = (value >> 8) & 0x00FF;
