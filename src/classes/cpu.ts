@@ -1,8 +1,6 @@
 import {MMU} from "./mmu"
 
 export class CPU {
-    private m_registers = [8].fill(0);
-
     private m_instructionMethods1 = [
         this.opcode00,
         this.opcode01,
@@ -273,6 +271,7 @@ export class CPU {
     private m_PC: number;
     private m_SP: number;
     private m_clock: number;
+    private m_registers;
 
     private IME: boolean;
     private m_cbPrefix: boolean;
@@ -308,6 +307,7 @@ export class CPU {
         this.m_PC = 0;
         this.m_SP = 0;
         this.m_clock = 0;
+        this.m_registers = new Array(8).fill(0);
 
         this.IME = false;
         this.m_cbPrefix = false;
@@ -342,9 +342,10 @@ export class CPU {
         this.checkForInterupts();
     
         if(!this.m_isHalted){
-            console.log(this.m_clock);
+            // console.log(this.m_clock);
             console.log(this.m_mmu);
             console.log(this.m_mmu.read(this.m_PC));
+            console.log(this.m_registers);
             if(this.m_clock == 0){
                 this.execute(this.m_mmu.read(this.m_PC));
             }
