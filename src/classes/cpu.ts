@@ -10,62 +10,62 @@ export class CPU {
         this.DEC,
         this.LD_8_Bit,
         this.RLC,
-        this.JP,
-        this.opcode00,
-        this.opcode00,
+        this.LD_16_Bit,
+        this.ADD_16_BIT,
+        this.LD_8_Bit,
         this.DEC_16_BIT,
         this.INC,
         this.DEC,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
+        this.LD_8_Bit,
+        this.RRC,
+        this.STOP,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.INC_16_BIT,
         this.INC,
         this.DEC,
-        this.opcode00,
-        this.opcode00,
+        this.LD_8_Bit,
+        this.RL,
         this.JR,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
+        this.ADD_16_BIT,
+        this.LD_8_Bit,
+        this.DEC_16_BIT,
         this.INC,
         this.DEC,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.INC,
-        this.DEC,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.INC,
-        this.DEC,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.INC,
-        this.DEC,
-        this.opcode00,
-        this.opcode00,
+        this.LD_8_Bit,
+        this.RR,
         this.JR,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.INC_16_BIT,
         this.INC,
         this.DEC,
-        this.opcode00,
-        this.opcode00,
+        this.LD_8_Bit,
+        this.DAA,
+        this.JR,
+        this.ADD_16_BIT,
+        this.LD_8_Bit,
+        this.DEC_16_BIT,
+        this.INC,
+        this.DEC,
+        this.LD_8_Bit,
+        this.CPL,
+        this.JR,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.INC_16_BIT,
+        this.INC,
+        this.DEC,
+        this.LD_8_Bit,
+        this.SCF,
+        this.JR,
+        this.ADD_16_BIT,
+        this.LD_8_Bit,
+        this.DEC_16_BIT,
+        this.INC,
+        this.DEC,
+        this.LD_8_Bit,
+        this.CCF,
         this.LD_R_to_R,
         this.LD_R_to_R,
         this.LD_R_to_R,
@@ -120,7 +120,7 @@ export class CPU {
         this.LD_R_to_R,
         this.LD_R_to_R,
         this.LD_R_to_R,
-        this.LD_R_to_R,
+        this.HALT,
         this.LD_R_to_R,
         this.LD_R_to_R,
         this.LD_R_to_R,
@@ -194,70 +194,329 @@ export class CPU {
         this.CP,
         this.CP,
         this.CP,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
-        this.opcode00,
+        this.RET,
+        this.LD_16_Bit,
+        this.JP,
+        this.JP,
+        this.CALL,
+        this.LD_16_Bit,
+        this.ADD,
+        this.RST,
+        this.RET,
+        this.RET,
+        this.JP,
+        this.CBPrefix,
+        this.CALL,
+        this.CALL,
+        this.ADD,
+        this.RST,
+        this.RET,
+        this.LD_16_Bit,
+        this.JP,
+        this.opcode00,
+        this.CALL,
+        this.LD_16_Bit,
+        this.SUB,
+        this.RST,
+        this.RET,
+        this.RET,
+        this.JP,
+        this.opcode00,
+        this.CALL,
+        this.opcode00,
+        this.SUB,
+        this.RST,
+        this.LD_8_Bit,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.opcode00,
+        this.opcode00,
+        this.LD_16_Bit,
+        this.AND,
+        this.RST,
+        this.ADD_16_BIT,
+        this.JP,
+        this.LD_8_Bit,
+        this.opcode00,
+        this.opcode00,
+        this.opcode00,
+        this.XOR,
+        this.RST,
+        this.LD_8_Bit,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.DI,
+        this.opcode00,
+        this.LD_16_Bit,
+        this.OR,
+        this.RST,
+        this.LD_16_Bit,
+        this.LD_16_Bit,
+        this.LD_8_Bit,
+        this.EI,
+        this.opcode00,
+        this.opcode00,
+        this.CP,
+        this.RST
+    ]
+
+    private m_instructionMethods2 = [
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RLC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RRC,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RL,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.RR,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SLA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SRA,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SWAP,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.SRL,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.BIT,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.RES,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET,
+        this.SET
     ]
 
     // private m_instructionMethods2 = [
@@ -507,6 +766,10 @@ export class CPU {
                 }
             }
         }
+    }
+
+    private LD_16_Bit(): void{
+
     }
 
     private JP(): void{
@@ -821,6 +1084,10 @@ export class CPU {
         this.setN(true);
     }
 
+    private ADD_16_BIT(): void{
+
+    }
+
     private INC_16_BIT(): void{
         let instruction = this.m_mmu.read(this.m_PC);
         let reg1 = instruction & 0b00111000;
@@ -869,6 +1136,10 @@ export class CPU {
         this.m_clock = 8;
     }
 
+    private CBPrefix(): void{
+        this.m_instructionMethods2;
+    }
+
     private RLC(): void{
         let instruction = this.m_mmu.read(this.m_PC);
         let reg2 = instruction & 0b00000111;
@@ -905,6 +1176,90 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
+    }
+
+    private RRC(): void{
+        ;
+    }
+
+    private RL(): void{
+        ;
+    }
+
+    private RR(): void{
+        ;
+    }
+
+    private SLA(): void{
+        ;
+    }
+
+    private SRA(): void{
+        ;
+    }
+
+    private SWAP(): void{
+        ;
+    }
+
+    private SRL(): void{
+        ;
+    }
+
+    private BIT(): void{
+        ;
+    }
+
+    private RES(): void{
+        ;
+    }
+
+    private SET(): void{
+        ;
+    }
+
+    private CALL(): void{
+        ;
+    }
+
+    private RET(): void{
+        ;
+    }
+
+    private RST(): void{
+        ;
+    }
+
+    private DAA(): void{
+        ;
+    }
+
+    private CPL(): void{
+        ;
+    }
+
+    private SCF(): void{
+        ;
+    }
+
+    private CCF(): void{
+        ;
+    }
+
+    private DI(): void{
+        ;
+    }
+
+    private EI(): void{
+        ;
+    }
+
+    private HALT(): void{
+        ;
+    }
+
+    private STOP(): void{
+        ;
     }
 
     // NOP
