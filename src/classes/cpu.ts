@@ -535,7 +535,7 @@ export class CPU {
     private IME: boolean;
     private m_cbPrefix: boolean;
     private m_isHalted: boolean;
-    private m_falligEdgeDelay: boolean;
+    private m_fallingEdgeDelay: boolean;
 
     private readonly P1 = 0xFF00;
     private readonly DIV = 0xFF03;
@@ -571,7 +571,7 @@ export class CPU {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
-        this.m_falligEdgeDelay = false;
+        this.m_fallingEdgeDelay = false;
 
         this.DIV;
         this.TIMA;
@@ -601,13 +601,9 @@ export class CPU {
         this.checkForInterupts();
     
         if(!this.m_isHalted){
-            // console.log(this.m_clock);
-            console.log(this.m_mmu);
-            console.log(this.m_mmu.read(this.m_PC));
-            console.log(this.m_registers);
-            if(this.m_clock == 0){
+            //if(this.m_clock == 0){
                 this.execute(this.m_mmu.read(this.m_PC));
-            }
+            //}
             this.m_clock -= 1;
         }
     }
@@ -617,31 +613,71 @@ export class CPU {
     }
 
     private execute(instruction: number){
+        console.log(this.R)
+        console.log(this.R.A)
+        console.log(this.m_registers[this.R.A])
         if(this.m_PC == 0x0100){
             this.m_BIOSMapped = false;
         }
 
-        let opcode = (instruction & 0b11000000) >> 6;
-        let register1 = (instruction & 0b00111000) >> 3;
-        let register2 = (instruction & 0b00000111);
-        this.m_instructionMethods1[instruction]!(opcode, register1, register2);
+        this.m_instructionMethods1[instruction]!();
+        console.log(this.m_PC);
         this.m_PC += 1; 
+        console.log(this.m_PC);
 
         this.IME;
         this.m_SP;
         this.m_cbPrefix;
-        this.m_falligEdgeDelay;
     }
 
+    // DIV needs to be implemented properly...
     private updateTimer(){
-        ; //TODO
+        this.m_mmu.write(this.DIV, this.m_mmu.read(this.DIV) + 1);
+        if((this.m_mmu.read(this.TAC) & 0x04) > 0){
+            let sum = this.m_mmu.read(this.TIMA);
+            if((this.m_mmu.read(this.TAC) & 0x03) > 0){
+                if((this.m_mmu.read(this.DIV) & (0x0002 << (((this.m_mmu.read(this.TAC) & 0x03) * 2)))) > 0){
+                    this.m_fallingEdgeDelay = true;
+                }
+                else{
+                    if(this.m_fallingEdgeDelay){
+                        sum += 1;
+                        this.m_fallingEdgeDelay = false;
+                    }
+                }
+            }
+            else{
+                if((this.m_mmu.read(this.DIV) & 0x0200) > 0){
+                    this.m_fallingEdgeDelay = true;
+                }
+                else{
+                    if(this.m_fallingEdgeDelay){
+                        sum += 1;
+                        this.m_fallingEdgeDelay = false;
+                    }
+                }
+            }
+
+            if(sum > 0x00FF){
+                this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
+            }
+            else{
+                this.m_mmu.write(this.TIMA, sum & 0x00FF);
+            }
+        }
     }
 
     private checkForInterupts(){
         ; //TODO
     }
 
-    private LD_R_to_R(op: number, reg1: number, reg2: number): void{
+    private LD_R_to_R(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = (instruction & 0b11000000) >> 6;
+        let reg1 = (instruction & 0b00111000) >> 3;
+        let reg2 = (instruction & 0b00000111);
+
         if(reg2 == 0x06){
             this.m_registers[reg1] = this.m_mmu.read(this.getHL());
             this.m_clock = 8;
@@ -659,7 +695,12 @@ export class CPU {
         op;
     }
 
-    private LD_8_Bit(op: number, reg1: number, reg2: number): void{
+    private LD_8_Bit(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let op = (instruction & 0b11000000) >> 6;
+        let reg1 = (instruction & 0b00111000) >> 3;
+        let reg2 = (instruction & 0b00000111);
+
         if(op == 0x03){
             let address = 0;
             if(reg2 == 0x00){
@@ -769,7 +810,10 @@ export class CPU {
     }
 
     private LD_16_Bit(): void{
-
+        console.log(this)
+        console.log(this.R)
+        console.log(this.R.A)
+        console.log(this.m_registers[this.R.A])
     }
 
     private JP(): void{
