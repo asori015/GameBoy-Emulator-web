@@ -613,17 +613,15 @@ export class CPU {
     }
 
     private execute(instruction: number){
-        console.log(this.R)
-        console.log(this.R.A)
-        console.log(this.m_registers[this.R.A])
+        console.log(this.m_PC)
+        console.log(instruction)
+        console.log(this.m_registers)
         if(this.m_PC == 0x0100){
             this.m_BIOSMapped = false;
         }
 
-        this.m_instructionMethods1[instruction]!();
-        console.log(this.m_PC);
-        this.m_PC += 1; 
-        console.log(this.m_PC);
+        this.m_instructionMethods1[instruction]!.call(this);
+        this.m_PC += 1;
 
         this.IME;
         this.m_SP;
@@ -810,10 +808,122 @@ export class CPU {
     }
 
     private LD_16_Bit(): void{
-        console.log(this)
-        console.log(this.R)
-        console.log(this.R.A)
-        console.log(this.m_registers[this.R.A])
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+        let reg2 = instruction & 0b00000111;
+        let op = instruction & 0b11000000;
+
+        if(op == 0x03){
+            if(reg2 == 0x01){
+                let lVal = 0;
+                let hVal = 0;
+                switch(reg1){
+                    case 0x00:
+                        lVal = this.m_mmu.read(this.m_SP++);
+                        hVal = this.m_mmu.read(this.m_SP++);
+                        this.setBC((hVal << 8) + lVal);
+                        this.m_clock = 12;
+                        break;
+                    case 0x02:
+                        lVal = this.m_mmu.read(this.m_SP++);
+                        hVal = this.m_mmu.read(this.m_SP++);
+                        this.setDE((hVal << 8) + lVal);
+                        this.m_clock = 12;
+                        break;
+                    case 0x04:
+                        lVal = this.m_mmu.read(this.m_SP++);
+                        hVal = this.m_mmu.read(this.m_SP++);
+                        this.setHL((hVal << 8) + lVal);
+                        this.m_clock = 12;
+                        break;
+                    case 0x06:
+                        lVal = this.m_mmu.read(this.m_SP++);
+                        hVal = this.m_mmu.read(this.m_SP++);
+                        this.setAF((hVal << 8) + lVal);
+                        this.m_clock = 12;
+                        break;
+                    case 0x07:
+                        this.m_SP = this.getHL();
+                        this.m_clock = 8;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else{
+                let val = 0;
+                switch(reg1){
+                    case 0x00:
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.B]);
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.C]);
+                        this.m_clock = 16;
+                        break;
+                    case 0x02:
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.D]);
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.E]);
+                        this.m_clock = 16;
+                        break;
+                    case 0x04:
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.H]);
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.L]);
+                        this.m_clock = 16;
+                        break;
+                    case 0x06:
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.F]);
+                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.A]);
+                        this.m_clock = 16;
+                        break;
+                    case 0x07:
+                        val = this.m_mmu.read(++this.m_PC);
+                        this.setHL(this.m_SP + val);
+
+                        // Set Z flag to 0
+                        this.setZ(false);
+                        // Set N flag to 0
+                        this.setN(false);
+                        // Calculate if Half-Carry flag needs to be set
+                        this.setH(((this.m_SP ^ this.getHL() ^ val) & 0x0010) == 0x0010);
+                        // Calculate if Carry flag needs to be set
+                        this.setC(((this.m_SP ^ this.getHL() ^ val) & 0x0100) == 0x0100);
+
+                        this.m_clock = 12;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else{
+            let lVal = this.m_mmu.read(++this.m_PC);
+            let hVal = this.m_mmu.read(++this.m_PC);
+            let addr;
+            switch(reg1){
+                case 0x00:
+                    this.setBC((hVal << 8) + lVal);
+                    this.m_clock = 12;
+                    break;
+                case 0x01:
+                    addr = (hVal << 8) + lVal;
+                    this.m_mmu.write(addr, this.m_SP & 0x00FF);
+                    this.m_mmu.write(addr + 1, this.m_SP & 0xFF00);
+                    this.m_clock = 20;
+                    break;
+                case 0x02:
+                    this.setDE((hVal << 8) + lVal);
+                    this.m_clock = 12;
+                    break;
+                case 0x04:
+                    this.setHL((hVal << 8) + lVal);
+                    this.m_clock = 12;
+                    break;
+                case 0x06:
+                    this.m_PC = (hVal << 8) + lVal;
+                    this.m_clock = 12;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private JP(): void{
@@ -1129,7 +1239,54 @@ export class CPU {
     }
 
     private ADD_16_BIT(): void{
+        let instruction = this.m_mmu.read(this.m_PC);
+        let reg1 = instruction & 0b00111000;
+        let reg2 = instruction & 0b00000111;
 
+        if(reg2 == 0x00){
+            let nVal = this.m_mmu.read(++this.m_PC);
+            let rVal = this.m_SP;
+            this.m_SP = (this.m_SP + nVal) & 0xFFFF;
+
+            // Set Z flag to 0
+            this.setZ(false);
+            // Set N flag to 0
+            this.setN(false);
+            // Calculate if Half-Carry flag needs to be set
+            this.setH(((this.m_SP ^ rVal ^ nVal) & 0x0010) == 0x0010);
+            // Calculate if Carry flag needs to be set
+            this.setC(((this.m_SP ^ rVal ^ nVal) & 0x0100) == 0x0100);
+
+            this.m_clock = 16;
+        }
+        else{
+            let rVal = this.getHL()
+            switch(reg1){
+                case 0x01:
+                    this.setHL(this.getHL() + this.getBC());
+                    break;
+                case 0x03:
+                    this.setHL(this.getHL() + this.getDE());
+                    break;
+                case 0x05:
+                    this.setHL(this.getHL() + this.getHL());
+                    break;
+                case 0x07:
+                    this.setHL(this.getHL() + this.m_SP);
+                    break;
+                default:
+                    break;
+            }
+
+            // Set N flag to 0
+            this.setN(false);
+            // Calculate if Half-Carry flag needs to be set
+            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+            // Calculate if Carry flag needs to be set
+            this.setC(this.getHL() < rVal);
+            
+            this.m_clock = 8;
+        }
     }
 
     private INC_16_BIT(): void{
@@ -1342,12 +1499,12 @@ export class CPU {
         return (this.m_registers[this.R.E]!) << 8 + this.m_registers[this.R.L]!;
     }
 
-    // private setAF(value: number): void{
-    //     let hVal = (value >> 8) & 0x00FF;
-    //     let lVal = value & 0x00FF;
-    //     this.m_registers[this.R.A] = hVal;
-    //     this.m_registers[this.R.F] = lVal;
-    // }
+    private setAF(value: number): void{
+        let hVal = (value >> 8) & 0x00FF;
+        let lVal = value & 0x00FF;
+        this.m_registers[this.R.A] = hVal;
+        this.m_registers[this.R.F] = lVal;
+    }
 
     private setBC(value: number): void{
         let hVal = (value >> 8) & 0x00FF;
