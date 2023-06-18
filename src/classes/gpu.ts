@@ -47,7 +47,7 @@ export class GPU {
 
     public step(){
         // If LCD is on
-        if((this.m_mmu.read(this.LCDC) & 0x80) == 0){
+        if((this.m_mmu.read(this.LCDC) & 0x80) > 0){
             switch(this.m_state){
                 case this.state.Mode0: // H-Blank
                     if(this.m_clock >= 456){
@@ -180,11 +180,11 @@ export class GPU {
             }
             else{
                 if((lBits & mask) > 0){
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0xC0) >> 2]!;
+                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x0C) >> 2]!;
                     this.m_bgDotVals[i] = 1;
                 }
                 else{
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x30)]!;
+                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x03)]!;
                     this.m_bgDotVals[i] = 0;
                 }
             }
