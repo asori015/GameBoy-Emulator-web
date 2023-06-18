@@ -527,7 +527,7 @@ export class CPU {
     public m_jstate2: number;
     public m_BIOSMapped: boolean;
 
-    private m_PC: number;
+    public m_PC: number;
     private m_SP: number;
     private m_clock: number;
     private m_registers;
@@ -613,9 +613,17 @@ export class CPU {
     }
 
     private execute(instruction: number){
-        console.log(this.m_PC)
-        console.log(instruction)
-        console.log(this.m_registers)
+        if(this.m_mmu.read(0xFF44) >= 62){
+            console.log('PC: 0x' + this.m_PC.toString(16))
+            console.log('inst: 0x' + instruction.toString(16))
+            console.log("A:" + this.m_registers[this.R.A].toString(16) + " F:" + this.m_registers[this.R.F].toString(16))
+            console.log("B:" + this.m_registers[this.R.B].toString(16) + " C:" + this.m_registers[this.R.C].toString(16))
+            console.log("D:" + this.m_registers[this.R.D].toString(16) + " E:" + this.m_registers[this.R.E].toString(16))
+            console.log("H:" + this.m_registers[this.R.H].toString(16) + " L:" + this.m_registers[this.R.L].toString(16))
+            console.log('SP: 0x' + this.m_SP.toString(16));
+            console.log('')
+        }
+        
         if(this.m_PC == 0x0100){
             this.m_BIOSMapped = false;
         }
@@ -770,23 +778,23 @@ export class CPU {
                         this.m_clock = 8;
                         break;
                     case 0x04:
-                        this.m_mmu.write(hl, this.m_registers[7]!);
-                        //setHL(hl + 1);
+                        this.m_mmu.write(hl, this.m_registers[7]);
+                        this.setHL(hl + 1);
                         this.m_clock = 8;
                         break;
                     case 0x05:
                         this.m_registers[7] = this.m_mmu.read(hl);
-                        //setHL(hl + 1);
+                        this.setHL(hl + 1);
                         this.m_clock = 8;
                         break;
                     case 0x06:
-                        this.m_mmu.write(hl, this.m_registers[7]!);
-                        //setHL(hl - 1);
+                        this.m_mmu.write(hl, this.m_registers[7]);
+                        this.setHL(hl - 1);
                         this.m_clock = 8;
                         break;
                     case 0x07:
                         this.m_registers[7] = this.m_mmu.read(hl);
-                        //setHL(hl - 1);
+                        this.setHL(hl - 1);
                         this.m_clock = 8;
                         break;
                     default:
@@ -809,9 +817,9 @@ export class CPU {
 
     private LD_16_Bit(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let op = (instruction & 0b11000000) >> 6;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
-        let op = instruction & 0b11000000;
 
         if(op == 0x03){
             if(reg2 == 0x01){
@@ -854,28 +862,28 @@ export class CPU {
                 let val = 0;
                 switch(reg1){
                     case 0x00:
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.B]);
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.C]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.B]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.C]);
                         this.m_clock = 16;
                         break;
                     case 0x02:
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.D]);
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.E]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.D]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.E]);
                         this.m_clock = 16;
                         break;
                     case 0x04:
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.H]);
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.L]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.H]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.L]);
                         this.m_clock = 16;
                         break;
                     case 0x06:
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.F]);
-                        this.m_mmu.write(--this.m_PC, this.m_registers[this.R.A]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.A]);
+                        this.m_mmu.write(--this.m_SP, this.m_registers[this.R.F]);
                         this.m_clock = 16;
                         break;
                     case 0x07:
                         val = this.m_mmu.read(++this.m_PC);
-                        this.setHL(this.m_SP + val);
+                        this.setHL(this.m_SP + (val << 24 >> 24));
 
                         // Set Z flag to 0
                         this.setZ(false);
@@ -917,7 +925,7 @@ export class CPU {
                     this.m_clock = 12;
                     break;
                 case 0x06:
-                    this.m_PC = (hVal << 8) + lVal;
+                    this.m_SP = (hVal << 8) + lVal;
                     this.m_clock = 12;
                     break;
                 default:
@@ -928,7 +936,7 @@ export class CPU {
 
     private JP(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         if(reg2 == 0x01){
@@ -966,12 +974,12 @@ export class CPU {
     }
 
     private JR(): void{
-        let nVal = this.m_mmu.read(++this.m_PC)
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
+        let nVal = this.m_mmu.read(++this.m_PC)
+        this.m_clock = 8;
 
         if(reg1 != 0x03){
-            this.m_clock = 8;
             switch(reg1){
                 case 0x04:
                     if(this.getZ()){return;}
@@ -988,7 +996,7 @@ export class CPU {
             }
         }
 
-        this.m_PC += nVal;
+        this.m_PC += (nVal << 24 >> 24);
         this.m_clock = 12;
     }
 
@@ -997,8 +1005,8 @@ export class CPU {
         let nVal = 0;
         let carry = 0;
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
-        let reg1 = instruction & 0b00111000;
+        let op = (instruction & 0b11000000) >> 6;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         // Check if carry bit will be used
@@ -1039,8 +1047,8 @@ export class CPU {
         let nVal = 0;
         let carry = 0;
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
-        let reg1 = instruction & 0b00111000;
+        let op = (instruction & 0b11000000) >> 6;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         if(reg1 == 0x03){
@@ -1076,7 +1084,7 @@ export class CPU {
 
     private AND(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
+        let op = (instruction & 0b11000000) >> 6;
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
@@ -1104,7 +1112,7 @@ export class CPU {
 
     private XOR(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
+        let op = (instruction & 0b11000000) >> 6;
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
@@ -1117,7 +1125,7 @@ export class CPU {
                 this.m_clock = 8;
             }
             else{
-                this.m_registers[this.R.A] ^= this.m_registers[reg2]!;
+                this.m_registers[this.R.A] ^= this.m_registers[reg2];
                 this.m_clock = 4;
             }
         }
@@ -1132,7 +1140,7 @@ export class CPU {
 
     private OR(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
+        let op = (instruction & 0b11000000) >> 6;
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
@@ -1162,7 +1170,7 @@ export class CPU {
         let rVal = this.m_registers[this.R.A]!;
         let nVal = 0;
         let instruction = this.m_mmu.read(this.m_PC);
-        let op = instruction & 0b11000000;
+        let op = (instruction & 0b11000000) >> 6;
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
@@ -1193,7 +1201,7 @@ export class CPU {
     private INC(): void{
         let result = 0;
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
     
         if (reg1 == 0x06) {
             this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) + 1);
@@ -1217,7 +1225,7 @@ export class CPU {
     private DEC(): void{
         let result = 0;
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
     
         if (reg1 == 0x06) {
             this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) - 1);
@@ -1240,13 +1248,13 @@ export class CPU {
 
     private ADD_16_BIT(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         if(reg2 == 0x00){
             let nVal = this.m_mmu.read(++this.m_PC);
             let rVal = this.m_SP;
-            this.m_SP = (this.m_SP + nVal) & 0xFFFF;
+            this.m_SP = (this.m_SP + (nVal << 24 >> 24)) & 0xFFFF;
 
             // Set Z flag to 0
             this.setZ(false);
@@ -1291,7 +1299,7 @@ export class CPU {
 
     private INC_16_BIT(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
 
         switch(reg1){
             case 0x00:
@@ -1315,7 +1323,7 @@ export class CPU {
 
     private DEC_16_BIT(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
 
         switch(reg1){
             case 0x00:
@@ -1625,7 +1633,7 @@ export class CPU {
 
     private BIT(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
         let mask = 0x01 << reg1;
 
@@ -1647,7 +1655,7 @@ export class CPU {
 
     private RES(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
         let mask = (0x01 << reg1) ^ 0xFF;
 
@@ -1663,7 +1671,7 @@ export class CPU {
 
     private SET(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
         let mask = 0x01 << reg1;
 
@@ -1679,7 +1687,7 @@ export class CPU {
 
     private CALL(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         let lAddr = this.m_mmu.read(++this.m_PC);
@@ -1714,7 +1722,7 @@ export class CPU {
 
     private RET(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
         if(reg2 == 0x00){
@@ -1744,14 +1752,14 @@ export class CPU {
             this.m_clock = 16;
         }
 
-        let lAddr = this.m_mmu.read(this.m_SP--);
-        let hAddr = this.m_mmu.read(this.m_SP--);
+        let lAddr = this.m_mmu.read(this.m_SP++);
+        let hAddr = this.m_mmu.read(this.m_SP++);
         this.m_PC = (hAddr << 8) + lAddr - 1;
     }
 
     private RST(): void{
         let instruction = this.m_mmu.read(this.m_PC);
-        let reg1 = instruction & 0b00111000;
+        let reg1 = (instruction & 0b00111000) >> 3;
 
         this.m_PC += 1;
         this.m_mmu.write(--this.m_SP, (0xFF00 & this.m_PC) >> 8);
@@ -1868,15 +1876,15 @@ export class CPU {
     // }
 
     private getBC(){
-        return (this.m_registers[this.R.B]!) << 8 + this.m_registers[this.R.C]!;
+        return (this.m_registers[this.R.B] << 8) + this.m_registers[this.R.C];
     }
 
     private getDE(){
-        return (this.m_registers[this.R.D]!) << 8 + this.m_registers[this.R.E]!;
+        return (this.m_registers[this.R.D] << 8) + this.m_registers[this.R.E];
     }
 
     private getHL(){
-        return (this.m_registers[this.R.E]!) << 8 + this.m_registers[this.R.L]!;
+        return (this.m_registers[this.R.H] << 8) + this.m_registers[this.R.L];
     }
 
     private setAF(value: number): void{

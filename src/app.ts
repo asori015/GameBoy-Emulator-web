@@ -20,11 +20,14 @@ function render(){
 let machine = new Machine("TBD");
 
 function wrapper(){
-    machine.getFrame();
+    let frame = machine.getFrame();
+
+    console.log(frame);
+
+    console.log('here')
 }
 
 setInterval(render, 1000/60);
 //setInterval(wrapper, 1000/60);
 wrapper();
-wrapper();
-wrapper();
+
