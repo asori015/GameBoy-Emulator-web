@@ -75,7 +75,6 @@ export class GPU {
                     }
                     break;
                 case this.state.Mode1: // V-Blank
-                    console.log('1')
                     if(this.m_clock >= 455){
                         this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
                         if(this.m_mmu.read(this.LY) == 0x9A){
@@ -91,7 +90,6 @@ export class GPU {
                     }
                     break;
                 case this.state.Mode2: // OAM Scan
-                    console.log('2')
                     if(this.m_clock >= 79){
                         this.m_state = this.state.Mode3; // Transition into Mode 3
                         this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x03); // Set mode on STAT register
@@ -145,23 +143,24 @@ export class GPU {
         for(let i = 0; i < 160; i++){
             let x = (this.m_mmu.read(this.SCX) + i) % 256;
             let y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) % 256;
-            let tileIndex = ((y / 8) * 32) + (x / 8);
+            
+            let tileIndex = (Math.floor(y / 8) * 32) + Math.floor(x / 8);
             let VRAM_Pointer = 0;
             
             if((this.m_mmu.read(this.LCDC) & 0x10) > 0){
                 if((this.m_mmu.read(this.LCDC) & 0x08) > 0){
-                    VRAM_Pointer = this.m_mmu.read(this.VRAM_1) + this.m_mmu.read((this.TILE_MAP2 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP2 + tileIndex) * 16);
                 }
                 else{
-                    VRAM_Pointer = this.m_mmu.read(this.VRAM_1) + this.m_mmu.read((this.TILE_MAP1 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP1 + tileIndex) * 16);
                 }
             }
             else{
                 if((this.m_mmu.read(this.LCDC) & 0x08) > 0){
-                    VRAM_Pointer = this.m_mmu.read(this.VRAM_2) + this.m_mmu.read((this.TILE_MAP2 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_2 + ((this.m_mmu.read(this.TILE_MAP2 + tileIndex) * 16) << 24 >> 24);
                 }
                 else{
-                    VRAM_Pointer = this.m_mmu.read(this.VRAM_2) + this.m_mmu.read((this.TILE_MAP1 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_2 + ((this.m_mmu.read(this.TILE_MAP1 + tileIndex) * 16) << 24 >> 24);
                 }
             }
 
