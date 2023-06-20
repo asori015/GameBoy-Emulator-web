@@ -50,9 +50,9 @@ export class GPU {
         if((this.m_mmu.read(this.LCDC) & 0x80) > 0){
             switch(this.m_state){
                 case this.state.Mode0: // H-Blank
-                    if(this.m_clock >= 456){
-                        if(this.m_mmu.read(this.LY) > 143){
-                            this.m_state = this.state.Mode1;
+                    if(this.m_clock >= 455){
+                        if(this.m_mmu.read(this.LY) >= 143){
+                            this.m_state = this.state.Mode1; // Transition into Mode 1
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x01);
                             this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
@@ -63,7 +63,7 @@ export class GPU {
                             this.m_windowLineCounter = 0;
                         }
                         else{
-                            this.m_state = this.state.Mode2;
+                            this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
                             this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
@@ -75,10 +75,11 @@ export class GPU {
                     }
                     break;
                 case this.state.Mode1: // V-Blank
-                    if(this.m_clock >= 456){
+                    console.log('1')
+                    if(this.m_clock >= 455){
                         this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
                         if(this.m_mmu.read(this.LY) == 0x9A){
-                            this.m_state = this.state.Mode2;
+                            this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
                             this.m_mmu.write(this.LY, 0);
@@ -90,15 +91,16 @@ export class GPU {
                     }
                     break;
                 case this.state.Mode2: // OAM Scan
-                    if(this.m_clock >= 80){
-                        this.m_state = this.state.Mode3;
+                    console.log('2')
+                    if(this.m_clock >= 79){
+                        this.m_state = this.state.Mode3; // Transition into Mode 3
                         this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x03); // Set mode on STAT register
                     }
                     break;
                 case this.state.Mode3: // Drawing Pixels
-                    if(this.m_clock >= 172){
+                    if(this.m_clock >= 251){
                         // Transition into H-Blank
-                        this.m_state = this.state.Mode0;
+                        this.m_state = this.state.Mode0; // Transition into Mode 0
                         this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                         if((this.m_mmu.read(this.STAT) & 0x80) > 0){ // Check if STAT interrupt enabled, request interrupt
                             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);  
@@ -191,13 +193,12 @@ export class GPU {
 
             this.m_frame[(this.m_mmu.read(this.LY) * 160) + i] = color;
         }
-        if(this.m_mmu.read(this.WX) < 166){
-            this.m_windowLineCounter += 1;
-        }
     }
 
     private renderWindowLine(): void{
-        this.m_windowLineCounter;
+        if(this.m_mmu.read(this.WX) < 166){
+            this.m_windowLineCounter += 1;
+        }
     }
 
     private renderObject(): void{
