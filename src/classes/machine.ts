@@ -10,11 +10,11 @@ export class Machine {
     private m_frame;
 
     constructor(
-        readonly m_path: File,
+        readonly m_file: File,
     ){
         this.m_frame = new Array(160 * 144).fill(0);
 
-        this.m_mmu = new MMU(m_path);
+        this.m_mmu = new MMU(m_file);
         this.m_cpu = new CPU(this.m_mmu);
         this.m_gpu = new GPU(this.m_mmu, this.m_frame);
 
@@ -25,6 +25,10 @@ export class Machine {
     }
 
     getFrame() {
+        while(!this.m_mmu.m_isRomLoaded){
+            return this.m_frame;
+        }
+
         while(this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK){
             this.m_cpu.step();
             this.m_gpu.step();

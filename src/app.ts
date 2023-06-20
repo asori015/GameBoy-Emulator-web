@@ -40,11 +40,5 @@ const fileSelector = <HTMLInputElement> document.getElementById('file-selector')
 fileSelector.addEventListener('change', (e) => {
     let files = (e.target as HTMLInputElement).files!;
     machine = new Machine(files[0]!);
-    wrapper();
-    // setInterval(wrapper, 1000/60);
+    setInterval(wrapper, 1000/60);
 });
-
-// wrapper();
-
-// setInterval(render, 1000/60);
-// 
