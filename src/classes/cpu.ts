@@ -940,13 +940,12 @@ export class CPU {
         let reg2 = instruction & 0b00000111;
 
         if(reg2 == 0x01){
-            this.m_PC = this.getHL() - 1;
+            this.m_PC = (this.getHL() - 1) & 0xFFFF;
             this.m_clock = 4;
         }
         else{
             let lVal = this.m_mmu.read(++this.m_PC);
             let hVal = this.m_mmu.read(++this.m_PC);
-            let addr = (hVal << 8) + lVal;
             this.m_clock = 12;
 
             if(reg2 == 0x02){
@@ -968,7 +967,7 @@ export class CPU {
                 }
             }
 
-            this.m_PC = addr - 1;
+            this.m_PC = ((hVal << 8) + lVal - 1) & 0xFFFF;;
             this.m_clock = 16;
         }
     }
@@ -992,6 +991,8 @@ export class CPU {
                     break;
                 case 0x07:
                     if(!this.getC()){return;}
+                    break;
+                default:
                     break;
             }
         }
@@ -1326,16 +1327,16 @@ export class CPU {
         let reg1 = (instruction & 0b00111000) >> 3;
 
         switch(reg1){
-            case 0x00:
+            case 0x01:
                 this.setBC(this.getBC() - 1);
                 break;
-            case 0x02:
+            case 0x03:
                 this.setDE(this.getDE() - 1);
                 break;
-            case 0x04:
+            case 0x05:
                 this.setHL(this.getHL() - 1);
                 break;
-            case 0x06:
+            case 0x07:
                 this.m_SP = (this.m_SP - 1) & 0xFFFF;
                 break;
             default:
@@ -1445,9 +1446,9 @@ export class CPU {
         else{
             let rVal = this.m_registers[reg2];
 
-            this.m_registers[reg2] = (rVal << 1) + Number(this.getC());
+            this.m_registers[reg2] = ((rVal << 1) + Number(this.getC())) & 0xFF;
             // Calculate if Carry flag needs to be set
-            this.setC(rVal > 0b10000000);
+            this.setC(rVal >= 0b10000000);
 
             // Calculate if Zero flag needs to be set
             if(this.m_cbPrefix){
@@ -1523,7 +1524,7 @@ export class CPU {
 
             // Calculate if Carry flag needs to be set
             this.setC(rVal >= 0b10000000);
-            this.m_registers[reg2] = rVal << 1;
+            this.m_registers[reg2] = (rVal << 1) & 0xFF;
 
             // Calculate if Zero flag needs to be set
             this.setZ(this.m_registers[reg2] == 0);
@@ -1542,9 +1543,9 @@ export class CPU {
         if(reg2 == 0x06){
             let rVal = this.m_mmu.read(this.getHL());
 
-            this.m_mmu.write(this.getHL(), (rVal >> 1) + (Number(this.getC()) << 7));
-            
             // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 0b10000000);
+            this.m_mmu.write(this.getHL(), (rVal >> 1) + (Number(this.getC()) << 7));            
             this.setC((rVal % 2) > 0);
 
             // Calculate if Zero flag needs to be set
@@ -1554,8 +1555,9 @@ export class CPU {
         else{
             let rVal = this.m_registers[reg2];
 
-            this.m_registers[reg2] = (rVal >> 1) + (Number(this.getC()) << 7);
             // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 0b10000000);
+            this.m_registers[reg2] = (rVal >> 1) + (Number(this.getC()) << 7);
             this.setC((rVal % 2) > 0);
 
             // Calculate if Zero flag needs to be set
