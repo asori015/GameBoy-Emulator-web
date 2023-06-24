@@ -26,7 +26,14 @@ export class CPU {
             this.m_mmu.write(addr + 1, (this.m_SP[0]! & 0xFF00) >> 8);
             this.m_clock = 20;
         },
-        this.ADD_16_BIT,
+        () => { // ADD HL,BC
+            let rVal = this.getHL();
+            this.setHL(this.getHL() + this.getBC());
+            this.setN(false);
+            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+            this.setC(this.getHL() < rVal);
+            this.m_clock = 8;
+        },
         () => { // LD A,(BC)
             this.m_registers[this.R.A] = this.m_mmu.read(this.getBC());
             this.m_clock = 8;
@@ -58,7 +65,14 @@ export class CPU {
         },
         this.RL,
         this.JR,
-        this.ADD_16_BIT,
+        () => { // ADD HL,DE
+            let rVal = this.getHL();
+            this.setHL(this.getHL() + this.getDE());
+            this.setN(false);
+            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+            this.setC(this.getHL() < rVal);
+            this.m_clock = 8;
+        },
         () => { // LD A,(DE)
             this.m_registers[this.R.A] = this.m_mmu.read(this.getDE());
             this.m_clock = 8;
@@ -91,7 +105,14 @@ export class CPU {
         },
         this.DAA,
         this.JR,
-        this.ADD_16_BIT,
+        () => { // ADD HL,HL
+            let rVal = this.getHL();
+            this.setHL(this.getHL() + this.getHL());
+            this.setN(false);
+            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+            this.setC(this.getHL() < rVal);
+            this.m_clock = 8;
+        },
         () => { // LD A,(HL+)
             this.m_registers[this.R.A] = this.m_mmu.read(this.getHL());
             this.setHL(this.getHL() + 1);
@@ -124,7 +145,14 @@ export class CPU {
         },
         this.SCF,
         this.JR,
-        this.ADD_16_BIT,
+        () => { // ADD HL,SP
+            let rVal = this.getHL();
+            this.setHL(this.getHL() + this.m_SP[0]!);
+            this.setN(false);
+            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+            this.setC(this.getHL() < rVal);
+            this.m_clock = 8;
+        },
         () => { // LD A,(HL-)
             this.m_registers[this.R.A] = this.m_mmu.read(this.getHL());
             this.setHL(this.getHL() - 1);
@@ -527,7 +555,16 @@ export class CPU {
         },
         this.AND,
         this.RST,
-        this.ADD_16_BIT,
+        () => { // ADD SP,r8
+            let nVal = this.m_mmu.read(++this.m_PC[0]) << 24 >> 24;
+            let rVal = this.m_SP[0]!;
+            this.m_SP[0] += nVal;
+            this.setZ(false);
+            this.setN(false);
+            this.setH(((this.m_SP[0]! ^ rVal ^ nVal) & 0x0010) == 0x0010);
+            this.setC(((this.m_SP[0]! ^ rVal ^ nVal) & 0x0100) == 0x0100);
+            this.m_clock = 16;
+        },
         this.JP,
         () => { // LD (a16),A
             this.m_mmu.write(this.m_mmu.read(++this.m_PC[0]) + (this.m_mmu.read(++this.m_PC[0]) << 8), this.m_registers[this.R.A]!);
@@ -1334,57 +1371,6 @@ export class CPU {
         this.setH((result & 0x0F) == 0x0F);
         // Set N flag to 1
         this.setN(true);
-    }
-
-    private ADD_16_BIT(): void{
-        let instruction = this.m_mmu.read(this.m_PC[0]!);
-        let reg1 = (instruction & 0b00111000) >> 3;
-        let reg2 = instruction & 0b00000111;
-
-        if(reg2 == 0x00){
-            let nVal = this.m_mmu.read(++this.m_PC[0]);
-            let rVal = this.m_SP[0]!;
-            this.m_SP[0] = (this.m_SP[0]! + (nVal << 24 >> 24)) & 0xFFFF;
-
-            // Set Z flag to 0
-            this.setZ(false);
-            // Set N flag to 0
-            this.setN(false);
-            // Calculate if Half-Carry flag needs to be set
-            this.setH(((this.m_SP[0] ^ rVal ^ nVal) & 0x0010) == 0x0010);
-            // Calculate if Carry flag needs to be set
-            this.setC(((this.m_SP[0] ^ rVal ^ nVal) & 0x0100) == 0x0100);
-
-            this.m_clock = 16;
-        }
-        else{
-            let rVal = this.getHL()
-            switch(reg1){
-                case 0x01:
-                    this.setHL(this.getHL() + this.getBC());
-                    break;
-                case 0x03:
-                    this.setHL(this.getHL() + this.getDE());
-                    break;
-                case 0x05:
-                    this.setHL(this.getHL() + this.getHL());
-                    break;
-                case 0x07:
-                    this.setHL(this.getHL() + this.m_SP[0]!);
-                    break;
-                default:
-                    break;
-            }
-
-            // Set N flag to 0
-            this.setN(false);
-            // Calculate if Half-Carry flag needs to be set
-            this.setH((this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
-            // Calculate if Carry flag needs to be set
-            this.setC(this.getHL() < rVal);
-            
-            this.m_clock = 8;
-        }
     }
 
     private INC_16_BIT(): void{
