@@ -5,14 +5,17 @@ export class MMU {
     private readonly m_addrBus;
     public m_isRomLoaded: boolean;
     private m_isBIOSMapped: boolean;
+    private m_isGBC: boolean;
 
     constructor(
         private readonly file: File,
     ){
         this.m_BIOS = new Uint8Array(0x0100).fill(0);
-        this.m_addrBus = new Uint8Array(0xFFFF).fill(0);
+        this.m_addrBus = new Uint8Array(0x10000).fill(0);
         this.m_isRomLoaded = false;
         this.m_isBIOSMapped = true;
+        this.m_isGBC = false; // TODO
+        
 
         let reader = new FileReader();
         reader.onload = () => this.loadROM(<ArrayBuffer> reader.result);
@@ -21,7 +24,38 @@ export class MMU {
         this.loadBIOS();
     }
 
+    /**
+     * Read from RAM at requested address
+     * @param addr Address to RAM
+     * @return value at requested address
+     */
     public read(addr: number) : number{
+        // switch(addr >> 13){
+        //     case 0:
+        //         if(this.m_isBIOSMapped && addr < 0x0100){
+        //             return this.m_BIOS[addr]!;
+        //         }
+        //         if(this.m_isBIOSMapped && this.m_isGBC && addr >= 0x0200 && addr < 0x0900){
+        //             return this.m_BIOS[addr - 0x0100]!;
+        //         }
+        //     case 1: // 0x0000 -> 0x3FFF
+                
+        //     case 2:
+        //     case 3: // 0x4000 -> 0x9FFF
+        //         break;
+        //     case 4:
+        //         break;
+        //     case 5:
+        //         break;
+        //     case 6:
+        //         break;
+        //     case 7:
+        //         break;
+        //     default:
+        //         return 0xFF;
+        // }
+        this.m_isGBC;
+
         if(this.m_isBIOSMapped){
             if(addr <= 0x100){
                 if(addr == 0x100){

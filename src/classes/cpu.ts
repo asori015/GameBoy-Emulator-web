@@ -1077,7 +1077,8 @@ export class CPU {
         L: 5
     }
 
-    // private debug = false;
+    private debug = false;
+    private counter = 1;
     
     constructor(
         private m_mmu: MMU
@@ -1272,17 +1273,30 @@ export class CPU {
         //     this.debug = false;
         // }
 
-        // if(this.debug){
-        //     console.log('PC: 0x' + this.m_PC[0]!.toString(16))
-        //     console.log('inst: 0x' + instruction.toString(16))
-        //     console.log("A:" + this.m_registers[this.R.A]!.toString(16) + " F:" + this.m_registers[this.R.F]!.toString(16))
-        //     console.log("B:" + this.m_registers[this.R.B]!.toString(16) + " C:" + this.m_registers[this.R.C]!.toString(16))
-        //     console.log("D:" + this.m_registers[this.R.D]!.toString(16) + " E:" + this.m_registers[this.R.E]!.toString(16))
-        //     console.log("H:" + this.m_registers[this.R.H]!.toString(16) + " L:" + this.m_registers[this.R.L]!.toString(16))
-        //     console.log('SP: 0x' + this.m_SP[0]!.toString(16));
-        //     console.log('')
-        //     //this.counter -= 1;
-        // }
+        if(this.m_PC[0] == 0x01DB){
+            this.debug = true;
+        }
+
+        if(this.m_mmu.read(0xFF44) == 140){
+            if(this.counter == 0){
+                this.debug = false;
+            }
+            this.counter -= 1;
+        }
+
+        if(this.debug){
+            // console.log('PC: 0x' + this.m_PC[0]!.toString(16))
+            // console.log('inst: 0x' + instruction.toString(16))
+            // console.log("A:" + this.m_registers[this.R.A]!.toString(16) + " F:" + this.m_registers[this.R.F]!.toString(16))
+            // console.log("B:" + this.m_registers[this.R.B]!.toString(16) + " C:" + this.m_registers[this.R.C]!.toString(16))
+            // console.log("D:" + this.m_registers[this.R.D]!.toString(16) + " E:" + this.m_registers[this.R.E]!.toString(16))
+            // console.log("H:" + this.m_registers[this.R.H]!.toString(16) + " L:" + this.m_registers[this.R.L]!.toString(16))
+            // console.log('SP: 0x' + this.m_SP[0]!.toString(16));
+            // console.log('')
+            // console.log(this.m_mmu.read(0xFF44).toString(16))
+            // console.log(this.m_mmu.read(0xFF45).toString(16))
+            //this.counter -= 1;
+        }
 
         this.m_clock = this.m_instructionMethods1[instruction]!.call(this);
         this.m_PC[0] += 1;
