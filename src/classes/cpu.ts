@@ -1116,11 +1116,17 @@ export class CPU {
         }
     
         this.updateTimer();
-        this.checkForInterupts();
+
+        // If an interrupt is pending, turn off halt mode
+        if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
+            this.m_isHalted = false;
+        }
     
         if(!this.m_isHalted){
             if(this.m_clock == 0){
-                this.execute(this.m_mmu.read(this.m_PC[0]!));
+                if(!this.checkForInterupts()){
+                    this.execute(this.m_mmu.read(this.m_PC[0]!));
+                }
             }
             this.m_clock -= 1;
         }
@@ -1241,27 +1247,26 @@ export class CPU {
         this.m_mmu.write(this.DIV + 1, div & 0x00FF);
     }
 
-    private checkForInterupts(){
-        if(this.m_mmu.read(this.IF) > 0x00 && this.m_mmu.read(this.IE) > 0x00){ // Interupt Request flag
-            let mask = 0x01;
-            for(let i = 0; i < 5; i++){
-                if((this.m_mmu.read(this.IF) & mask) && (this.m_mmu.read(this.IE) & mask)){
-                    this.m_isHalted = false;
-
-                    if(this.IME){
-                        this.IME = false;
-                        this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
-                        this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! >> 8);
-                        this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! & 0x00FF);
-                        this.m_PC[0] = 0x0040 + (i * 8);
-                        this.m_clock = 4;
-                    }
-
-                    break;
-                }
-                mask = mask << 1;
-            }
+    private checkForInterupts(): boolean {
+        if(!this.IME){
+            return false;
         }
+
+        let mask = 0x01;
+        for(let i = 0; i < 5; i++){
+            if((this.m_mmu.read(this.IF) & mask) && (this.m_mmu.read(this.IE) & mask)){
+                this.IME = false;
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
+                this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! >> 8);
+                this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! & 0x00FF);
+                this.m_PC[0] = 0x0040 + (i * 8);
+                this.m_clock = 4;
+                return true;
+            }
+            mask = mask << 1;
+        }
+
+        return false;
     }
 
     private execute(instruction: number){
