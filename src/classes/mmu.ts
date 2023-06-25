@@ -73,7 +73,9 @@ export class MMU {
     }
 
     public write(addr: number, val: number){
-        this.m_addrBus[addr] = val;
+        if(addr >= 0x8000){
+            this.m_addrBus[addr] = val;
+        }
     }
 
     private loadBIOS(){
