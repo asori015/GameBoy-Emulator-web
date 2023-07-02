@@ -1,1 +1,2625 @@
-(()=>{"use strict";var t,s=function(){function t(t){var s=this;this.m_mmu=t,this.m_instructionMethods1=[function(){return 4},function(){return s.m_registers[s.R.C]=s.m_mmu.read(++s.m_PC[0]),s.m_registers[s.R.B]=s.m_mmu.read(++s.m_PC[0]),12},function(){return s.m_mmu.write(s.getBC(),s.m_registers[s.R.A]),8},function(){return s.setBC(s.getBC()+1),8},function(){return s.m_registers[s.R.B]+=1,s.setZ(0==s.m_registers[s.R.B]),s.setH(0==(15&s.m_registers[s.R.B])),s.setN(!1),4},function(){return s.m_registers[s.R.B]-=1,s.setZ(0==s.m_registers[s.R.B]),s.setH(15==(15&s.m_registers[s.R.B])),s.setN(!0),4},function(){return s.m_registers[s.R.B]=s.m_mmu.read(++s.m_PC[0]),8},function(){return s.setC(s.m_registers[s.R.A]>=128),s.m_registers[s.R.A]=(s.m_registers[s.R.A]<<1)+Number(s.getC())&255,s.setZ(!1),s.setH(!1),s.setN(!1),4},function(){var t=s.m_mmu.read(++s.m_PC[0])+(s.m_mmu.read(++s.m_PC[0])<<8);return s.m_mmu.write(t,255&s.m_SP[0]),s.m_mmu.write(t+1,(65280&s.m_SP[0])>>8),20},function(){var t=s.getHL();return s.setHL(s.getHL()+s.getBC()),s.setN(!1),s.setH((4095&s.getHL())<(4095&t)),s.setC(s.getHL()<t),8},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.getBC()),8},function(){return s.setBC(s.getBC()-1),8},function(){return s.m_registers[s.R.C]+=1,s.setZ(0==s.m_registers[s.R.C]),s.setH(0==(15&s.m_registers[s.R.C])),s.setN(!1),4},function(){return s.m_registers[s.R.C]-=1,s.setZ(0==s.m_registers[s.R.C]),s.setH(15==(15&s.m_registers[s.R.C])),s.setN(!0),4},function(){return s.m_registers[s.R.C]=s.m_mmu.read(++s.m_PC[0]),8},function(){return s.setC(s.m_registers[s.R.A]%2>0),s.m_registers[s.R.A]=(s.m_registers[s.R.A]>>1)+(Number(s.getC())<<7),s.setZ(!1),s.setH(!1),s.setN(!1),4},this.STOP,function(){return s.m_registers[s.R.E]=s.m_mmu.read(++s.m_PC[0]),s.m_registers[s.R.D]=s.m_mmu.read(++s.m_PC[0]),12},function(){return s.m_mmu.write(s.getDE(),s.m_registers[s.R.A]),8},function(){return s.setDE(s.getDE()+1),8},function(){return s.m_registers[s.R.D]+=1,s.setZ(0==s.m_registers[s.R.D]),s.setH(0==(15&s.m_registers[s.R.D])),s.setN(!1),4},function(){return s.m_registers[s.R.D]-=1,s.setZ(0==s.m_registers[s.R.D]),s.setH(15==(15&s.m_registers[s.R.D])),s.setN(!0),4},function(){return s.m_registers[s.R.D]=s.m_mmu.read(++s.m_PC[0]),8},this.RL,this.JR,function(){var t=s.getHL();return s.setHL(s.getHL()+s.getDE()),s.setN(!1),s.setH((4095&s.getHL())<(4095&t)),s.setC(s.getHL()<t),8},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.getDE()),8},function(){return s.setDE(s.getDE()-1),8},function(){return s.m_registers[s.R.E]+=1,s.setZ(0==s.m_registers[s.R.E]),s.setH(0==(15&s.m_registers[s.R.E])),s.setN(!1),4},function(){return s.m_registers[s.R.E]-=1,s.setZ(0==s.m_registers[s.R.E]),s.setH(15==(15&s.m_registers[s.R.E])),s.setN(!0),4},function(){return s.m_registers[s.R.E]=s.m_mmu.read(++s.m_PC[0]),8},this.RR,this.JR,function(){return s.m_registers[s.R.L]=s.m_mmu.read(++s.m_PC[0]),s.m_registers[s.R.H]=s.m_mmu.read(++s.m_PC[0]),12},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.A]),s.setHL(s.getHL()+1),8},function(){return s.setHL(s.getHL()+1),8},function(){return s.m_registers[s.R.H]+=1,s.setZ(0==s.m_registers[s.R.H]),s.setH(0==(15&s.m_registers[s.R.H])),s.setN(!1),4},function(){return s.m_registers[s.R.H]-=1,s.setZ(0==s.m_registers[s.R.H]),s.setH(15==(15&s.m_registers[s.R.H])),s.setN(!0),4},function(){return s.m_registers[s.R.H]=s.m_mmu.read(++s.m_PC[0]),8},this.DAA,this.JR,function(){var t=s.getHL();return s.setHL(s.getHL()+s.getHL()),s.setN(!1),s.setH((4095&s.getHL())<(4095&t)),s.setC(s.getHL()<t),8},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.getHL()),s.setHL(s.getHL()+1),8},function(){return s.setHL(s.getHL()-1),8},function(){return s.m_registers[s.R.L]+=1,s.setZ(0==s.m_registers[s.R.L]),s.setH(0==(15&s.m_registers[s.R.L])),s.setN(!1),4},function(){return s.m_registers[s.R.L]-=1,s.setZ(0==s.m_registers[s.R.L]),s.setH(15==(15&s.m_registers[s.R.L])),s.setN(!0),4},function(){return s.m_registers[s.R.L]=s.m_mmu.read(++s.m_PC[0]),8},function(){return s.m_registers[s.R.A]=255-s.m_registers[s.R.A],s.setN(!0),s.setH(!0),4},this.JR,function(){return s.m_SP[0]=s.m_mmu.read(++s.m_PC[0])+(s.m_mmu.read(++s.m_PC[0])<<8),12},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.A]),s.setHL(s.getHL()-1),8},function(){return s.m_SP[0]+=1,8},function(){return s.m_mmu.write(s.getHL(),s.m_mmu.read(s.getHL())+1),s.setZ(0==s.m_mmu.read(s.getHL())),s.setH(0==(15&s.m_mmu.read(s.getHL()))),s.setN(!1),12},function(){return s.m_mmu.write(s.getHL(),s.m_mmu.read(s.getHL())-1),s.setZ(0==s.m_mmu.read(s.getHL())),s.setH(15==(15&s.m_mmu.read(s.getHL()))),s.setN(!0),12},function(){return s.m_mmu.write(s.getHL(),s.m_mmu.read(++s.m_PC[0])),8},function(){return s.setN(!1),s.setH(!1),s.setC(!0),4},this.JR,function(){var t=s.getHL();return s.setHL(s.getHL()+s.m_SP[0]),s.setN(!1),s.setH((4095&s.getHL())<(4095&t)),s.setC(s.getHL()<t),8},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.getHL()),s.setHL(s.getHL()-1),8},function(){return s.m_SP[0]-=1,8},function(){return s.m_registers[s.R.A]+=1,s.setZ(0==s.m_registers[s.R.A]),s.setH(0==(15&s.m_registers[s.R.A])),s.setN(!1),4},function(){return s.m_registers[s.R.A]-=1,s.setZ(0==s.m_registers[s.R.A]),s.setH(15==(15&s.m_registers[s.R.A])),s.setN(!0),4},function(){return s.m_registers[s.R.A]=s.m_mmu.read(++s.m_PC[0]),8},function(){return s.setN(!1),s.setH(!1),s.setC(!s.getC()),4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.B]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.B]=s.m_registers[s.R.A],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.C]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.C]=s.m_registers[s.R.A],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.D]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.D]=s.m_registers[s.R.A],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.E]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.E]=s.m_registers[s.R.A],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.H]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.H]=s.m_registers[s.R.A],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.L]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.L]=s.m_registers[s.R.A],4},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.B]),8},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.C]),8},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.D]),8},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.E]),8},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.H]),8},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.L]),8},function(){return s.m_isHalted=!0,4},function(){return s.m_mmu.write(s.getHL(),s.m_registers[s.R.A]),8},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.B],4},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.C],4},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.D],4},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.E],4},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.H],4},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.L],4},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.getHL()),8},function(){return s.m_registers[s.R.A]=s.m_registers[s.R.A],4},this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.ADD,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.SUB,this.AND,this.AND,this.AND,this.AND,this.AND,this.AND,this.AND,this.AND,this.XOR,this.XOR,this.XOR,this.XOR,this.XOR,this.XOR,this.XOR,this.XOR,this.OR,this.OR,this.OR,this.OR,this.OR,this.OR,this.OR,this.OR,this.CP,this.CP,this.CP,this.CP,this.CP,this.CP,this.CP,this.CP,this.RET,function(){return s.m_registers[s.R.C]=s.m_mmu.read(s.m_SP[0]++),s.m_registers[s.R.B]=s.m_mmu.read(s.m_SP[0]++),12},this.JP,this.JP,this.CALL,function(){return s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.B]),s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.C]),16},this.ADD,this.RST,this.RET,this.RET,this.JP,function(){s.m_cbPrefix=!0;var t=s.m_instructionMethods2[s.m_mmu.read(++s.m_PC[0])].call(s);return s.m_cbPrefix=!1,t},this.CALL,this.CALL,this.ADD,this.RST,this.RET,function(){return s.m_registers[s.R.E]=s.m_mmu.read(s.m_SP[0]++),s.m_registers[s.R.D]=s.m_mmu.read(s.m_SP[0]++),12},this.JP,this.opcode00,this.CALL,function(){return s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.D]),s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.E]),16},this.SUB,this.RST,this.RET,this.RET,this.JP,this.opcode00,this.CALL,this.opcode00,this.SUB,this.RST,function(){return s.m_mmu.write(65280+s.m_mmu.read(++s.m_PC[0]),s.m_registers[s.R.A]),12},function(){return s.m_registers[s.R.L]=s.m_mmu.read(s.m_SP[0]++),s.m_registers[s.R.H]=s.m_mmu.read(s.m_SP[0]++),12},function(){return s.m_mmu.write(65280+s.m_registers[s.R.C],s.m_registers[s.R.A]),8},this.opcode00,this.opcode00,function(){return s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.H]),s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.L]),16},this.AND,this.RST,function(){var t=s.m_mmu.read(++s.m_PC[0])<<24>>24,i=s.m_SP[0];return s.m_SP[0]+=t,s.setZ(!1),s.setN(!1),s.setH(16==(16&(s.m_SP[0]^i^t))),s.setC(256==(256&(s.m_SP[0]^i^t))),16},this.JP,function(){return s.m_mmu.write(s.m_mmu.read(++s.m_PC[0])+(s.m_mmu.read(++s.m_PC[0])<<8),s.m_registers[s.R.A]),16},this.opcode00,this.opcode00,this.opcode00,this.XOR,this.RST,function(){return s.m_registers[s.R.A]=s.m_mmu.read(65280+s.m_mmu.read(++s.m_PC[0])),12},function(){return s.m_registers[s.R.F]=240&s.m_mmu.read(s.m_SP[0]++),s.m_registers[s.R.A]=s.m_mmu.read(s.m_SP[0]++),12},function(){return s.m_registers[s.R.A]=s.m_mmu.read(65280+s.m_registers[s.R.C]),8},function(){return s.IME=!1,4},this.opcode00,function(){return s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.A]),s.m_mmu.write(--s.m_SP[0],s.m_registers[s.R.F]),16},this.OR,this.RST,function(){var t=s.m_mmu.read(++s.m_PC[0])<<24>>24;return s.setHL(s.m_SP[0]+t),s.setZ(!1),s.setN(!1),s.setH(16==(16&(s.m_SP[0]^s.getHL()^t))),s.setC(256==(256&(s.m_SP[0]^s.getHL()^t))),12},function(){return s.m_SP[0]=s.getHL(),8},function(){return s.m_registers[s.R.A]=s.m_mmu.read(s.m_mmu.read(++s.m_PC[0])+(s.m_mmu.read(++s.m_PC[0])<<8)),16},function(){return s.IME=!0,4},this.opcode00,this.opcode00,this.CP,this.RST],this.m_instructionMethods2=[this.RLC,this.RLC,this.RLC,this.RLC,this.RLC,this.RLC,this.RLC,this.RLC,this.RRC,this.RRC,this.RRC,this.RRC,this.RRC,this.RRC,this.RRC,this.RRC,this.RL,this.RL,this.RL,this.RL,this.RL,this.RL,this.RL,this.RL,this.RR,this.RR,this.RR,this.RR,this.RR,this.RR,this.RR,this.RR,this.SLA,this.SLA,this.SLA,this.SLA,this.SLA,this.SLA,this.SLA,this.SLA,this.SRA,this.SRA,this.SRA,this.SRA,this.SRA,this.SRA,this.SRA,this.SRA,this.SWAP,this.SWAP,this.SWAP,this.SWAP,this.SWAP,this.SWAP,this.SWAP,this.SWAP,this.SRL,this.SRL,this.SRL,this.SRL,this.SRL,this.SRL,this.SRL,this.SRL,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.BIT,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.RES,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET,this.SET],this.P1=65280,this.DIV=65283,this.TIMA=65285,this.TMA=65286,this.TAC=65287,this.IF=65295,this.IE=65535,this.R={A:7,B:0,C:1,D:2,E:3,F:6,H:4,L:5},this.debug=!1,this.counter=1,this.m_jstate1=0,this.m_jstate2=0,this.m_BIOSMapped=!0,this.m_PC=new Uint16Array([0]),this.m_SP=new Uint16Array([0]),this.m_clock=0,this.m_sysClock=0,this.m_registers=new Uint8Array(8),this.IME=!1,this.m_cbPrefix=!1,this.m_isHalted=!1,this.m_fallingEdgeDelay=!1}return t.prototype.step=function(){16&this.m_mmu.read(this.P1)?this.m_mmu.write(this.P1,this.m_mmu.read(this.P1)|this.m_jstate2):this.m_mmu.write(this.P1,this.m_mmu.read(this.P1)|this.m_jstate1),0==this.m_sysClock?(this.getInput(),this.m_sysClock=1e3):this.m_sysClock-=1,this.updateTimer(),this.m_mmu.read(this.IE)&this.m_mmu.read(this.IF)&&(this.m_isHalted=!1),this.m_isHalted||(0==this.m_clock&&(this.checkForInterupts()||this.execute(this.m_mmu.read(this.m_PC[0]))),this.m_clock-=1)},t.prototype.getInput=function(){1&this.m_jstate1||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate1|=1,2&this.m_jstate1||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate1|=2,4&this.m_jstate1||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate1|=4,8&this.m_jstate1||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate1|=8,1&this.m_jstate2||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate2|=1,2&this.m_jstate2||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate2|=2,4&this.m_jstate2||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate2|=4,8&this.m_jstate2||this.m_mmu.write(this.IF,16|this.m_mmu.read(this.IF)),this.m_jstate2|=8},t.prototype.updateTimer=function(){var t=(this.m_mmu.read(this.DIV)<<8)+this.m_mmu.read(this.DIV+1);if(t+=1,(4&this.m_mmu.read(this.TAC))>0){var s=this.m_mmu.read(this.TIMA);(3&this.m_mmu.read(this.TAC))>0?(t&2<<2*(3&this.m_mmu.read(this.TAC)))>0?this.m_fallingEdgeDelay=!0:this.m_fallingEdgeDelay&&(s+=1,this.m_fallingEdgeDelay=!1):(512&t)>0?this.m_fallingEdgeDelay=!0:this.m_fallingEdgeDelay&&(s+=1,this.m_fallingEdgeDelay=!1),s>255?(this.m_mmu.write(this.TIMA,this.m_mmu.read(this.TMA)),this.m_mmu.write(this.IF,4|this.m_mmu.read(this.IF))):this.m_mmu.write(this.TIMA,255&s)}this.m_mmu.write(this.DIV,t>>8&255),this.m_mmu.write(this.DIV+1,255&t)},t.prototype.checkForInterupts=function(){if(!this.IME)return!1;for(var t=1,s=0;s<5;s++){if(this.m_mmu.read(this.IF)&t&&this.m_mmu.read(this.IE)&t)return this.IME=!1,this.m_mmu.write(this.IF,this.m_mmu.read(this.IF)&255-t),this.m_mmu.write(--this.m_SP[0],this.m_PC[0]>>8),this.m_mmu.write(--this.m_SP[0],255&this.m_PC[0]),this.m_PC[0]=64+8*s,this.m_clock=4,!0;t<<=1}return!1},t.prototype.execute=function(t){475==this.m_PC[0]&&(this.debug=!0),140==this.m_mmu.read(65348)&&(0==this.counter&&(this.debug=!1),this.counter-=1),this.debug,this.m_clock=this.m_instructionMethods1[t].call(this),this.m_PC[0]+=1},t.prototype.JP=function(){var t=this.m_mmu.read(this.m_PC[0]),s=(56&t)>>3,i=7&t;if(1==i)return this.m_PC[0]=this.getHL()-1&65535,4;var e=this.m_mmu.read(++this.m_PC[0]),r=this.m_mmu.read(++this.m_PC[0]);if(2==i)switch(s){case 0:if(this.getZ())return 12;break;case 1:if(!this.getZ())return 12;break;case 2:if(this.getC())return 12;break;case 3:if(!this.getC())return 12}return this.m_PC[0]=(r<<8)+e-1&65535,16},t.prototype.JR=function(){var t=(56&this.m_mmu.read(this.m_PC[0]))>>3,s=this.m_mmu.read(++this.m_PC[0]);if(3!=t)switch(t){case 4:if(this.getZ())return 8;break;case 5:if(!this.getZ())return 8;break;case 6:if(this.getC())return 8;break;case 7:if(!this.getC())return 8}return this.m_PC[0]+=s<<24>>24,12},t.prototype.ADD=function(){var t=this.m_registers[this.R.A],s=0,i=0,e=this.m_mmu.read(this.m_PC[0]),r=(192&e)>>6,m=7&e;return 1==(56&e)>>3&&(i=Number(this.getC())),3==r?(s=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==m?(s=this.m_mmu.read(this.getHL()),this.m_clock=8):(s=this.m_registers[m],this.m_clock=4),this.m_registers[this.R.A]=t+s+i&255,this.setZ(0==this.m_registers[this.R.A]),this.setN(!1),this.setH((15&t)+(15&s)+i>15),this.setC(t+s+i>255),4},t.prototype.SUB=function(){var t=this.m_registers[this.R.A],s=0,i=0,e=this.m_mmu.read(this.m_PC[0]),r=(192&e)>>6,m=7&e;return 3==(56&e)>>3&&(i=Number(this.getC())),3==r?(s=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==m?(s=this.m_mmu.read(this.getHL()),this.m_clock=8):(s=this.m_registers[m],this.m_clock=4),this.setH((15&t)<(15&s)+i),this.m_registers[this.R.A]=t-s-i&255,this.setC(s+i>t),this.setZ(0==this.m_registers[this.R.A]),this.setN(!0),4},t.prototype.AND=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t;return 3==(192&t)>>6?(this.m_registers[this.R.A]&=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==s?(this.m_registers[this.R.A]&=this.m_mmu.read(this.getHL()),this.m_clock=8):(this.m_registers[this.R.A]&=this.m_registers[s],this.m_clock=4),this.setZ(0==this.m_registers[this.R.A]),this.setC(!1),this.setH(!0),this.setN(!1),4},t.prototype.XOR=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t;return 3==(192&t)>>6?(this.m_registers[this.R.A]^=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==s?(this.m_registers[this.R.A]^=this.m_mmu.read(this.getHL()),this.m_clock=8):(this.m_registers[this.R.A]^=this.m_registers[s],this.m_clock=4),this.setZ(0==this.m_registers[this.R.A]),this.setC(!1),this.setH(!1),this.setN(!1),4},t.prototype.OR=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t;return 3==(192&t)>>6?(this.m_registers[this.R.A]|=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==s?(this.m_registers[this.R.A]|=this.m_mmu.read(this.getHL()),this.m_clock=8):(this.m_registers[this.R.A]|=this.m_registers[s],this.m_clock=4),this.setZ(0==this.m_registers[this.R.A]),this.setC(!1),this.setH(!1),this.setN(!1),4},t.prototype.CP=function(){var t=this.m_registers[this.R.A],s=0,i=this.m_mmu.read(this.m_PC[0]),e=7&i;return 3==(192&i)>>6?(s=this.m_mmu.read(++this.m_PC[0]),this.m_clock=8):6==e?(s=this.m_mmu.read(this.getHL()),this.m_clock=8):(s=this.m_registers[e],this.m_clock=4),this.setH((t-s&15)>(15&t)),this.setC(s>t),this.setZ(s==t),this.setN(!0),4},t.prototype.RLC=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.setC(s>=128),this.m_mmu.write(this.getHL(),(s<<1)+Number(this.getC())&255),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.setC(s>=128),this.m_registers[t]=(s<<1)+Number(this.getC())&255,this.m_cbPrefix?(this.setZ(0==this.m_registers[t]),this.m_clock=8):(this.setZ(!1),this.m_clock=4);return this.setH(!1),this.setN(!1),8},t.prototype.RRC=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.setC(s%2>0),this.m_mmu.write(this.getHL(),(s>>1)+(Number(this.getC())<<7)),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.setC(s%2>0),this.m_registers[t]=(s>>1)+(Number(this.getC())<<7),this.m_cbPrefix?(this.setZ(0==this.m_registers[t]),this.m_clock=8):(this.setZ(!1),this.m_clock=4);return this.setH(!1),this.setN(!1),4},t.prototype.RL=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.m_mmu.write(this.getHL(),(s<<1)+Number(this.getC())),this.setC(s>=128),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.m_registers[t]=(s<<1)+Number(this.getC())&255,this.setC(s>=128),this.m_cbPrefix?(this.setZ(0==this.m_registers[t]),this.m_clock=8):(this.setZ(!1),this.m_clock=4);return this.setH(!1),this.setN(!1),8},t.prototype.RR=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.m_mmu.write(this.getHL(),(s>>1)+(Number(this.getC())<<7)),this.setC(s%2>0),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.m_registers[t]=(s>>1)+(Number(this.getC())<<7),this.setC(s%2>0),this.m_cbPrefix?(this.setZ(0==this.m_registers[t]),this.m_clock=8):(this.setZ(!1),this.m_clock=4);return this.setH(!1),this.setN(!1),8},t.prototype.SLA=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.setC(s>=128),this.m_mmu.write(this.getHL(),s<<1),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.setC(s>=128),this.m_registers[t]=s<<1&255,this.setZ(0==this.m_registers[t]),this.m_clock=8;return this.setH(!1),this.setN(!1),8},t.prototype.SRA=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.setC(s>=128),this.m_mmu.write(this.getHL(),(s>>1)+(Number(this.getC())<<7)),this.setC(s%2>0),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.setC(s>=128),this.m_registers[t]=(s>>1)+(Number(this.getC())<<7),this.setC(s%2>0),this.setZ(0==this.m_registers[t]),this.m_clock=8;return this.setH(!1),this.setN(!1),8},t.prototype.SWAP=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.m_mmu.write(this.getHL(),(s<<4)+(s>>4)),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.m_registers[t]=(s<<4)+(s>>4)&255,this.setZ(0==this.m_registers[t]),this.m_clock=8;return this.setC(!1),this.setH(!1),this.setN(!1),8},t.prototype.SRL=function(){var t=7&this.m_mmu.read(this.m_PC[0]);if(6==t){var s=this.m_mmu.read(this.getHL());this.setC(s%2>0),this.m_mmu.write(this.getHL(),s>>1),this.setZ(0==this.m_mmu.read(this.getHL())),this.m_clock=16}else s=this.m_registers[t],this.setC(s%2>0),this.m_registers[t]=s>>1,this.setZ(0==this.m_registers[t]),this.m_clock=8;return this.setH(!1),this.setN(!1),8},t.prototype.BIT=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t,i=1<<((56&t)>>3);return 6==s?(this.setZ(0==(this.m_mmu.read(this.getHL())&i)),this.m_clock=12):(this.setZ(0==(this.m_registers[s]&i)),this.m_clock=8),this.setH(!0),this.setN(!1),8},t.prototype.RES=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t,i=1<<((56&t)>>3)^255;return 6==s?(this.m_mmu.write(this.getHL(),this.m_mmu.read(this.getHL())&i),this.m_clock=16):(this.m_registers[s]&=255&i,this.m_clock=8),8},t.prototype.SET=function(){var t=this.m_mmu.read(this.m_PC[0]),s=7&t,i=1<<((56&t)>>3);return 6==s?(this.m_mmu.write(this.getHL(),this.m_mmu.read(this.getHL())|i),this.m_clock=16):(this.m_registers[s]|=255&i,this.m_clock=8),8},t.prototype.CALL=function(){var t=this.m_mmu.read(this.m_PC[0]),s=(56&t)>>3,i=7&t,e=this.m_mmu.read(++this.m_PC[0]),r=this.m_mmu.read(++this.m_PC[0]);if(4==i)switch(s){case 0:if(this.getZ())return 12;break;case 1:if(!this.getZ())return 12;break;case 2:if(this.getC())return 12;break;case 3:if(!this.getC())return 12}return this.m_PC[0]+=1,this.m_mmu.write(--this.m_SP[0],(65280&this.m_PC[0])>>8),this.m_mmu.write(--this.m_SP[0],255&this.m_PC[0]),this.m_PC[0]=(r<<8)+e-1,24},t.prototype.RET=function(){var t=this.m_mmu.read(this.m_PC[0]),s=(56&t)>>3;if(0==(7&t)){switch(this.m_clock=8,s){case 0:if(this.getZ())return 8;break;case 1:if(!this.getZ())return 8;break;case 2:if(this.getC())return 8;break;case 3:if(!this.getC())return 8}this.m_clock=20}else 3==s&&(this.IME=!0),this.m_clock=16;var i=this.m_mmu.read(this.m_SP[0]++),e=this.m_mmu.read(this.m_SP[0]++);return this.m_PC[0]=(e<<8)+i-1,16},t.prototype.RST=function(){var t=(56&this.m_mmu.read(this.m_PC[0]))>>3;return this.m_PC[0]+=1,this.m_mmu.write(--this.m_SP[0],(65280&this.m_PC[0])>>8),this.m_mmu.write(--this.m_SP[0],255&this.m_PC[0]),this.m_PC[0]=8*t-1,16},t.prototype.DAA=function(){return this.getN()?this.getC()?this.getH()?this.m_registers[this.R.A]=this.m_registers[this.R.A]+154&255:this.m_registers[this.R.A]=this.m_registers[this.R.A]+160&255:this.getH()&&(this.m_registers[this.R.A]=this.m_registers[this.R.A]+250&255):((this.getC()||this.m_registers[this.R.A]>153)&&(this.m_registers[this.R.A]=this.m_registers[this.R.A]+96&255,this.setC(!0)),(this.getH()||(15&this.m_registers[this.R.A])>9)&&(this.m_registers[this.R.A]=this.m_registers[this.R.A]+6&255)),this.setZ(0==this.m_registers[this.R.A]),this.setH(!1),4},t.prototype.STOP=function(){return 4},t.prototype.opcode00=function(){return 4},t.prototype.getBC=function(){return(this.m_registers[this.R.B]<<8)+this.m_registers[this.R.C]},t.prototype.getDE=function(){return(this.m_registers[this.R.D]<<8)+this.m_registers[this.R.E]},t.prototype.getHL=function(){return(this.m_registers[this.R.H]<<8)+this.m_registers[this.R.L]},t.prototype.setBC=function(t){var s=t>>8&255,i=255&t;this.m_registers[this.R.B]=s,this.m_registers[this.R.C]=i},t.prototype.setDE=function(t){var s=t>>8&255,i=255&t;this.m_registers[this.R.D]=s,this.m_registers[this.R.E]=i},t.prototype.setHL=function(t){var s=t>>8&255,i=255&t;this.m_registers[this.R.H]=s,this.m_registers[this.R.L]=i},t.prototype.getC=function(){return(16&this.m_registers[this.R.F])>0},t.prototype.getH=function(){return(32&this.m_registers[this.R.F])>0},t.prototype.getN=function(){return(64&this.m_registers[this.R.F])>0},t.prototype.getZ=function(){return(128&this.m_registers[this.R.F])>0},t.prototype.setC=function(t){t?this.m_registers[this.R.F]|=16:this.m_registers[this.R.F]&=239},t.prototype.setH=function(t){t?this.m_registers[this.R.F]|=32:this.m_registers[this.R.F]&=223},t.prototype.setN=function(t){t?this.m_registers[this.R.F]|=64:this.m_registers[this.R.F]&=191},t.prototype.setZ=function(t){t?this.m_registers[this.R.F]|=128:this.m_registers[this.R.F]&=127},t}(),i=function(){function t(t,s){this.m_mmu=t,this.m_frame=s,this.VRAM_1=32768,this.VRAM_2=36864,this.TILE_MAP1=38912,this.TILE_MAP2=39936,this.OAM=65024,this.IF=65295,this.LCDC=65344,this.STAT=65345,this.SCY=65346,this.SCX=65347,this.LY=65348,this.LYC=65349,this.BGP=65351,this.OBP0=65352,this.OBP1=65353,this.WY=65354,this.WX=65355,this.colorValues=[65535,22197,10666,0],this.state={Mode0:0,Mode1:1,Mode2:2,Mode3:3},this.m_state=this.state.Mode2,this.m_clock=0,this.m_windowLineCounter=0,this.m_bgDotVals=new Array(160).fill(0)}return t.prototype.step=function(){if((128&this.m_mmu.read(this.LCDC))>0){switch(this.m_state){case this.state.Mode0:this.m_clock>=455&&(this.m_mmu.read(this.LY)>=143?(this.m_state=this.state.Mode1,this.m_mmu.write(this.STAT,252&this.m_mmu.read(this.STAT)),this.m_mmu.write(this.STAT,1|this.m_mmu.read(this.STAT)),this.m_mmu.write(this.LY,this.m_mmu.read(this.LY)+1),this.m_mmu.write(this.IF,1|this.m_mmu.read(this.IF)),(16&this.m_mmu.read(this.STAT))>0&&this.m_mmu.write(this.IF,2|this.m_mmu.read(this.IF)),this.m_windowLineCounter=0):(this.m_state=this.state.Mode2,this.m_mmu.write(this.STAT,252&this.m_mmu.read(this.STAT)),this.m_mmu.write(this.STAT,2|this.m_mmu.read(this.STAT)),this.m_mmu.write(this.LY,this.m_mmu.read(this.LY)+1),(32&this.m_mmu.read(this.STAT))>0&&this.m_mmu.write(this.IF,2|this.m_mmu.read(this.IF))),this.m_clock=-1);break;case this.state.Mode1:this.m_clock>=455&&(this.m_mmu.write(this.LY,this.m_mmu.read(this.LY)+1),154==this.m_mmu.read(this.LY)&&(this.m_state=this.state.Mode2,this.m_mmu.write(this.STAT,252&this.m_mmu.read(this.STAT)),this.m_mmu.write(this.STAT,2|this.m_mmu.read(this.STAT)),this.m_mmu.write(this.LY,0),(32&this.m_mmu.read(this.STAT))>0&&this.m_mmu.write(this.IF,2|this.m_mmu.read(this.IF))),this.m_clock=-1);break;case this.state.Mode2:this.m_clock>=79&&(this.m_state=this.state.Mode3,this.m_mmu.write(this.STAT,3|this.m_mmu.read(this.STAT)));break;case this.state.Mode3:this.m_clock>=251&&(this.m_state=this.state.Mode0,this.m_mmu.write(this.STAT,252&this.m_mmu.read(this.STAT)),(128&this.m_mmu.read(this.STAT))>0&&this.m_mmu.write(this.IF,2|this.m_mmu.read(this.IF)),this.renderLine())}this.m_mmu.read(this.LY)==this.m_mmu.read(this.LYC)?0==(4&this.m_mmu.read(this.STAT))&&((64&this.m_mmu.read(this.STAT))>0&&this.m_mmu.write(this.IF,2|this.m_mmu.read(this.IF)),this.m_mmu.write(this.STAT,4|this.m_mmu.read(this.STAT))):this.m_mmu.write(this.STAT,251&this.m_mmu.read(this.STAT)),this.m_clock+=1}},t.prototype.renderLine=function(){(1&this.m_mmu.read(this.LCDC))>0&&this.renderBackgroundLine(),(32&this.m_mmu.read(this.LCDC))>0&&this.renderWindowLine(),(2&this.m_mmu.read(this.LCDC))>0&&this.renderObjectLine()},t.prototype.renderBackgroundLine=function(){for(var t=0;t<160;t++){var s,i=(this.m_mmu.read(this.SCX)+t)%256,e=(this.m_mmu.read(this.SCY)+this.m_mmu.read(this.LY))%256,r=32*Math.floor(e/8)+Math.floor(i/8);s=(16&this.m_mmu.read(this.LCDC))>0?(8&this.m_mmu.read(this.LCDC))>0?this.VRAM_1+16*this.m_mmu.read(this.TILE_MAP2+r):this.VRAM_1+16*this.m_mmu.read(this.TILE_MAP1+r):(8&this.m_mmu.read(this.LCDC))>0?this.VRAM_2+(16*this.m_mmu.read(this.TILE_MAP2+r)<<24>>24):this.VRAM_2+(16*this.m_mmu.read(this.TILE_MAP1+r)<<24>>24);var m=this.m_mmu.read(s+e%8*2),h=128>>i%8,_=0;(this.m_mmu.read(s+e%8*2+1)&h)>0?(m&h)>0?(_=this.colorValues[(192&this.m_mmu.read(this.BGP))>>6],this.m_bgDotVals[t]=3):(_=this.colorValues[(48&this.m_mmu.read(this.BGP))>>4],this.m_bgDotVals[t]=2):(m&h)>0?(_=this.colorValues[(12&this.m_mmu.read(this.BGP))>>2],this.m_bgDotVals[t]=1):(_=this.colorValues[3&this.m_mmu.read(this.BGP)],this.m_bgDotVals[t]=0),this.m_frame[160*this.m_mmu.read(this.LY)+t]=_}},t.prototype.renderWindowLine=function(){if(this.m_mmu.read(this.LY)>=this.m_mmu.read(this.WY)){for(var t=this.m_mmu.read(this.WX)-7;t<160;t++){var s,i=t+7-this.m_mmu.read(this.WX),e=this.m_windowLineCounter,r=32*Math.floor(e/8)+Math.floor(i/8);s=(64&this.m_mmu.read(this.WX))>0?this.VRAM_1+16*this.m_mmu.read(this.TILE_MAP2+r):this.VRAM_1+16*this.m_mmu.read(this.TILE_MAP1+r);var m=this.m_mmu.read(s+e%8*2),h=128>>i%8,_=0;(this.m_mmu.read(s+e%8*2+1)&h)>0?(m&h)>0?(_=this.colorValues[(192&this.m_mmu.read(this.BGP))>>6],this.m_bgDotVals[t]=3):(_=this.colorValues[(48&this.m_mmu.read(this.BGP))>>4],this.m_bgDotVals[t]=2):(m&h)>0?(_=this.colorValues[(12&this.m_mmu.read(this.BGP))>>2],this.m_bgDotVals[t]=1):(_=this.colorValues[3&this.m_mmu.read(this.BGP)],this.m_bgDotVals[t]=0),this.m_frame[160*this.m_mmu.read(this.LY)+t]=_}this.m_mmu.read(this.WX)<=166&&(this.m_windowLineCounter+=1)}},t.prototype.renderObjectLine=function(){for(var t=0,s=0;s<40;s++){var i=this.m_mmu.read(this.OAM+4*s+1)-8,e=this.m_mmu.read(this.OAM+4*s)-this.m_mmu.read(this.LY),r=this.m_mmu.read(this.OAM+4*s+3),m=0;if((4&this.m_mmu.read(this.LCDC))>0){if(e<1||e>16)continue;m=e<9?64&r?this.VRAM_1+16*(254&this.m_mmu.read(this.OAM+4*s+2)):this.VRAM_1+16*(1|this.m_mmu.read(this.OAM+4*s+2)):64&r?this.VRAM_1+16*(1|this.m_mmu.read(this.OAM+4*s+2)):this.VRAM_1+16*(254&this.m_mmu.read(this.OAM+4*s+2))}else{if(e<9||e>16)continue;m=this.VRAM_1+16*this.m_mmu.read(this.OAM+4*s+2)}64&r?e-=1:e=16-e;var h=this.m_mmu.read(m+e%8*2),_=this.m_mmu.read(m+e%8*2+1),u=0;u=(32&r)>0?1:128;for(var n=0;n<8;n++){if(i>=0||i<160){var o,g=0;if(o=16&r?this.OBP1:this.OBP0,_&u)g=h&u?this.colorValues[(192&this.m_mmu.read(o))>>6]:this.colorValues[(48&this.m_mmu.read(o))>>4];else{if(!(h&u)){32&r?u<<=1:u>>=1,i+=1;continue}g=this.colorValues[(12&this.m_mmu.read(o))>>2]}(128&r)>0?0==this.m_bgDotVals[i]&&(this.m_frame[160*this.m_mmu.read(this.LY)+i]=g):this.m_frame[160*this.m_mmu.read(this.LY)+i]=g}(32&r)>0?u<<=1:u>>=1,i+=1}if(10==(t+=1))break}},t}(),e=function(){function t(){}return t.BIOS_DMG=[49,254,255,175,33,255,159,50,203,124,32,251,33,38,255,14,17,62,128,50,226,12,62,243,226,50,62,119,119,62,252,224,71,17,4,1,33,16,128,26,205,149,0,205,150,0,19,123,254,52,32,243,17,216,0,6,8,26,19,34,35,5,32,249,62,25,234,16,153,33,47,153,14,12,61,40,8,50,13,32,249,46,15,24,243,103,62,100,87,224,66,62,145,224,64,4,30,2,14,12,240,68,254,144,32,250,13,32,247,29,32,242,14,19,36,124,30,131,254,98,40,6,30,193,254,100,32,6,123,226,12,62,135,226,240,66,144,224,66,21,32,210,5,32,79,22,32,24,203,79,6,4,197,203,17,23,193,203,17,23,5,32,245,34,35,34,35,201,206,237,102,102,204,13,0,11,3,115,0,131,0,12,0,13,0,8,17,31,136,137,0,14,220,204,110,230,221,221,217,153,187,187,103,99,110,14,236,204,221,220,153,159,187,185,51,62,60,66,185,165,185,165,66,60,33,4,1,17,168,0,26,19,190,32,254,35,125,254,52,32,245,6,25,120,134,35,5,32,251,134,32,254,62,1,224,80],t}(),r=function(){function t(t){var s=this;this.file=t,this.m_BIOS=new Uint8Array(256).fill(0),this.m_addrBus=new Uint8Array(65536).fill(0),this.m_isRomLoaded=!1,this.m_isBIOSMapped=!0,this.m_isGBC=!1;var i=new FileReader;i.onload=function(){return s.loadROM(i.result)},i.readAsArrayBuffer(this.file),this.loadBIOS()}return t.prototype.read=function(t){if(this.m_isGBC,this.m_isBIOSMapped){if(t<=256){if(256!=t)return this.m_BIOS[t];this.m_isBIOSMapped=!1}return this.m_addrBus[t]}return this.m_addrBus[t]},t.prototype.write=function(t,s){t>=32768&&(this.m_addrBus[t]=s)},t.prototype.loadBIOS=function(){for(var t=0;t<e.BIOS_DMG.length;t++)this.m_BIOS[t]=e.BIOS_DMG[t]},t.prototype.loadROM=function(t){for(var s=new Uint8Array(t),i=0;i<s.length;i++)this.m_addrBus[i]=s[i];this.m_isRomLoaded=!0},t}(),m=function(){function t(t){this.m_file=t,this.m_frame=new Array(23040).fill(0),this.m_mmu=new r(t),this.m_cpu=new s(this.m_mmu),this.m_gpu=new i(this.m_mmu,this.m_frame),this.m_inVBLANK=!1,this.m_cpu,this.m_gpu,this.m_inVBLANK}return t.prototype.getFrame=function(){for(;!this.m_mmu.m_isRomLoaded;)return this.m_frame;for(;this.m_mmu.read(65348)>=144&&this.m_inVBLANK;)this.m_cpu.step(),this.m_gpu.step();for(this.m_inVBLANK=!1;this.m_mmu.read(65348)<144&&!this.m_inVBLANK;)this.m_cpu.step(),this.m_gpu.step();return this.m_inVBLANK=!0,this.m_frame},t}(),h=document.getElementById("canvas").getContext("2d"),_=[0,8,16,24,32,41,49,57,65,74,82,90,98,106,115,123,131,139,148,156,164,172,180,189,197,205,213,222,230,238,246,255],u=h.createImageData(160,144),n=0;function o(){for(var s=u.data,i=t.getFrame(),e=0;e<144;e++)for(var r=0;r<1;r++)for(var m=0;m<160;m++)for(var o=0;o<1;o++)s[4*(n=160*e+m)]=_[31&i[n]],s[4*n+1]=_[(992&i[n])>>5],s[4*n+2]=_[(31744&i[n])>>10],s[4*n+3]=255;h.putImageData(u,0,0)}document.getElementById("file-selector").addEventListener("change",(function(s){var i=s.target.files;t=new m(i[0]),setInterval(o,1e3/60)}))})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ([
+/* 0 */,
+/* 1 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Machine: () => (/* binding */ Machine)
+/* harmony export */ });
+/* harmony import */ var _cpu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _gpu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+/* harmony import */ var _mmu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+
+
+
+var Machine = /** @class */ (function () {
+    function Machine(m_file) {
+        this.m_file = m_file;
+        this.m_frame = new Array(160 * 144).fill(0);
+        this.m_mmu = new _mmu__WEBPACK_IMPORTED_MODULE_2__.MMU(m_file);
+        this.m_cpu = new _cpu__WEBPACK_IMPORTED_MODULE_0__.CPU(this.m_mmu);
+        this.m_gpu = new _gpu__WEBPACK_IMPORTED_MODULE_1__.GPU(this.m_mmu, this.m_frame);
+        this.m_inVBLANK = false;
+        this.m_cpu;
+        this.m_gpu;
+        this.m_inVBLANK;
+    }
+    Machine.prototype.getFrame = function () {
+        while (!this.m_mmu.m_isRomLoaded) {
+            return this.m_frame;
+        }
+        while (this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK) {
+            this.m_cpu.step();
+            this.m_gpu.step();
+        }
+        this.m_inVBLANK = false;
+        while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK) {
+            this.m_cpu.step();
+            this.m_gpu.step();
+        }
+        this.m_inVBLANK = true;
+        return this.m_frame;
+    };
+    return Machine;
+}());
+
+
+
+/***/ }),
+/* 2 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CPU: () => (/* binding */ CPU)
+/* harmony export */ });
+var CPU = /** @class */ (function () {
+    function CPU(m_mmu) {
+        var _this = this;
+        this.m_mmu = m_mmu;
+        this.m_instructionMethods1 = [
+            function () {
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_mmu.read(++_this.m_PC[0]);
+                _this.m_registers[_this.R.B] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getBC(), _this.m_registers[_this.R.A]);
+                return 8;
+            },
+            function () {
+                _this.setBC(_this.getBC() + 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.B] += 1;
+                _this.setZ(_this.m_registers[_this.R.B] == 0x00);
+                _this.setH((_this.m_registers[_this.R.B] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] -= 1;
+                _this.setZ(_this.m_registers[_this.R.B] == 0x00);
+                _this.setH((_this.m_registers[_this.R.B] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            function () {
+                _this.setC(_this.m_registers[_this.R.A] >= 128);
+                _this.m_registers[_this.R.A] = ((_this.m_registers[_this.R.A] << 1) + Number(_this.getC())) & 0xFF;
+                _this.setZ(false);
+                _this.setH(false);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                var addr = _this.m_mmu.read(++_this.m_PC[0]) + (_this.m_mmu.read(++_this.m_PC[0]) << 8);
+                _this.m_mmu.write(addr, _this.m_SP[0] & 0x00FF);
+                _this.m_mmu.write(addr + 1, (_this.m_SP[0] & 0xFF00) >> 8);
+                return 20;
+            },
+            function () {
+                var rVal = _this.getHL();
+                _this.setHL(_this.getHL() + _this.getBC());
+                _this.setN(false);
+                _this.setH((_this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+                _this.setC(_this.getHL() < rVal);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.getBC());
+                return 8;
+            },
+            function () {
+                _this.setBC(_this.getBC() - 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.C] += 1;
+                _this.setZ(_this.m_registers[_this.R.C] == 0x00);
+                _this.setH((_this.m_registers[_this.R.C] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] -= 1;
+                _this.setZ(_this.m_registers[_this.R.C] == 0x00);
+                _this.setH((_this.m_registers[_this.R.C] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            function () {
+                _this.setC((_this.m_registers[_this.R.A] % 2) > 0);
+                _this.m_registers[_this.R.A] = (_this.m_registers[_this.R.A] >> 1) + (Number(_this.getC()) << 7);
+                _this.setZ(false);
+                _this.setH(false);
+                _this.setN(false);
+                return 4;
+            },
+            this.STOP,
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_mmu.read(++_this.m_PC[0]);
+                _this.m_registers[_this.R.D] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getDE(), _this.m_registers[_this.R.A]);
+                return 8;
+            },
+            function () {
+                _this.setDE(_this.getDE() + 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.D] += 1;
+                _this.setZ(_this.m_registers[_this.R.D] == 0x00);
+                _this.setH((_this.m_registers[_this.R.D] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] -= 1;
+                _this.setZ(_this.m_registers[_this.R.D] == 0x00);
+                _this.setH((_this.m_registers[_this.R.D] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            this.RL,
+            this.JR,
+            function () {
+                var rVal = _this.getHL();
+                _this.setHL(_this.getHL() + _this.getDE());
+                _this.setN(false);
+                _this.setH((_this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+                _this.setC(_this.getHL() < rVal);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.getDE());
+                return 8;
+            },
+            function () {
+                _this.setDE(_this.getDE() - 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.E] += 1;
+                _this.setZ(_this.m_registers[_this.R.E] == 0x00);
+                _this.setH((_this.m_registers[_this.R.E] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] -= 1;
+                _this.setZ(_this.m_registers[_this.R.E] == 0x00);
+                _this.setH((_this.m_registers[_this.R.E] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            this.RR,
+            this.JR,
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_mmu.read(++_this.m_PC[0]);
+                _this.m_registers[_this.R.H] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.A]);
+                _this.setHL(_this.getHL() + 1);
+                return 8;
+            },
+            function () {
+                _this.setHL(_this.getHL() + 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.H] += 1;
+                _this.setZ(_this.m_registers[_this.R.H] == 0x00);
+                _this.setH((_this.m_registers[_this.R.H] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] -= 1;
+                _this.setZ(_this.m_registers[_this.R.H] == 0x00);
+                _this.setH((_this.m_registers[_this.R.H] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            this.DAA,
+            this.JR,
+            function () {
+                var rVal = _this.getHL();
+                _this.setHL(_this.getHL() + _this.getHL());
+                _this.setN(false);
+                _this.setH((_this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+                _this.setC(_this.getHL() < rVal);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.getHL());
+                _this.setHL(_this.getHL() + 1);
+                return 8;
+            },
+            function () {
+                _this.setHL(_this.getHL() - 1);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.L] += 1;
+                _this.setZ(_this.m_registers[_this.R.L] == 0x00);
+                _this.setH((_this.m_registers[_this.R.L] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] -= 1;
+                _this.setZ(_this.m_registers[_this.R.L] == 0x00);
+                _this.setH((_this.m_registers[_this.R.L] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = 0xFF - _this.m_registers[_this.R.A];
+                _this.setN(true);
+                _this.setH(true);
+                return 4;
+            },
+            this.JR,
+            function () {
+                _this.m_SP[0] = _this.m_mmu.read(++_this.m_PC[0]) + (_this.m_mmu.read(++_this.m_PC[0]) << 8);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.A]);
+                _this.setHL(_this.getHL() - 1);
+                return 8;
+            },
+            function () {
+                _this.m_SP[0] += 1;
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_mmu.read(_this.getHL()) + 1);
+                _this.setZ(_this.m_mmu.read(_this.getHL()) == 0x00);
+                _this.setH((_this.m_mmu.read(_this.getHL()) & 0x0F) == 0x00);
+                _this.setN(false);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_mmu.read(_this.getHL()) - 1);
+                _this.setZ(_this.m_mmu.read(_this.getHL()) == 0x00);
+                _this.setH((_this.m_mmu.read(_this.getHL()) & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_mmu.read(++_this.m_PC[0]));
+                return 8;
+            },
+            function () {
+                _this.setN(false);
+                _this.setH(false);
+                _this.setC(true);
+                return 4;
+            },
+            this.JR,
+            function () {
+                var rVal = _this.getHL();
+                _this.setHL(_this.getHL() + _this.m_SP[0]);
+                _this.setN(false);
+                _this.setH((_this.getHL() & 0x0FFF) < (rVal & 0x0FFF));
+                _this.setC(_this.getHL() < rVal);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.getHL());
+                _this.setHL(_this.getHL() - 1);
+                return 8;
+            },
+            function () {
+                _this.m_SP[0] -= 1;
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] += 1;
+                _this.setZ(_this.m_registers[_this.R.A] == 0x00);
+                _this.setH((_this.m_registers[_this.R.A] & 0x0F) == 0x00);
+                _this.setN(false);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] -= 1;
+                _this.setZ(_this.m_registers[_this.R.A] == 0x00);
+                _this.setH((_this.m_registers[_this.R.A] & 0x0F) == 0x0F);
+                _this.setN(true);
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(++_this.m_PC[0]);
+                return 8;
+            },
+            function () {
+                _this.setN(false);
+                _this.setH(false);
+                _this.setC(!_this.getC());
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.B] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.D] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.H] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.B]);
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.C]);
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.D]);
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.E]);
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.H]);
+                return 8;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.L]);
+                return 8;
+            },
+            function () {
+                _this.m_isHalted = true;
+                return 4;
+            },
+            function () {
+                _this.m_mmu.write(_this.getHL(), _this.m_registers[_this.R.A]);
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.B];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.C];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.D];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.E];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.H];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.L];
+                return 4;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.getHL());
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_registers[_this.R.A];
+                return 4;
+            },
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.ADD,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.SUB,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.AND,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.XOR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.OR,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.CP,
+            this.RET,
+            function () {
+                _this.m_registers[_this.R.C] = _this.m_mmu.read(_this.m_SP[0]++);
+                _this.m_registers[_this.R.B] = _this.m_mmu.read(_this.m_SP[0]++);
+                return 12;
+            },
+            this.JP,
+            this.JP,
+            this.CALL,
+            function () {
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.B]);
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.C]);
+                return 16;
+            },
+            this.ADD,
+            this.RST,
+            this.RET,
+            this.RET,
+            this.JP,
+            function () {
+                _this.m_cbPrefix = true;
+                var x = _this.m_instructionMethods2[_this.m_mmu.read(++_this.m_PC[0])].call(_this);
+                _this.m_cbPrefix = false;
+                return x;
+            },
+            this.CALL,
+            this.CALL,
+            this.ADD,
+            this.RST,
+            this.RET,
+            function () {
+                _this.m_registers[_this.R.E] = _this.m_mmu.read(_this.m_SP[0]++);
+                _this.m_registers[_this.R.D] = _this.m_mmu.read(_this.m_SP[0]++);
+                return 12;
+            },
+            this.JP,
+            this.opcode00,
+            this.CALL,
+            function () {
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.D]);
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.E]);
+                return 16;
+            },
+            this.SUB,
+            this.RST,
+            this.RET,
+            this.RET,
+            this.JP,
+            this.opcode00,
+            this.CALL,
+            this.opcode00,
+            this.SUB,
+            this.RST,
+            function () {
+                _this.m_mmu.write(0xFF00 + _this.m_mmu.read(++_this.m_PC[0]), _this.m_registers[_this.R.A]);
+                return 12;
+            },
+            function () {
+                _this.m_registers[_this.R.L] = _this.m_mmu.read(_this.m_SP[0]++);
+                _this.m_registers[_this.R.H] = _this.m_mmu.read(_this.m_SP[0]++);
+                return 12;
+            },
+            function () {
+                _this.m_mmu.write(0xFF00 + _this.m_registers[_this.R.C], _this.m_registers[_this.R.A]);
+                return 8;
+            },
+            this.opcode00,
+            this.opcode00,
+            function () {
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.H]);
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.L]);
+                return 16;
+            },
+            this.AND,
+            this.RST,
+            function () {
+                var nVal = _this.m_mmu.read(++_this.m_PC[0]) << 24 >> 24;
+                var rVal = _this.m_SP[0];
+                _this.m_SP[0] += nVal;
+                _this.setZ(false);
+                _this.setN(false);
+                _this.setH(((_this.m_SP[0] ^ rVal ^ nVal) & 0x0010) == 0x0010);
+                _this.setC(((_this.m_SP[0] ^ rVal ^ nVal) & 0x0100) == 0x0100);
+                return 16;
+            },
+            this.JP,
+            function () {
+                _this.m_mmu.write(_this.m_mmu.read(++_this.m_PC[0]) + (_this.m_mmu.read(++_this.m_PC[0]) << 8), _this.m_registers[_this.R.A]);
+                return 16;
+            },
+            this.opcode00,
+            this.opcode00,
+            this.opcode00,
+            this.XOR,
+            this.RST,
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(0xFF00 + _this.m_mmu.read(++_this.m_PC[0]));
+                return 12;
+            },
+            function () {
+                _this.m_registers[_this.R.F] = _this.m_mmu.read(_this.m_SP[0]++) & 0xF0;
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.m_SP[0]++);
+                return 12;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(0xFF00 + _this.m_registers[_this.R.C]);
+                return 8;
+            },
+            function () {
+                _this.IME = false;
+                return 4;
+            },
+            this.opcode00,
+            function () {
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.A]);
+                _this.m_mmu.write(--_this.m_SP[0], _this.m_registers[_this.R.F]);
+                return 16;
+            },
+            this.OR,
+            this.RST,
+            function () {
+                var val = (_this.m_mmu.read(++_this.m_PC[0]) << 24 >> 24);
+                _this.setHL(_this.m_SP[0] + val);
+                _this.setZ(false);
+                _this.setN(false);
+                _this.setH(((_this.m_SP[0] ^ _this.getHL() ^ val) & 0x0010) == 0x0010);
+                _this.setC(((_this.m_SP[0] ^ _this.getHL() ^ val) & 0x0100) == 0x0100);
+                return 12;
+            },
+            function () {
+                _this.m_SP[0] = _this.getHL();
+                return 8;
+            },
+            function () {
+                _this.m_registers[_this.R.A] = _this.m_mmu.read(_this.m_mmu.read(++_this.m_PC[0]) + (_this.m_mmu.read(++_this.m_PC[0]) << 8));
+                return 16;
+            },
+            function () {
+                _this.IME = true;
+                return 4;
+            },
+            this.opcode00,
+            this.opcode00,
+            this.CP,
+            this.RST
+        ];
+        this.m_instructionMethods2 = [
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RLC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RRC,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RL,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.RR,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SLA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SRA,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SWAP,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.SRL,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.BIT,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.RES,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET,
+            this.SET
+        ];
+        this.P1 = 0xFF00;
+        this.DIV = 0xFF03;
+        this.TIMA = 0xFF05;
+        this.TMA = 0xFF06;
+        this.TAC = 0xFF07;
+        this.IF = 0xFF0F;
+        this.IE = 0xFFFF;
+        this.R = {
+            A: 7,
+            B: 0,
+            C: 1,
+            D: 2,
+            E: 3,
+            F: 6,
+            H: 4,
+            L: 5
+        };
+        this.debug = false;
+        this.counter = 1;
+        this.m_jstate1 = 0;
+        this.m_jstate2 = 0;
+        this.m_BIOSMapped = true;
+        this.m_PC = new Uint16Array([0]);
+        this.m_SP = new Uint16Array([0]);
+        this.m_clock = 0;
+        this.m_sysClock = 0;
+        this.m_registers = new Uint8Array(8);
+        this.IME = false;
+        this.m_cbPrefix = false;
+        this.m_isHalted = false;
+        this.m_fallingEdgeDelay = false;
+    }
+    CPU.prototype.step = function () {
+        if (!(this.m_mmu.read(this.P1) & 0x10)) {
+            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate1);
+        }
+        else {
+            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate2);
+        }
+        if (this.m_sysClock == 0) {
+            this.getInput();
+            this.m_sysClock = 1000;
+        }
+        else {
+            this.m_sysClock -= 1;
+        }
+        this.updateTimer();
+        // If an interrupt is pending, turn off halt mode
+        if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)) {
+            this.m_isHalted = false;
+        }
+        if (!this.m_isHalted) {
+            if (this.m_clock == 0) {
+                if (!this.checkForInterupts()) {
+                    this.execute(this.m_mmu.read(this.m_PC[0]));
+                }
+            }
+            this.m_clock -= 1;
+        }
+    };
+    CPU.prototype.getInput = function () {
+        if (false) {}
+        else {
+            if (!(this.m_jstate1 & 0x01)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate1 |= 0x01;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate1 & 0x02)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate1 |= 0x02;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate1 & 0x04)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate1 |= 0x04;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate1 & 0x08)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate1 |= 0x08;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate2 & 0x01)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate2 |= 0x01;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate2 & 0x02)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate2 |= 0x02;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate2 & 0x04)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate2 |= 0x04;
+        }
+        if (false) {}
+        else {
+            if (!(this.m_jstate2 & 0x08)) {
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
+            }
+            this.m_jstate2 |= 0x08;
+        }
+    };
+    CPU.prototype.updateTimer = function () {
+        var div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV + 1);
+        div += 1;
+        if ((this.m_mmu.read(this.TAC) & 0x04) > 0) {
+            var sum = this.m_mmu.read(this.TIMA);
+            if ((this.m_mmu.read(this.TAC) & 0x03) > 0) {
+                if ((div & (0x0002 << ((this.m_mmu.read(this.TAC) & 0x03) * 2))) > 0) {
+                    this.m_fallingEdgeDelay = true;
+                }
+                else {
+                    if (this.m_fallingEdgeDelay) {
+                        sum += 1;
+                        this.m_fallingEdgeDelay = false;
+                    }
+                }
+            }
+            else {
+                if ((div & 0x0200) > 0) {
+                    this.m_fallingEdgeDelay = true;
+                }
+                else {
+                    if (this.m_fallingEdgeDelay) {
+                        sum += 1;
+                        this.m_fallingEdgeDelay = false;
+                    }
+                }
+            }
+            if (sum > 0x00FF) {
+                this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
+                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
+            }
+            else {
+                this.m_mmu.write(this.TIMA, sum & 0x00FF);
+            }
+        }
+        this.m_mmu.write(this.DIV, (div >> 8) & 0x00FF);
+        this.m_mmu.write(this.DIV + 1, div & 0x00FF);
+    };
+    CPU.prototype.checkForInterupts = function () {
+        if (!this.IME) {
+            return false;
+        }
+        var mask = 0x01;
+        for (var i = 0; i < 5; i++) {
+            if ((this.m_mmu.read(this.IF) & this.m_mmu.read(this.IE) & mask) == 0x00) {
+                mask = mask << 1;
+                continue;
+            }
+            this.IME = false;
+            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
+            this.m_mmu.write(--this.m_SP[0], this.m_PC[0] >> 8);
+            this.m_mmu.write(--this.m_SP[0], this.m_PC[0] & 0x00FF);
+            this.m_PC[0] = 0x0040 + (i * 8);
+            this.m_clock = 4;
+            return true;
+        }
+        return false;
+    };
+    CPU.prototype.execute = function (instruction) {
+        // if(this.counter > 0){
+        //     this.debug = true;
+        //     this.counter -= 1;
+        // }
+        // else{
+        //     this.debug = false;
+        // }
+        if (this.m_PC[0] == 0x01DB) {
+            this.debug = true;
+        }
+        if (this.m_mmu.read(0xFF44) == 140) {
+            if (this.counter == 0) {
+                this.debug = false;
+            }
+            this.counter -= 1;
+        }
+        if (this.debug) {
+            // console.log('PC: 0x' + this.m_PC[0]!.toString(16))
+            // console.log('inst: 0x' + instruction.toString(16))
+            // console.log("A:" + this.m_registers[this.R.A]!.toString(16) + " F:" + this.m_registers[this.R.F]!.toString(16))
+            // console.log("B:" + this.m_registers[this.R.B]!.toString(16) + " C:" + this.m_registers[this.R.C]!.toString(16))
+            // console.log("D:" + this.m_registers[this.R.D]!.toString(16) + " E:" + this.m_registers[this.R.E]!.toString(16))
+            // console.log("H:" + this.m_registers[this.R.H]!.toString(16) + " L:" + this.m_registers[this.R.L]!.toString(16))
+            // console.log('SP: 0x' + this.m_SP[0]!.toString(16));
+            // console.log('')
+            // console.log(this.m_mmu.read(0xFF44).toString(16))
+            // console.log(this.m_mmu.read(0xFF45).toString(16))
+            //this.counter -= 1;
+        }
+        this.m_clock = this.m_instructionMethods1[instruction].call(this);
+        this.m_PC[0] += 1;
+    };
+    CPU.prototype.JP = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        if (reg2 == 0x01) {
+            this.m_PC[0] = (this.getHL() - 1) & 0xFFFF;
+            return 4;
+        }
+        else {
+            var lVal = this.m_mmu.read(++this.m_PC[0]);
+            var hVal = this.m_mmu.read(++this.m_PC[0]);
+            if (reg2 == 0x02) {
+                switch (reg1) {
+                    case 0x00:
+                        if (this.getZ()) {
+                            return 12;
+                        }
+                        break;
+                    case 0x01:
+                        if (!this.getZ()) {
+                            return 12;
+                        }
+                        break;
+                    case 0x02:
+                        if (this.getC()) {
+                            return 12;
+                        }
+                        break;
+                    case 0x03:
+                        if (!this.getC()) {
+                            return 12;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            this.m_PC[0] = ((hVal << 8) + lVal - 1) & 0xFFFF;
+            ;
+            return 16;
+        }
+    };
+    CPU.prototype.JR = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var nVal = this.m_mmu.read(++this.m_PC[0]);
+        if (reg1 != 0x03) {
+            switch (reg1) {
+                case 0x04:
+                    if (this.getZ()) {
+                        return 8;
+                    }
+                    break;
+                case 0x05:
+                    if (!this.getZ()) {
+                        return 8;
+                    }
+                    break;
+                case 0x06:
+                    if (this.getC()) {
+                        return 8;
+                    }
+                    break;
+                case 0x07:
+                    if (!this.getC()) {
+                        return 8;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        this.m_PC[0] += (nVal << 24 >> 24);
+        return 12;
+    };
+    CPU.prototype.ADD = function () {
+        var rVal = this.m_registers[this.R.A];
+        var nVal = 0;
+        var carry = 0;
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        // Check if carry bit will be used
+        if (reg1 == 0x01) {
+            carry = Number(this.getC());
+        }
+        // Get the value being used for the calculation with Register A
+        if (op == 0x03) {
+            nVal = this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                nVal = this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Perform addition to A register
+        this.m_registers[this.R.A] = (rVal + nVal + carry) & 0xFF;
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set N flag to 0
+        this.setN(false);
+        // Calculate if Half-Carry flag needs to be set
+        this.setH(((rVal & 0x0F) + (nVal & 0x0F) + carry) > 0x0F);
+        // Calculate if Full-Carry flag needs to be set
+        this.setC((rVal + nVal + carry) > 0xFF);
+        return 4;
+    };
+    CPU.prototype.SUB = function () {
+        var rVal = this.m_registers[this.R.A];
+        var nVal = 0;
+        var carry = 0;
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        if (reg1 == 0x03) {
+            carry = Number(this.getC());
+        }
+        if (op == 0x03) {
+            nVal = this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                nVal = this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Calculate if Half-Carry flag needs to be set
+        this.setH((rVal & 0x0F) < (nVal & 0x0F) + carry);
+        // Perform subtraction to A register
+        this.m_registers[this.R.A] = (rVal - nVal - carry) & 0xFF;
+        // Calculate if Full-Carry flag needs to be set
+        this.setC(nVal + carry > rVal);
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set N flag to 1
+        this.setN(true);
+        return 4;
+    };
+    CPU.prototype.AND = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg2 = instruction & 7;
+        if (op == 0x03) {
+            this.m_registers[this.R.A] &= this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                this.m_registers[this.R.A] &= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                this.m_registers[this.R.A] &= this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C and N flags to 0, H flag to 1
+        this.setC(false);
+        this.setH(true);
+        this.setN(false);
+        return 4;
+    };
+    CPU.prototype.XOR = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg2 = instruction & 7;
+        if (op == 0x03) {
+            this.m_registers[this.R.A] ^= this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                this.m_registers[this.R.A] ^= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                this.m_registers[this.R.A] ^= this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C, H, and N flags to 0
+        this.setC(false);
+        this.setH(false);
+        this.setN(false);
+        return 4;
+    };
+    CPU.prototype.OR = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg2 = instruction & 7;
+        if (op == 0x03) {
+            this.m_registers[this.R.A] |= this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                this.m_registers[this.R.A] |= this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                this.m_registers[this.R.A] |= this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set C, H, and N flags to 0
+        this.setC(false);
+        this.setH(false);
+        this.setN(false);
+        return 4;
+    };
+    CPU.prototype.CP = function () {
+        var rVal = this.m_registers[this.R.A];
+        var nVal = 0;
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var op = (instruction & 192) >> 6;
+        var reg2 = instruction & 7;
+        if (op == 0x03) {
+            nVal = this.m_mmu.read(++this.m_PC[0]);
+            this.m_clock = 8;
+        }
+        else {
+            if (reg2 == 0x06) {
+                nVal = this.m_mmu.read(this.getHL());
+                this.m_clock = 8;
+            }
+            else {
+                nVal = this.m_registers[reg2];
+                this.m_clock = 4;
+            }
+        }
+        // Calculate if Half-Carry flag needs to be set
+        this.setH(((rVal - nVal) & 0x0F) > (rVal & 0x0F));
+        // Calculate if Full-Carry flag needs to be set
+        this.setC(nVal > rVal);
+        // Calculate if Zero flag needs to be set
+        this.setZ(nVal == rVal);
+        // Set N flag to 1
+        this.setN(true);
+        return 4;
+    };
+    CPU.prototype.RLC = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_mmu.write(this.getHL(), ((rVal << 1) + Number(this.getC())) & 0xFF);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_registers[reg2] = ((rVal << 1) + Number(this.getC())) & 0xFF;
+            // Calculate if Zero flag needs to be set
+            if (this.m_cbPrefix) {
+                this.setZ(this.m_registers[reg2] == 0);
+                this.m_clock = 8;
+            }
+            else {
+                this.setZ(false);
+                this.m_clock = 4;
+            }
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.RRC = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            this.m_mmu.write(this.getHL(), (rVal >> 1) + (Number(this.getC()) << 7));
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            this.m_registers[reg2] = (rVal >> 1) + (Number(this.getC()) << 7);
+            // Calculate if Zero flag needs to be set
+            if (this.m_cbPrefix) {
+                this.setZ(this.m_registers[reg2] == 0);
+                this.m_clock = 8;
+            }
+            else {
+                this.setZ(false);
+                this.m_clock = 4;
+            }
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 4;
+    };
+    CPU.prototype.RL = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            this.m_mmu.write(this.getHL(), (rVal << 1) + Number(this.getC()));
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            this.m_registers[reg2] = ((rVal << 1) + Number(this.getC())) & 0xFF;
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            // Calculate if Zero flag needs to be set
+            if (this.m_cbPrefix) {
+                this.setZ(this.m_registers[reg2] == 0);
+                this.m_clock = 8;
+            }
+            else {
+                this.setZ(false);
+                this.m_clock = 4;
+            }
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.RR = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            this.m_mmu.write(this.getHL(), (rVal >> 1) + (Number(this.getC()) << 7));
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            this.m_registers[reg2] = (rVal >> 1) + (Number(this.getC()) << 7);
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            // Calculate if Zero flag needs to be set
+            if (this.m_cbPrefix) {
+                this.setZ(this.m_registers[reg2] == 0);
+                this.m_clock = 8;
+            }
+            else {
+                this.setZ(false);
+                this.m_clock = 4;
+            }
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.SLA = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_mmu.write(this.getHL(), rVal << 1);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_registers[reg2] = (rVal << 1) & 0xFF;
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_registers[reg2] == 0);
+            this.m_clock = 8;
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.SRA = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_mmu.write(this.getHL(), (rVal >> 1) + (Number(this.getC()) << 7));
+            this.setC((rVal % 2) > 0);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            // Calculate if Carry flag needs to be set
+            this.setC(rVal >= 128);
+            this.m_registers[reg2] = (rVal >> 1) + (Number(this.getC()) << 7);
+            this.setC((rVal % 2) > 0);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_registers[reg2] == 0);
+            this.m_clock = 8;
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.SWAP = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            this.m_mmu.write(this.getHL(), (rVal << 4) + (rVal >> 4));
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            this.m_registers[reg2] = ((rVal << 4) + (rVal >> 4)) & 0xFF;
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_registers[reg2] == 0);
+            this.m_clock = 8;
+        }
+        // Set C, H and N flags to 0
+        this.setC(false);
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.SRL = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg2 = instruction & 7;
+        if (reg2 == 0x06) {
+            var rVal = this.m_mmu.read(this.getHL());
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            this.m_mmu.write(this.getHL(), (rVal >> 1));
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_mmu.read(this.getHL()) == 0x00);
+            this.m_clock = 16;
+        }
+        else {
+            var rVal = this.m_registers[reg2];
+            // Calculate if Carry flag needs to be set
+            this.setC((rVal % 2) > 0);
+            this.m_registers[reg2] = (rVal >> 1);
+            // Calculate if Zero flag needs to be set
+            this.setZ(this.m_registers[reg2] == 0);
+            this.m_clock = 8;
+        }
+        // Set H and N flags to 0
+        this.setH(false);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.BIT = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        var mask = 0x01 << reg1;
+        if (reg2 == 0x06) {
+            // Calculate if Zero flag needs to be set
+            this.setZ((this.m_mmu.read(this.getHL()) & mask) == 0);
+            this.m_clock = 12;
+        }
+        else {
+            // Calculate if Zero flag needs to be set
+            this.setZ((this.m_registers[reg2] & mask) == 0);
+            this.m_clock = 8;
+        }
+        // Set H flag to 1, N flag to 0
+        this.setH(true);
+        this.setN(false);
+        return 8;
+    };
+    CPU.prototype.RES = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        var mask = (0x01 << reg1) ^ 0xFF;
+        if (reg2 == 0x06) {
+            this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) & mask);
+            this.m_clock = 16;
+        }
+        else {
+            this.m_registers[reg2] &= (mask & 0xFF);
+            this.m_clock = 8;
+        }
+        return 8;
+    };
+    CPU.prototype.SET = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        var mask = 0x01 << reg1;
+        if (reg2 == 0x06) {
+            this.m_mmu.write(this.getHL(), this.m_mmu.read(this.getHL()) | mask);
+            this.m_clock = 16;
+        }
+        else {
+            this.m_registers[reg2] |= (mask & 0xFF);
+            this.m_clock = 8;
+        }
+        return 8;
+    };
+    CPU.prototype.CALL = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        var lAddr = this.m_mmu.read(++this.m_PC[0]);
+        var hAddr = this.m_mmu.read(++this.m_PC[0]);
+        if (reg2 == 0x04) {
+            switch (reg1) {
+                case 0x00:
+                    if (this.getZ()) {
+                        return 12;
+                    }
+                    break;
+                case 0x01:
+                    if (!this.getZ()) {
+                        return 12;
+                    }
+                    break;
+                case 0x02:
+                    if (this.getC()) {
+                        return 12;
+                    }
+                    break;
+                case 0x03:
+                    if (!this.getC()) {
+                        return 12;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        this.m_PC[0] += 1;
+        this.m_mmu.write(--this.m_SP[0], (0xFF00 & this.m_PC[0]) >> 8);
+        this.m_mmu.write(--this.m_SP[0], 0x00FF & this.m_PC[0]);
+        this.m_PC[0] = (hAddr << 8) + lAddr - 1;
+        return 24;
+    };
+    CPU.prototype.RET = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        var reg2 = instruction & 7;
+        if (reg2 == 0x00) {
+            this.m_clock = 8;
+            switch (reg1) {
+                case 0x00:
+                    if (this.getZ()) {
+                        return 8;
+                    }
+                    break;
+                case 0x01:
+                    if (!this.getZ()) {
+                        return 8;
+                    }
+                    break;
+                case 0x02:
+                    if (this.getC()) {
+                        return 8;
+                    }
+                    break;
+                case 0x03:
+                    if (!this.getC()) {
+                        return 8;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            this.m_clock = 20;
+        }
+        else {
+            if (reg1 == 0x03) {
+                this.IME = true;
+            }
+            this.m_clock = 16;
+        }
+        var lAddr = this.m_mmu.read(this.m_SP[0]++);
+        var hAddr = this.m_mmu.read(this.m_SP[0]++);
+        this.m_PC[0] = (hAddr << 8) + lAddr - 1;
+        return 16;
+    };
+    CPU.prototype.RST = function () {
+        var instruction = this.m_mmu.read(this.m_PC[0]);
+        var reg1 = (instruction & 56) >> 3;
+        this.m_PC[0] += 1;
+        this.m_mmu.write(--this.m_SP[0], (0xFF00 & this.m_PC[0]) >> 8);
+        this.m_mmu.write(--this.m_SP[0], 0x00FF & this.m_PC[0]);
+        this.m_PC[0] = (reg1 * 8) - 1;
+        return 16;
+    };
+    CPU.prototype.DAA = function () {
+        if (!this.getN()) {
+            if (this.getC() || this.m_registers[this.R.A] > 0x99) {
+                this.m_registers[this.R.A] = (this.m_registers[this.R.A] + 0x60) & 0xFF;
+                this.setC(true);
+            }
+            if (this.getH() || (this.m_registers[this.R.A] & 0x0F) > 0x09) {
+                this.m_registers[this.R.A] = (this.m_registers[this.R.A] + 0x06) & 0xFF;
+            }
+        }
+        else if (this.getC()) {
+            if (this.getH()) {
+                this.m_registers[this.R.A] = (this.m_registers[this.R.A] + 0x9A) & 0xFF;
+            }
+            else {
+                this.m_registers[this.R.A] = (this.m_registers[this.R.A] + 0xA0) & 0xFF;
+            }
+        }
+        else if (this.getH()) {
+            this.m_registers[this.R.A] = (this.m_registers[this.R.A] + 0xFA) & 0xFF;
+        }
+        // Calculate if Zero flag needs to be set
+        this.setZ(this.m_registers[this.R.A] == 0);
+        // Set Half-Carry flag to 0
+        this.setH(false);
+        return 4;
+    };
+    CPU.prototype.STOP = function () {
+        return 4;
+    };
+    // NOP
+    CPU.prototype.opcode00 = function () {
+        return 4;
+    };
+    // private getAF(){
+    //     return (this.m_registers[this.R.A]!) << 8 + this.m_registers[this.R.F]!;
+    // }
+    CPU.prototype.getBC = function () {
+        return (this.m_registers[this.R.B] << 8) + this.m_registers[this.R.C];
+    };
+    CPU.prototype.getDE = function () {
+        return (this.m_registers[this.R.D] << 8) + this.m_registers[this.R.E];
+    };
+    CPU.prototype.getHL = function () {
+        return (this.m_registers[this.R.H] << 8) + this.m_registers[this.R.L];
+    };
+    // private setAF(value: number): void{
+    //     let hVal = (value >> 8) & 0x00FF;
+    //     let lVal = value & 0x00F0;
+    //     this.m_registers[this.R.A] = hVal;
+    //     this.m_registers[this.R.F] = lVal;
+    // }
+    CPU.prototype.setBC = function (value) {
+        var hVal = (value >> 8) & 0x00FF;
+        var lVal = value & 0x00FF;
+        this.m_registers[this.R.B] = hVal;
+        this.m_registers[this.R.C] = lVal;
+    };
+    CPU.prototype.setDE = function (value) {
+        var hVal = (value >> 8) & 0x00FF;
+        var lVal = value & 0x00FF;
+        this.m_registers[this.R.D] = hVal;
+        this.m_registers[this.R.E] = lVal;
+    };
+    CPU.prototype.setHL = function (value) {
+        var hVal = (value >> 8) & 0x00FF;
+        var lVal = value & 0x00FF;
+        this.m_registers[this.R.H] = hVal;
+        this.m_registers[this.R.L] = lVal;
+    };
+    CPU.prototype.getC = function () {
+        return (this.m_registers[this.R.F] & 16) > 0;
+    };
+    CPU.prototype.getH = function () {
+        return (this.m_registers[this.R.F] & 32) > 0;
+    };
+    CPU.prototype.getN = function () {
+        return (this.m_registers[this.R.F] & 64) > 0;
+    };
+    CPU.prototype.getZ = function () {
+        return (this.m_registers[this.R.F] & 128) > 0;
+    };
+    CPU.prototype.setC = function (val) {
+        if (val) {
+            this.m_registers[this.R.F] |= 16;
+        }
+        else {
+            this.m_registers[this.R.F] &= 239;
+        }
+    };
+    CPU.prototype.setH = function (val) {
+        if (val) {
+            this.m_registers[this.R.F] |= 32;
+        }
+        else {
+            this.m_registers[this.R.F] &= 223;
+        }
+    };
+    CPU.prototype.setN = function (val) {
+        if (val) {
+            this.m_registers[this.R.F] |= 64;
+        }
+        else {
+            this.m_registers[this.R.F] &= 191;
+        }
+    };
+    CPU.prototype.setZ = function (val) {
+        if (val) {
+            this.m_registers[this.R.F] |= 128;
+        }
+        else {
+            this.m_registers[this.R.F] &= 127;
+        }
+    };
+    return CPU;
+}());
+
+
+
+/***/ }),
+/* 3 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GPU: () => (/* binding */ GPU)
+/* harmony export */ });
+var GPU = /** @class */ (function () {
+    function GPU(m_mmu, m_frame) {
+        this.m_mmu = m_mmu;
+        this.m_frame = m_frame;
+        this.VRAM_1 = 0x8000;
+        this.VRAM_2 = 0x9000;
+        this.TILE_MAP1 = 0x9800;
+        this.TILE_MAP2 = 0x9C00;
+        this.OAM = 0xFE00;
+        this.IF = 0xFF0F;
+        // LCD Register
+        this.LCDC = 0xFF40;
+        this.STAT = 0xFF41;
+        this.SCY = 0xFF42;
+        this.SCX = 0xFF43;
+        this.LY = 0xFF44;
+        this.LYC = 0xFF45;
+        //private readonly DMA = 0xFF46;
+        this.BGP = 0xFF47;
+        this.OBP0 = 0xFF48;
+        this.OBP1 = 0xFF49;
+        this.WY = 0xFF4A;
+        this.WX = 0xFF4B;
+        this.colorValues = [0xFFFF, 0x56B5, 0x29AA, 0x0000];
+        this.state = {
+            Mode0: 0,
+            Mode1: 1,
+            Mode2: 2,
+            Mode3: 3,
+        };
+        this.m_state = this.state.Mode2;
+        this.m_clock = 0;
+        this.m_windowLineCounter = 0;
+        this.m_bgDotVals = new Array(160).fill(0);
+    }
+    GPU.prototype.step = function () {
+        // If LCD is on
+        if ((this.m_mmu.read(this.LCDC) & 0x80) > 0) {
+            switch (this.m_state) {
+                case this.state.Mode0: // H-Blank
+                    if (this.m_clock >= 455) {
+                        if (this.m_mmu.read(this.LY) >= 143) {
+                            this.m_state = this.state.Mode1; // Transition into Mode 1
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x01);
+                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x01);
+                            if ((this.m_mmu.read(this.STAT) & 0x10) > 0) { // Check if STAT interrupt enabled, request interrupt
+                                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
+                            }
+                            this.m_windowLineCounter = 0;
+                        }
+                        else {
+                            this.m_state = this.state.Mode2; // Transition into Mode 2
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
+                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            if ((this.m_mmu.read(this.STAT) & 0x20) > 0) { // Check if STAT interrupt enabled, request interrupt
+                                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
+                            }
+                        }
+                        this.m_clock = -1;
+                    }
+                    break;
+                case this.state.Mode1: // V-Blank
+                    if (this.m_clock >= 455) {
+                        this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                        if (this.m_mmu.read(this.LY) == 0x9A) {
+                            this.m_state = this.state.Mode2; // Transition into Mode 2
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
+                            this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
+                            this.m_mmu.write(this.LY, 0);
+                            if ((this.m_mmu.read(this.STAT) & 0x20) > 0) { // Check if STAT interrupt enabled, request interrupt
+                                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
+                            }
+                        }
+                        this.m_clock = -1;
+                    }
+                    break;
+                case this.state.Mode2: // OAM Scan
+                    if (this.m_clock >= 79) {
+                        this.m_state = this.state.Mode3; // Transition into Mode 3
+                        this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x03); // Set mode on STAT register
+                    }
+                    break;
+                case this.state.Mode3: // Drawing Pixels
+                    if (this.m_clock >= 251) {
+                        // Transition into H-Blank
+                        this.m_state = this.state.Mode0; // Transition into Mode 0
+                        this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
+                        if ((this.m_mmu.read(this.STAT) & 0x80) > 0) { // Check if STAT interrupt enabled, request interrupt
+                            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
+                        }
+                        this.renderLine();
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (this.m_mmu.read(this.LY) == this.m_mmu.read(this.LYC)) {
+                if ((this.m_mmu.read(this.STAT) & 0x04) == 0) {
+                    if ((this.m_mmu.read(this.STAT) & 0x40) > 0) {
+                        this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
+                    }
+                    this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x04);
+                }
+            }
+            else {
+                this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFB);
+            }
+            this.m_clock += 1;
+        }
+    };
+    GPU.prototype.renderLine = function () {
+        // clearLine();
+        if ((this.m_mmu.read(this.LCDC) & 0x01) > 0) {
+            this.renderBackgroundLine();
+        }
+        if ((this.m_mmu.read(this.LCDC) & 0x20) > 1000) {
+            var wx = this.m_mmu.read(this.WX);
+            var wy = this.m_mmu.read(this.WY);
+            if (wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143) {
+                this.renderWindowLine();
+            }
+        }
+        if ((this.m_mmu.read(this.LCDC) & 0x02) > 0) {
+            this.renderObjectLine();
+        }
+    };
+    GPU.prototype.renderBackgroundLine = function () {
+        var backgroundTileVRAM = (this.m_mmu.read(this.LCDC) & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        var backgroundTileMap = (this.m_mmu.read(this.LCDC) & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        var y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) & 0xFF;
+        for (var i = 0; i <= 20; i++) {
+            var x = (this.m_mmu.read(this.SCX) + (i << 3)) & 0xFF;
+            var tileIndex = ((y >> 3) * 32) + (x >> 3);
+            var tileVal = this.m_mmu.read(backgroundTileMap + tileIndex);
+            if ((this.m_mmu.read(this.LCDC) & 0x10) == 0x00) {
+                tileVal = (tileVal << 24) >> 24;
+            }
+            var VRAM_Pointer = backgroundTileVRAM + (tileVal * 16);
+            var lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
+            var hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
+            for (var j = 7; j >= 0; j--) {
+                var screenX_1 = j - (this.m_mmu.read(this.SCX) & 0x07) + (i << 3);
+                if (screenX_1 < 0) {
+                    break;
+                }
+                var palid = ((hBits & 0x01) << 1) | (lBits & 0x01);
+                lBits = lBits >> 1;
+                hBits = hBits >> 1;
+                if (screenX_1 >= 160) {
+                    continue;
+                }
+                var color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)];
+                this.m_bgDotVals[(i << 3) + j] = palid;
+                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX_1] = color;
+            }
+        }
+    };
+    GPU.prototype.renderWindowLine = function () {
+        var windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        var y = this.m_windowLineCounter - this.m_mmu.read(this.WY);
+        if (y < 0) {
+            return;
+        }
+        for (var i = 0; i < 21; i++) {
+            var addr = windowTileMap + ((y >> 3) * 32) + i;
+            if (addr >= 0xA000) {
+                continue;
+            }
+            // let tileNum = this.m_mmu.read(addr);
+        }
+        if (this.m_mmu.read(this.LY) >= this.m_mmu.read(this.WY)) {
+            for (var i = this.m_mmu.read(this.WX) - 7; i < 160; i++) {
+                var x = i + 7 - this.m_mmu.read(this.WX);
+                var y_1 = this.m_windowLineCounter;
+                var tileIndex = (Math.floor(y_1 / 8) * 32) + Math.floor(x / 8);
+                var VRAM_Pointer = 0;
+                if ((this.m_mmu.read(this.WX) & 0x40) > 0x00) {
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
+                }
+                else {
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
+                }
+                var lBits = this.m_mmu.read(VRAM_Pointer + ((y_1 % 8) * 2));
+                var hBits = this.m_mmu.read(VRAM_Pointer + ((y_1 % 8) * 2) + 1);
+                var mask = 0x80 >> (x % 8);
+                var color = 0;
+                if ((hBits & mask) > 0x00) {
+                    if ((lBits & mask) > 0x00) {
+                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0xC0) >> 6];
+                        this.m_bgDotVals[i] = 3;
+                    }
+                    else {
+                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x30) >> 4];
+                        this.m_bgDotVals[i] = 2;
+                    }
+                }
+                else {
+                    if ((lBits & mask) > 0x00) {
+                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x0C) >> 2];
+                        this.m_bgDotVals[i] = 1;
+                    }
+                    else {
+                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x03)];
+                        this.m_bgDotVals[i] = 0;
+                    }
+                }
+                this.m_frame[(this.m_mmu.read(this.LY) * 160) + i] = color;
+            }
+            if (this.m_mmu.read(this.WX) <= 166) {
+                this.m_windowLineCounter += 1;
+            }
+        }
+    };
+    GPU.prototype.renderObjectLine = function () {
+        var yCount = 0;
+        for (var i = 0; i < 40; i++) {
+            var x = this.m_mmu.read(this.OAM + (i * 4) + 1) - 8;
+            var y = this.m_mmu.read(this.OAM + (i * 4)) - this.m_mmu.read(this.LY);
+            var attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
+            var VRAM_Pointer = 0;
+            if ((this.m_mmu.read(this.LCDC) & 0x04) > 0x00) {
+                if (y < 1 || y > 16) {
+                    continue;
+                }
+                if (y < 9) {
+                    if (attributes & 0x40) {
+                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) & 0xFE) * 16);
+                    }
+                    else {
+                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) | 0x01) * 16);
+                    }
+                }
+                else {
+                    if (attributes & 0x40) {
+                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) | 0x01) * 16);
+                    }
+                    else {
+                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) & 0xFE) * 16);
+                    }
+                }
+            }
+            else {
+                if (y < 9 || y > 16) {
+                    continue;
+                }
+                VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.OAM + (i * 4) + 2) * 16);
+            }
+            if (attributes & 0x40) {
+                y -= 1;
+            }
+            else {
+                y = 16 - y;
+            }
+            var lBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2));
+            var hBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2) + 1);
+            var mask = 0;
+            if ((attributes & 0x20) > 0x00) {
+                mask = 0x01;
+            }
+            else {
+                mask = 0x80;
+            }
+            for (var j = 0; j < 8; j++) {
+                if (x >= 0 || x < 160) {
+                    var color = 0;
+                    var pallete = 0;
+                    if (attributes & 0x10) {
+                        pallete = this.OBP1;
+                    }
+                    else {
+                        pallete = this.OBP0;
+                    }
+                    if (hBits & mask) {
+                        if (lBits & mask) {
+                            color = this.colorValues[(this.m_mmu.read(pallete) & 0xC0) >> 6];
+                        }
+                        else {
+                            color = this.colorValues[(this.m_mmu.read(pallete) & 0x30) >> 4];
+                        }
+                    }
+                    else {
+                        if (lBits & mask) {
+                            color = this.colorValues[(this.m_mmu.read(pallete) & 0x0C) >> 2];
+                        }
+                        else {
+                            if (attributes & 0x20) {
+                                mask = mask << 1;
+                            }
+                            else {
+                                mask = mask >> 1;
+                            }
+                            x += 1;
+                            continue;
+                        }
+                    }
+                    if ((attributes & 0x80) > 0x00) {
+                        if (this.m_bgDotVals[x] == 0) {
+                            this.m_frame[(this.m_mmu.read(this.LY) * 160) + x] = color;
+                        }
+                    }
+                    else {
+                        this.m_frame[(this.m_mmu.read(this.LY) * 160) + x] = color;
+                    }
+                }
+                if ((attributes & 0x20) > 0x00) {
+                    mask = mask << 1;
+                }
+                else {
+                    mask = mask >> 1;
+                }
+                x += 1;
+            }
+            yCount += 1;
+            if (yCount == 10) {
+                break;
+            }
+        }
+    };
+    return GPU;
+}());
+
+
+
+/***/ }),
+/* 4 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MMU: () => (/* binding */ MMU)
+/* harmony export */ });
+/* harmony import */ var _bootroms__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
+
+var MMU = /** @class */ (function () {
+    function MMU(file) {
+        var _this = this;
+        this.file = file;
+        this.m_BIOS = new Uint8Array(0x0100).fill(0);
+        this.m_addrBus = new Uint8Array(0x10000).fill(0);
+        this.m_isRomLoaded = false;
+        this.m_isBIOSMapped = true;
+        this.m_isGBC = false; // TODO
+        var reader = new FileReader();
+        reader.onload = function () { return _this.loadROM(reader.result); };
+        reader.readAsArrayBuffer(this.file);
+        this.loadBIOS();
+    }
+    /**
+     * Read from RAM at requested address
+     * @param addr Address to RAM
+     * @return value at requested address
+     */
+    MMU.prototype.read = function (addr) {
+        // switch(addr >> 13){
+        //     case 0:
+        //         if(this.m_isBIOSMapped && addr < 0x0100){
+        //             return this.m_BIOS[addr]!;
+        //         }
+        //         if(this.m_isBIOSMapped && this.m_isGBC && addr >= 0x0200 && addr < 0x0900){
+        //             return this.m_BIOS[addr - 0x0100]!;
+        //         }
+        //     case 1: // 0x0000 -> 0x3FFF
+        //     case 2:
+        //     case 3: // 0x4000 -> 0x9FFF
+        //         break;
+        //     case 4:
+        //         break;
+        //     case 5:
+        //         break;
+        //     case 6:
+        //         break;
+        //     case 7:
+        //         break;
+        //     default:
+        //         return 0xFF;
+        // }
+        this.m_isGBC;
+        if (this.m_isBIOSMapped) {
+            if (addr <= 0x100) {
+                if (addr == 0x100) {
+                    this.m_isBIOSMapped = false;
+                }
+                else {
+                    return this.m_BIOS[addr];
+                }
+            }
+            return this.m_addrBus[addr];
+        }
+        else {
+            return this.m_addrBus[addr];
+        }
+    };
+    MMU.prototype.write = function (addr, val) {
+        if (addr >= 0x8000) {
+            this.m_addrBus[addr] = val;
+        }
+    };
+    MMU.prototype.loadBIOS = function () {
+        for (var i = 0; i < _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_DMG.length; i++) {
+            this.m_BIOS[i] = _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_DMG[i];
+        }
+    };
+    MMU.prototype.loadROM = function (buffer) {
+        var view = new Uint8Array(buffer);
+        for (var i = 0; i < view.length; i++) {
+            this.m_addrBus[i] = view[i];
+        }
+        this.m_isRomLoaded = true;
+    };
+    return MMU;
+}());
+
+
+
+/***/ }),
+/* 5 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BootROMS: () => (/* binding */ BootROMS)
+/* harmony export */ });
+var BootROMS = /** @class */ (function () {
+    function BootROMS() {
+    }
+    BootROMS.BIOS_DMG = [
+        0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb, 0x21, 0x26, 0xff, 0x0e,
+        0x11, 0x3e, 0x80, 0x32, 0xe2, 0x0c, 0x3e, 0xf3, 0xe2, 0x32, 0x3e, 0x77, 0x77, 0x3e, 0xfc, 0xe0,
+        0x47, 0x11, 0x04, 0x01, 0x21, 0x10, 0x80, 0x1a, 0xcd, 0x95, 0x00, 0xcd, 0x96, 0x00, 0x13, 0x7b,
+        0xfe, 0x34, 0x20, 0xf3, 0x11, 0xd8, 0x00, 0x06, 0x08, 0x1a, 0x13, 0x22, 0x23, 0x05, 0x20, 0xf9,
+        0x3e, 0x19, 0xea, 0x10, 0x99, 0x21, 0x2f, 0x99, 0x0e, 0x0c, 0x3d, 0x28, 0x08, 0x32, 0x0d, 0x20,
+        0xf9, 0x2e, 0x0f, 0x18, 0xf3, 0x67, 0x3e, 0x64, 0x57, 0xe0, 0x42, 0x3e, 0x91, 0xe0, 0x40, 0x04,
+        0x1e, 0x02, 0x0e, 0x0c, 0xf0, 0x44, 0xfe, 0x90, 0x20, 0xfa, 0x0d, 0x20, 0xf7, 0x1d, 0x20, 0xf2,
+        0x0e, 0x13, 0x24, 0x7c, 0x1e, 0x83, 0xfe, 0x62, 0x28, 0x06, 0x1e, 0xc1, 0xfe, 0x64, 0x20, 0x06,
+        0x7b, 0xe2, 0x0c, 0x3e, 0x87, 0xe2, 0xf0, 0x42, 0x90, 0xe0, 0x42, 0x15, 0x20, 0xd2, 0x05, 0x20,
+        0x4f, 0x16, 0x20, 0x18, 0xcb, 0x4f, 0x06, 0x04, 0xc5, 0xcb, 0x11, 0x17, 0xc1, 0xcb, 0x11, 0x17,
+        0x05, 0x20, 0xf5, 0x22, 0x23, 0x22, 0x23, 0xc9, 0xce, 0xed, 0x66, 0x66, 0xcc, 0x0d, 0x00, 0x0b,
+        0x03, 0x73, 0x00, 0x83, 0x00, 0x0c, 0x00, 0x0d, 0x00, 0x08, 0x11, 0x1f, 0x88, 0x89, 0x00, 0x0e,
+        0xdc, 0xcc, 0x6e, 0xe6, 0xdd, 0xdd, 0xd9, 0x99, 0xbb, 0xbb, 0x67, 0x63, 0x6e, 0x0e, 0xec, 0xcc,
+        0xdd, 0xdc, 0x99, 0x9f, 0xbb, 0xb9, 0x33, 0x3e, 0x3c, 0x42, 0xb9, 0xa5, 0xb9, 0xa5, 0x42, 0x3c,
+        0x21, 0x04, 0x01, 0x11, 0xa8, 0x00, 0x1a, 0x13, 0xbe, 0x20, 0xfe, 0x23, 0x7d, 0xfe, 0x34, 0x20,
+        0xf5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xfb, 0x86, 0x20, 0xfe, 0x3e, 0x01, 0xe0, 0x50
+    ];
+    return BootROMS;
+}());
+
+
+/***/ })
+/******/ 	]);
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _classes_machine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var width = 160;
+var height = 144;
+var scale = 2;
+var machine;
+var colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
+    0X41, 0X4A, 0X52, 0X5A, 0X62, 0X6A, 0X73, 0X7B,
+    0X83, 0X8B, 0X94, 0X9C, 0XA4, 0XAC, 0XB4, 0XBD,
+    0XC5, 0XCD, 0XD5, 0XDE, 0XE6, 0XEE, 0XF6, 0XFF];
+ctx.canvas.width = width * scale;
+ctx.canvas.height = height * scale;
+var myImageData = ctx.createImageData(width * scale, height * scale);
+function wrapper() {
+    var data = myImageData.data;
+    var frame = machine.getFrame();
+    var index1 = 0;
+    for (var i = 0; i < height; i++) {
+        for (var x = 0; x < scale; x++) {
+            for (var j = 0; j < width; j++) {
+                for (var y = 0; y < scale; y++) {
+                    var index2 = (i * width) + j;
+                    data[(index1 * 4)] = colorMap[(frame[index2] & 0x001F)];
+                    data[(index1 * 4) + 1] = colorMap[(frame[index2] & 0x03E0) >> 5];
+                    data[(index1 * 4) + 2] = colorMap[(frame[index2] & 0x7C00) >> 10];
+                    data[(index1 * 4) + 3] = 255;
+                    index1++;
+                }
+            }
+        }
+    }
+    ctx.putImageData(myImageData, 0, 0);
+}
+var fileSelector = document.getElementById('file-selector');
+fileSelector.addEventListener('change', function (e) {
+    var files = e.target.files;
+    machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(files[0]);
+    setInterval(wrapper, 1000 / 60);
+});
+
+})();
+
+/******/ })()
+;

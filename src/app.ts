@@ -4,7 +4,7 @@ const canvas = <HTMLCanvasElement> document.getElementById("canvas");
 const ctx = canvas.getContext("2d")!;
 const width = 160;
 const height = 144;
-const scale = 1;
+const scale = 2;
 let machine: Machine;
 
 const colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
@@ -12,22 +12,26 @@ const colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
                   0X83, 0X8B, 0X94, 0X9C, 0XA4, 0XAC, 0XB4, 0XBD,
                   0XC5, 0XCD, 0XD5, 0XDE, 0XE6, 0XEE, 0XF6, 0XFF]
 
-const myImageData = ctx.createImageData(width, height);
-let index = 0;
+                  
+ctx.canvas.width = width * scale;
+ctx.canvas.height = height * scale;
+const myImageData = ctx.createImageData(width * scale, height * scale);
 
 function wrapper(){
     const data = myImageData.data;
     let frame = machine.getFrame();
 
+    let index1 = 0;
     for(let i = 0; i < height; i++){
         for(let x = 0; x < scale; x++){
             for(let j = 0; j < width; j++){
                 for(let y = 0; y < scale; y++){
-                    index = (i * width) + j;
-                    data[(index * 4)] = colorMap[(frame[index] & 0x001F)]!;
-                    data[(index * 4) + 1] = colorMap[(frame[index] & 0x03E0) >> 5]!;
-                    data[(index * 4) + 2] = colorMap[(frame[index] & 0x7C00) >> 10]!;
-                    data[(index * 4) + 3] = 255;
+                    let index2 = (i * width) + j;
+                    data[(index1 * 4)] = colorMap[(frame[index2] & 0x001F)]!;
+                    data[(index1 * 4) + 1] = colorMap[(frame[index2] & 0x03E0) >> 5]!;
+                    data[(index1 * 4) + 2] = colorMap[(frame[index2] & 0x7C00) >> 10]!;
+                    data[(index1 * 4) + 3] = 255;
+                    index1++;
                 }
             }
         }

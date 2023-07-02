@@ -1254,16 +1254,18 @@ export class CPU {
 
         let mask = 0x01;
         for(let i = 0; i < 5; i++){
-            if((this.m_mmu.read(this.IF) & mask) && (this.m_mmu.read(this.IE) & mask)){
-                this.IME = false;
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
-                this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! >> 8);
-                this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! & 0x00FF);
-                this.m_PC[0] = 0x0040 + (i * 8);
-                this.m_clock = 4;
-                return true;
+            if((this.m_mmu.read(this.IF) & this.m_mmu.read(this.IE) & mask) == 0x00){
+                mask = mask << 1;
+                continue;
             }
-            mask = mask << 1;
+            
+            this.IME = false;
+            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
+            this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! >> 8);
+            this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! & 0x00FF);
+            this.m_PC[0] = 0x0040 + (i * 8);
+            this.m_clock = 4;
+            return true;
         }
 
         return false;

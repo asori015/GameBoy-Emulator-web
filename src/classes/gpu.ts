@@ -131,8 +131,12 @@ export class GPU {
         if((this.m_mmu.read(this.LCDC) & 0x01) > 0){
             this.renderBackgroundLine();
         }
-        if((this.m_mmu.read(this.LCDC) & 0x20) > 0){
-            this.renderWindowLine();
+        if((this.m_mmu.read(this.LCDC) & 0x20) > 1000){
+            let wx = this.m_mmu.read(this.WX);
+            let wy = this.m_mmu.read(this.WY);
+            if(wx >= 0 && wx <= 166 && wy >=0 && wy <= 143){
+                this.renderWindowLine();
+            }
         }
         if((this.m_mmu.read(this.LCDC) & 0x02) > 0){
             this.renderObjectLine();
@@ -140,61 +144,59 @@ export class GPU {
     }
 
     private renderBackgroundLine(): void{
-        for(let i = 0; i < 160; i++){
-            let x = (this.m_mmu.read(this.SCX) + i) % 256;
-            let y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) % 256;
+        let backgroundTileVRAM = (this.m_mmu.read(this.LCDC) & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        let backgroundTileMap = (this.m_mmu.read(this.LCDC) & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) & 0xFF;
+
+        for(let i = 0; i <= 20; i++){
+            let x = (this.m_mmu.read(this.SCX) + (i << 3)) & 0xFF;
             
-            let tileIndex = (Math.floor(y / 8) * 32) + Math.floor(x / 8);
-            let VRAM_Pointer = 0;
-            
-            if((this.m_mmu.read(this.LCDC) & 0x10) > 0){
-                if((this.m_mmu.read(this.LCDC) & 0x08) > 0){
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP2 + tileIndex) * 16);
-                }
-                else{
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP1 + tileIndex) * 16);
-                }
-            }
-            else{
-                if((this.m_mmu.read(this.LCDC) & 0x08) > 0){
-                    VRAM_Pointer = this.VRAM_2 + ((this.m_mmu.read(this.TILE_MAP2 + tileIndex) * 16) << 24 >> 24);
-                }
-                else{
-                    VRAM_Pointer = this.VRAM_2 + ((this.m_mmu.read(this.TILE_MAP1 + tileIndex) * 16) << 24 >> 24);
-                }
+            let tileIndex = ((y >> 3) * 32) + (x >> 3);
+            let tileVal = this.m_mmu.read(backgroundTileMap + tileIndex);
+            if((this.m_mmu.read(this.LCDC) & 0x10) == 0x00){
+                tileVal = (tileVal << 24) >> 24;
             }
 
-            let lBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2));
-            let hBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2) + 1);
-            let mask = 0x80 >> (x % 8);
-            let color = 0;
+            let VRAM_Pointer = backgroundTileVRAM + (tileVal * 16);
 
-            if((hBits & mask) > 0){
-                if((lBits & mask) > 0){
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0xC0) >> 6]!;
-                    this.m_bgDotVals[i] = 3;
-                }
-                else{
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x30) >> 4]!;
-                    this.m_bgDotVals[i] = 2;
-                }
-            }
-            else{
-                if((lBits & mask) > 0){
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x0C) >> 2]!;
-                    this.m_bgDotVals[i] = 1;
-                }
-                else{
-                    color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x03)]!;
-                    this.m_bgDotVals[i] = 0;
-                }
-            }
+            let lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
+            let hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
 
-            this.m_frame[(this.m_mmu.read(this.LY) * 160) + i] = color;
+            for(let j = 7; j >= 0; j--){
+                let screenX = j - (this.m_mmu.read(this.SCX) & 0x07) + (i << 3);
+                if (screenX < 0) {
+                    break;
+                }
+                let palid = ((hBits & 0x01) << 1) | (lBits & 0x01);
+                lBits = lBits >> 1;
+                hBits = hBits >> 1;
+                if (screenX >= 160) {
+                    continue;
+                }
+                let color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)]!;
+                this.m_bgDotVals[(i << 3) + j] = palid;
+
+                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
+            }
         }
     }
 
     private renderWindowLine(): void{
+        let windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let y = this.m_windowLineCounter - this.m_mmu.read(this.WY);
+
+        if(y < 0){
+            return;
+        }
+
+        for(let i = 0; i < 21; i++){
+            let addr = windowTileMap + ((y >> 3) * 32) + i;
+            if(addr >= 0xA000){
+                continue;
+            }
+            // let tileNum = this.m_mmu.read(addr);
+        }
+
         if(this.m_mmu.read(this.LY) >= this.m_mmu.read(this.WY)){
             for(let i = this.m_mmu.read(this.WX) - 7; i < 160; i++){
                 let x = i + 7 - this.m_mmu.read(this.WX);
@@ -204,10 +206,10 @@ export class GPU {
                 let VRAM_Pointer = 0;
                 
                 if((this.m_mmu.read(this.WX) & 0x40) > 0x00){
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP2 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
                 }
                 else{
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.TILE_MAP1 + tileIndex) * 16);
+                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
                 }
 
                 let lBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2));
