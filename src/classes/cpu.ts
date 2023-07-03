@@ -1056,13 +1056,13 @@ export class CPU {
     private IME: boolean;
     private m_cbPrefix: boolean;
     private m_isHalted: boolean;
-    private m_fallingEdgeDelay: boolean;
+    // private m_fallingEdgeDelay: boolean;
 
     private readonly P1 = 0xFF00;
-    private readonly DIV = 0xFF03;
-    private readonly TIMA = 0xFF05;
-    private readonly TMA = 0xFF06;
-    private readonly TAC = 0xFF07;
+    // private readonly DIV = 0xFF03;
+    // private readonly TIMA = 0xFF05;
+    // private readonly TMA = 0xFF06;
+    // private readonly TAC = 0xFF07;
     private readonly IF = 0xFF0F;
     private readonly IE = 0xFFFF;
 
@@ -1096,7 +1096,7 @@ export class CPU {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
-        this.m_fallingEdgeDelay = false;
+        // this.m_fallingEdgeDelay = false;
     }
 
     public step(){
@@ -1115,7 +1115,7 @@ export class CPU {
             this.m_sysClock -= 1;
         }
     
-        this.updateTimer();
+        // this.updateTimer();
 
         // If an interrupt is pending, turn off halt mode
         if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
@@ -1207,45 +1207,45 @@ export class CPU {
         }
     }
 
-    private updateTimer(){
-        let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV + 1);
-        div += 1;
-        if((this.m_mmu.read(this.TAC) & 0x04) > 0){
-            let sum = this.m_mmu.read(this.TIMA);
-            if((this.m_mmu.read(this.TAC) & 0x03) > 0){
-                if((div & (0x0002 << ((this.m_mmu.read(this.TAC) & 0x03) * 2))) > 0){
-                    this.m_fallingEdgeDelay = true;
-                }
-                else{
-                    if(this.m_fallingEdgeDelay){
-                        sum += 1;
-                        this.m_fallingEdgeDelay = false;
-                    }
-                }
-            }
-            else{
-                if((div & 0x0200) > 0){
-                    this.m_fallingEdgeDelay = true;
-                }
-                else{
-                    if(this.m_fallingEdgeDelay){
-                        sum += 1;
-                        this.m_fallingEdgeDelay = false;
-                    }
-                }
-            }
+    // private updateTimer(){
+    //     let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV + 1);
+    //     div += 1;
+    //     if((this.m_mmu.read(this.TAC) & 0x04) > 0){
+    //         let sum = this.m_mmu.read(this.TIMA);
+    //         if((this.m_mmu.read(this.TAC) & 0x03) > 0){
+    //             if((div & (0x0002 << ((this.m_mmu.read(this.TAC) & 0x03) * 2))) > 0){
+    //                 this.m_fallingEdgeDelay = true;
+    //             }
+    //             else{
+    //                 if(this.m_fallingEdgeDelay){
+    //                     sum += 1;
+    //                     this.m_fallingEdgeDelay = false;
+    //                 }
+    //             }
+    //         }
+    //         else{
+    //             if((div & 0x0200) > 0){
+    //                 this.m_fallingEdgeDelay = true;
+    //             }
+    //             else{
+    //                 if(this.m_fallingEdgeDelay){
+    //                     sum += 1;
+    //                     this.m_fallingEdgeDelay = false;
+    //                 }
+    //             }
+    //         }
 
-            if(sum > 0x00FF){
-                this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
-            }
-            else{
-                this.m_mmu.write(this.TIMA, sum & 0x00FF);
-            }
-        }
-        this.m_mmu.write(this.DIV, (div >> 8) & 0x00FF);
-        this.m_mmu.write(this.DIV + 1, div & 0x00FF);
-    }
+    //         if(sum > 0x00FF){
+    //             this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
+    //             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
+    //         }
+    //         else{
+    //             this.m_mmu.write(this.TIMA, sum & 0x00FF);
+    //         }
+    //     }
+    //     this.m_mmu.write(this.DIV, (div >> 8) & 0x00FF);
+    //     this.m_mmu.write(this.DIV + 1, div & 0x00FF);
+    // }
 
     private checkForInterupts(): boolean {
         if(!this.IME){

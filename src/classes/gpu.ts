@@ -315,7 +315,7 @@ export class GPU {
                         }
                     }
                     if((attributes & 0x80) > 0x00){
-                        if(this.m_bgDotVals[x] == 0){
+                        if(this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + x] == 0){
                             this.m_frame[(this.m_mmu.read(this.LY) * 160) + x] = color;
                         }
                     }
