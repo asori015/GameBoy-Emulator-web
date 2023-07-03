@@ -74,7 +74,15 @@ export class MMU {
 
     public write(addr: number, val: number){
         if(addr >= 0x8000){
-            this.m_addrBus[addr] = val;
+            if(addr == 0xFF46){ // DMA transfer
+                addr = val << 8;
+                for(let i = 0; i < 160; i++){
+                    this.m_addrBus[0xFE00 + i] = this.m_addrBus[addr + i]!;
+                }
+            }
+            else{
+                this.m_addrBus[addr] = val;
+            }
         }
     }
 

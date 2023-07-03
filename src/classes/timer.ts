@@ -7,7 +7,7 @@ export class Timer {
     private readonly TAC = 0xFF07;
     private readonly IF = 0xFF0F;
 
-    private readonly DIV_BIT = [7, 1, 3, 4];
+    private readonly DIV_BIT = [7, 1, 3, 5];
 
     private fallingEdgeDelay = false;
     private pendingOverflow = false;
@@ -31,13 +31,20 @@ export class Timer {
         div += 1;
         this.m_mmu.write(this.DIV, div >> 8);
         this.m_mmu.write(this.DIV - 1, div);
-        
+
         this.updateEdge(div);
     }
 
     private updateEdge(div: number){
-        let bit = (div & (1 << this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03]!)) != 0;
-        bit = bit && (this.m_mmu.read(this.TAC) & 0x04) != 0;
+        let temp1 = this.m_mmu.read(this.TAC);
+        let temp2 = this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03];
+        temp1; temp2;
+
+        if((this.m_mmu.read(this.TAC) & 0x04) == 0x00){
+            return;
+        }
+
+        let bit = (div & (0x04 << this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03]!)) != 0;
         if(this.fallingEdgeDelay && !bit){
             let tima = this.m_mmu.read(this.TIMA) + 1;
             this.m_mmu.write(this.TIMA, tima);

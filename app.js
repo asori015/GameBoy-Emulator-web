@@ -2453,7 +2453,15 @@ var MMU = /** @class */ (function () {
     };
     MMU.prototype.write = function (addr, val) {
         if (addr >= 0x8000) {
-            this.m_addrBus[addr] = val;
+            if (addr == 0xFF46) { // DMA transfer
+                addr = val << 8;
+                for (var i = 0; i < 160; i++) {
+                    this.m_addrBus[0xFE00 + i] = this.m_addrBus[addr + i];
+                }
+            }
+            else {
+                this.m_addrBus[addr] = val;
+            }
         }
     };
     MMU.prototype.loadBIOS = function () {
@@ -2522,7 +2530,7 @@ var Timer = /** @class */ (function () {
         this.TMA = 0xFF06;
         this.TAC = 0xFF07;
         this.IF = 0xFF0F;
-        this.DIV_BIT = [7, 1, 3, 4];
+        this.DIV_BIT = [7, 1, 3, 5];
         this.fallingEdgeDelay = false;
         this.pendingOverflow = false;
         this.fallingEdgeDelay = false;
@@ -2542,8 +2550,14 @@ var Timer = /** @class */ (function () {
         this.updateEdge(div);
     };
     Timer.prototype.updateEdge = function (div) {
-        var bit = (div & (1 << this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03])) != 0;
-        bit = bit && (this.m_mmu.read(this.TAC) & 0x04) != 0;
+        var temp1 = this.m_mmu.read(this.TAC);
+        var temp2 = this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03];
+        temp1;
+        temp2;
+        if ((this.m_mmu.read(this.TAC) & 0x04) == 0x00) {
+            return;
+        }
+        var bit = (div & (0x04 << this.DIV_BIT[this.m_mmu.read(this.TAC) & 0x03])) != 0;
         if (this.fallingEdgeDelay && !bit) {
             var tima = this.m_mmu.read(this.TIMA) + 1;
             this.m_mmu.write(this.TIMA, tima);
