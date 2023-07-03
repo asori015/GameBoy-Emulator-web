@@ -55,7 +55,7 @@ export class GPU {
                             this.m_state = this.state.Mode1; // Transition into Mode 1
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x01);
-                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            this.incrementLineCounters();
                             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x01);
                             if((this.m_mmu.read(this.STAT) & 0x10) > 0){ // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);  
@@ -66,7 +66,7 @@ export class GPU {
                             this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
-                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            this.incrementLineCounters();
                             if((this.m_mmu.read(this.STAT) & 0x20) > 0){ // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02); 
                             }
@@ -76,12 +76,13 @@ export class GPU {
                     break;
                 case this.state.Mode1: // V-Blank
                     if(this.m_clock >= 455){
-                        this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                        this.incrementLineCounters();
                         if(this.m_mmu.read(this.LY) == 0x9A){
                             this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
                             this.m_mmu.write(this.LY, 0);
+                            this.m_windowLineCounter = 0;
                             if((this.m_mmu.read(this.STAT) & 0x20) > 0){ // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);  
                             }
@@ -131,12 +132,8 @@ export class GPU {
         if((this.m_mmu.read(this.LCDC) & 0x01) > 0){
             this.renderBackgroundLine();
         }
-        if((this.m_mmu.read(this.LCDC) & 0x20) > 1000){
-            let wx = this.m_mmu.read(this.WX);
-            let wy = this.m_mmu.read(this.WY);
-            if(wx >= 0 && wx <= 166 && wy >=0 && wy <= 143){
-                this.renderWindowLine();
-            }
+        if((this.m_mmu.read(this.LCDC) & 0x20) > 0){
+            this.renderWindowLine();
         }
         if((this.m_mmu.read(this.LCDC) & 0x02) > 0){
             this.renderObjectLine();
@@ -167,14 +164,16 @@ export class GPU {
                 if (screenX < 0) {
                     break;
                 }
+
                 let palid = ((hBits & 0x01) << 1) | (lBits & 0x01);
                 lBits = lBits >> 1;
                 hBits = hBits >> 1;
                 if (screenX >= 160) {
                     continue;
                 }
+
                 let color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)]!;
-                this.m_bgDotVals[(i << 3) + j] = palid;
+                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
 
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
             }
@@ -182,66 +181,46 @@ export class GPU {
     }
 
     private renderWindowLine(): void{
+        let wx = this.m_mmu.read(this.WX);
+        let wy = this.m_mmu.read(this.WY);
+        if(wx < 0 || wx > 166 || wy < 0 || wy > 143){
+            return;
+        }
+
         let windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
-        let y = this.m_windowLineCounter - this.m_mmu.read(this.WY);
+        let y = this.m_windowLineCounter - wy;
 
         if(y < 0){
             return;
         }
 
-        for(let i = 0; i < 21; i++){
-            let addr = windowTileMap + ((y >> 3) * 32) + i;
-            if(addr >= 0xA000){
+        for(let i = 0; i <= 20; i++){
+            let tileIndex = ((y >> 3) * 32) + i;
+            let tileMapAddr = windowTileMap + tileIndex;
+            if(tileMapAddr >= 0xA000){
                 continue;
             }
-            // let tileNum = this.m_mmu.read(addr);
-        }
 
-        if(this.m_mmu.read(this.LY) >= this.m_mmu.read(this.WY)){
-            for(let i = this.m_mmu.read(this.WX) - 7; i < 160; i++){
-                let x = i + 7 - this.m_mmu.read(this.WX);
-                let y = this.m_windowLineCounter;
+            let tileVal = this.m_mmu.read(tileMapAddr);
+            let VRAM_Pointer = this.VRAM_1 + (tileVal * 16);
 
-                let tileIndex = (Math.floor(y / 8) * 32) + Math.floor(x / 8);
-                let VRAM_Pointer = 0;
-                
-                if((this.m_mmu.read(this.WX) & 0x40) > 0x00){
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
-                }
-                else{
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
-                }
+            let lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
+            let hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
 
-                let lBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2));
-                let hBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2) + 1);
-                let mask = 0x80 >> (x % 8);
-                let color = 0;
+            for(let j = 7; j >= 0; j--){
+                let screenX = j - 7 + wx + (i << 3);
 
-                if((hBits & mask) > 0x00){
-                    if((lBits & mask) > 0x00){
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0xC0) >> 6]!;
-                        this.m_bgDotVals[i] = 3;
-                    }
-                    else{
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x30) >> 4]!;
-                        this.m_bgDotVals[i] = 2;
-                    }
-                }
-                else{
-                    if((lBits & mask) > 0x00){
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x0C) >> 2]!;
-                        this.m_bgDotVals[i] = 1;
-                    }
-                    else{
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x03)]!;
-                        this.m_bgDotVals[i] = 0;
-                    }
+                let palid = ((hBits & 0x01) << 1) | (lBits & 0x01);
+                lBits = lBits >> 1;
+                hBits = hBits >> 1;
+                if(screenX < 0 || screenX >= 160) {
+                    continue;
                 }
 
-                this.m_frame[(this.m_mmu.read(this.LY) * 160) + i] = color;
-            }
-            if(this.m_mmu.read(this.WX) <= 166){
-                this.m_windowLineCounter += 1;
+                let color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)]!;
+                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
+
+                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
             }
         }
     }
@@ -359,6 +338,15 @@ export class GPU {
             if(yCount == 10){
                 break;
             }
+        }
+    }
+
+    private incrementLineCounters(): void{
+        this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+        let wx = this.m_mmu.read(this.WX);
+        let wy = this.m_mmu.read(this.WY);
+        if(wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143){
+            this.m_windowLineCounter += 1;
         }
     }
 

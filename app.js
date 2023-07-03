@@ -2111,7 +2111,7 @@ var GPU = /** @class */ (function () {
                             this.m_state = this.state.Mode1; // Transition into Mode 1
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x01);
-                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            this.incrementLineCounters();
                             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x01);
                             if ((this.m_mmu.read(this.STAT) & 0x10) > 0) { // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
@@ -2122,7 +2122,7 @@ var GPU = /** @class */ (function () {
                             this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
-                            this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                            this.incrementLineCounters();
                             if ((this.m_mmu.read(this.STAT) & 0x20) > 0) { // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
                             }
@@ -2132,12 +2132,13 @@ var GPU = /** @class */ (function () {
                     break;
                 case this.state.Mode1: // V-Blank
                     if (this.m_clock >= 455) {
-                        this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+                        this.incrementLineCounters();
                         if (this.m_mmu.read(this.LY) == 0x9A) {
                             this.m_state = this.state.Mode2; // Transition into Mode 2
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) | 0x02);
                             this.m_mmu.write(this.LY, 0);
+                            this.m_windowLineCounter = 0;
                             if ((this.m_mmu.read(this.STAT) & 0x20) > 0) { // Check if STAT interrupt enabled, request interrupt
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
                             }
@@ -2184,12 +2185,8 @@ var GPU = /** @class */ (function () {
         if ((this.m_mmu.read(this.LCDC) & 0x01) > 0) {
             this.renderBackgroundLine();
         }
-        if ((this.m_mmu.read(this.LCDC) & 0x20) > 1000) {
-            var wx = this.m_mmu.read(this.WX);
-            var wy = this.m_mmu.read(this.WY);
-            if (wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143) {
-                this.renderWindowLine();
-            }
+        if ((this.m_mmu.read(this.LCDC) & 0x20) > 0) {
+            this.renderWindowLine();
         }
         if ((this.m_mmu.read(this.LCDC) & 0x02) > 0) {
             this.renderObjectLine();
@@ -2221,64 +2218,43 @@ var GPU = /** @class */ (function () {
                     continue;
                 }
                 var color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)];
-                this.m_bgDotVals[(i << 3) + j] = palid;
+                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX_1] = palid;
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX_1] = color;
             }
         }
     };
     GPU.prototype.renderWindowLine = function () {
+        var wx = this.m_mmu.read(this.WX);
+        var wy = this.m_mmu.read(this.WY);
+        if (wx < 0 || wx > 166 || wy < 0 || wy > 143) {
+            return;
+        }
         var windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
-        var y = this.m_windowLineCounter - this.m_mmu.read(this.WY);
+        var y = this.m_windowLineCounter - wy;
         if (y < 0) {
             return;
         }
-        for (var i = 0; i < 21; i++) {
-            var addr = windowTileMap + ((y >> 3) * 32) + i;
-            if (addr >= 0xA000) {
+        for (var i = 0; i <= 20; i++) {
+            var tileIndex = ((y >> 3) * 32) + i;
+            var tileMapAddr = windowTileMap + tileIndex;
+            if (tileMapAddr >= 0xA000) {
                 continue;
             }
-            // let tileNum = this.m_mmu.read(addr);
-        }
-        if (this.m_mmu.read(this.LY) >= this.m_mmu.read(this.WY)) {
-            for (var i = this.m_mmu.read(this.WX) - 7; i < 160; i++) {
-                var x = i + 7 - this.m_mmu.read(this.WX);
-                var y_1 = this.m_windowLineCounter;
-                var tileIndex = (Math.floor(y_1 / 8) * 32) + Math.floor(x / 8);
-                var VRAM_Pointer = 0;
-                if ((this.m_mmu.read(this.WX) & 0x40) > 0x00) {
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
+            var tileVal = this.m_mmu.read(tileMapAddr);
+            var VRAM_Pointer = this.VRAM_1 + (tileVal * 16);
+            var lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
+            var hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
+            for (var j = 7; j >= 0; j--) {
+                var screenX_2 = j - 7 + wx + (i << 3);
+                var palid = ((hBits & 0x01) << 1) | (lBits & 0x01);
+                lBits = lBits >> 1;
+                hBits = hBits >> 1;
+                if (screenX_2 < 0 || screenX_2 >= 160) {
+                    continue;
                 }
-                else {
-                    VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(windowTileMap + tileIndex) * 16);
-                }
-                var lBits = this.m_mmu.read(VRAM_Pointer + ((y_1 % 8) * 2));
-                var hBits = this.m_mmu.read(VRAM_Pointer + ((y_1 % 8) * 2) + 1);
-                var mask = 0x80 >> (x % 8);
-                var color = 0;
-                if ((hBits & mask) > 0x00) {
-                    if ((lBits & mask) > 0x00) {
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0xC0) >> 6];
-                        this.m_bgDotVals[i] = 3;
-                    }
-                    else {
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x30) >> 4];
-                        this.m_bgDotVals[i] = 2;
-                    }
-                }
-                else {
-                    if ((lBits & mask) > 0x00) {
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x0C) >> 2];
-                        this.m_bgDotVals[i] = 1;
-                    }
-                    else {
-                        color = this.colorValues[(this.m_mmu.read(this.BGP) & 0x03)];
-                        this.m_bgDotVals[i] = 0;
-                    }
-                }
-                this.m_frame[(this.m_mmu.read(this.LY) * 160) + i] = color;
-            }
-            if (this.m_mmu.read(this.WX) <= 166) {
-                this.m_windowLineCounter += 1;
+                var color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)];
+                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX_2] = palid;
+                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX_2] = color;
             }
         }
     };
@@ -2385,6 +2361,14 @@ var GPU = /** @class */ (function () {
             if (yCount == 10) {
                 break;
             }
+        }
+    };
+    GPU.prototype.incrementLineCounters = function () {
+        this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
+        var wx = this.m_mmu.read(this.WX);
+        var wy = this.m_mmu.read(this.WY);
+        if (wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143) {
+            this.m_windowLineCounter += 1;
         }
     };
     return GPU;
