@@ -17,6 +17,16 @@ ctx.canvas.width = width * scale;
 ctx.canvas.height = height * scale;
 const myImageData = ctx.createImageData(width * scale, height * scale);
 
+let result = null
+let xmlhttp = new XMLHttpRequest();
+xmlhttp.open("GET", 'https://asori015.github.io/GB-Files/01-001.data', false);
+xmlhttp.send();
+if (xmlhttp.status==200) {
+    result = xmlhttp.responseText;
+}
+
+console.log(result)
+
 function wrapper(){
     const data = myImageData.data;
     let frame = machine.getFrame();

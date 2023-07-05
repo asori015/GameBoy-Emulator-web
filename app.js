@@ -2648,6 +2648,14 @@ var colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
 ctx.canvas.width = width * scale;
 ctx.canvas.height = height * scale;
 var myImageData = ctx.createImageData(width * scale, height * scale);
+var result = null;
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.open("GET", 'https://asori015.github.io/GB-Files/01-001.data', false);
+xmlhttp.send();
+if (xmlhttp.status == 200) {
+    result = xmlhttp.responseText;
+}
+console.log(result);
 function wrapper() {
     var data = myImageData.data;
     var frame = machine.getFrame();
