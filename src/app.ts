@@ -1,6 +1,6 @@
 import {Machine} from "./classes/machine"
 
-const canvas = <HTMLCanvasElement> document.getElementById("canvas");
+const canvas = <HTMLCanvasElement> document.getElementById('canvas');
 const ctx = canvas.getContext("2d")!;
 const width = 160;
 const height = 144;
@@ -16,16 +16,6 @@ const colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
 ctx.canvas.width = width * scale;
 ctx.canvas.height = height * scale;
 const myImageData = ctx.createImageData(width * scale, height * scale);
-
-let result = null
-let xmlhttp = new XMLHttpRequest();
-xmlhttp.open("GET", 'https://asori015.github.io/GB-Files/01-001.data', false);
-xmlhttp.send();
-if (xmlhttp.status==200) {
-    result = xmlhttp.responseText;
-}
-
-console.log(result)
 
 function wrapper(){
     const data = myImageData.data;
@@ -55,4 +45,25 @@ fileSelector.addEventListener('change', (e) => {
     let files = (e.target as HTMLInputElement).files!;
     machine = new Machine(files[0]!);
     setInterval(wrapper, 1000/60);
+});
+
+function loadRemoteFile(url: string){
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.responseType = "blob";
+    
+    xmlhttp.onload = () => {
+        let blob = xmlhttp.response;
+        let file = new File([blob], "foo.txt", {type: "text/plain"});
+        
+        machine = new Machine(file);
+        setInterval(wrapper, 1000/60);
+    };
+
+    xmlhttp.send();
+}
+
+const button = <HTMLButtonElement> document.getElementById('tetris');
+button.addEventListener("click", () => {
+    loadRemoteFile('https://asori015.github.io/GB-Files/01-001.data');
 });

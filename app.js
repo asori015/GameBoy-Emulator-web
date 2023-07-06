@@ -2635,7 +2635,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _classes_machine__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
 
-var canvas = document.getElementById("canvas");
+var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext("2d");
 var width = 160;
 var height = 144;
@@ -2648,14 +2648,6 @@ var colorMap = [0X00, 0X08, 0X10, 0X18, 0X20, 0X29, 0X31, 0X39,
 ctx.canvas.width = width * scale;
 ctx.canvas.height = height * scale;
 var myImageData = ctx.createImageData(width * scale, height * scale);
-var result = null;
-var xmlhttp = new XMLHttpRequest();
-xmlhttp.open("GET", 'https://asori015.github.io/GB-Files/01-001.data', false);
-xmlhttp.send();
-if (xmlhttp.status == 200) {
-    result = xmlhttp.responseText;
-}
-console.log(result);
 function wrapper() {
     var data = myImageData.data;
     var frame = machine.getFrame();
@@ -2681,6 +2673,32 @@ fileSelector.addEventListener('change', function (e) {
     var files = e.target.files;
     machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(files[0]);
     setInterval(wrapper, 1000 / 60);
+});
+function loadRemoteFile(url) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", url, true);
+    xmlhttp.responseType = "blob";
+    xmlhttp.onload = function () {
+        var blob = xmlhttp.response; // Note: not req.responseText
+        var file = new File([blob], "foo.txt", { type: "text/plain" });
+        machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(file);
+        setInterval(wrapper, 1000 / 60);
+        // if (arrayBuffer) {
+        //     const byteArray = new Uint8Array(arrayBuffer);
+        //     byteArray.forEach((element, index) => {
+        //         // do something with each byte in the array
+        //     });
+        // }
+    };
+    xmlhttp.send();
+    // var blob = new Blob([result!], { type: 'text/plain' });
+    // var file = new File([blob], "foo.txt", {type: "text/plain"});
+    // machine = new Machine(file);
+    // setInterval(wrapper, 1000/60);
+}
+var button = document.getElementById('tetris');
+button.addEventListener("click", function () {
+    loadRemoteFile('https://asori015.github.io/GB-Files/01-001.data');
 });
 
 })();
