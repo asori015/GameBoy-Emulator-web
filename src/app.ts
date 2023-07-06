@@ -63,7 +63,17 @@ function loadRemoteFile(url: string){
     xmlhttp.send();
 }
 
-const button = <HTMLButtonElement> document.getElementById('tetris');
-button.addEventListener("click", () => {
+const button1 = <HTMLButtonElement> document.getElementById('tetris');
+button1.addEventListener("click", () => {
     loadRemoteFile('https://asori015.github.io/GB-Files/01-001.data');
+});
+
+const button2 = <HTMLButtonElement> document.getElementById('poke-red');
+button2.addEventListener("click", () => {
+    loadRemoteFile('https://asori015.github.io/GB-Files/02-001.data');
+});
+
+const button3 = <HTMLButtonElement> document.getElementById('zelda');
+button3.addEventListener("click", () => {
+    loadRemoteFile('https://asori015.github.io/GB-Files/03-001.data');
 });

@@ -2679,26 +2679,24 @@ function loadRemoteFile(url) {
     xmlhttp.open("GET", url, true);
     xmlhttp.responseType = "blob";
     xmlhttp.onload = function () {
-        var blob = xmlhttp.response; // Note: not req.responseText
+        var blob = xmlhttp.response;
         var file = new File([blob], "foo.txt", { type: "text/plain" });
         machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(file);
         setInterval(wrapper, 1000 / 60);
-        // if (arrayBuffer) {
-        //     const byteArray = new Uint8Array(arrayBuffer);
-        //     byteArray.forEach((element, index) => {
-        //         // do something with each byte in the array
-        //     });
-        // }
     };
     xmlhttp.send();
-    // var blob = new Blob([result!], { type: 'text/plain' });
-    // var file = new File([blob], "foo.txt", {type: "text/plain"});
-    // machine = new Machine(file);
-    // setInterval(wrapper, 1000/60);
 }
-var button = document.getElementById('tetris');
-button.addEventListener("click", function () {
+var button1 = document.getElementById('tetris');
+button1.addEventListener("click", function () {
     loadRemoteFile('https://asori015.github.io/GB-Files/01-001.data');
+});
+var button2 = document.getElementById('poke-red');
+button2.addEventListener("click", function () {
+    loadRemoteFile('https://asori015.github.io/GB-Files/02-001.data');
+});
+var button3 = document.getElementById('zelda');
+button3.addEventListener("click", function () {
+    loadRemoteFile('https://asori015.github.io/GB-Files/03-001.data');
 });
 
 })();
