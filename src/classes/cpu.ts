@@ -1207,46 +1207,6 @@ export class CPU {
         }
     }
 
-    // private updateTimer(){
-    //     let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV + 1);
-    //     div += 1;
-    //     if((this.m_mmu.read(this.TAC) & 0x04) > 0){
-    //         let sum = this.m_mmu.read(this.TIMA);
-    //         if((this.m_mmu.read(this.TAC) & 0x03) > 0){
-    //             if((div & (0x0002 << ((this.m_mmu.read(this.TAC) & 0x03) * 2))) > 0){
-    //                 this.m_fallingEdgeDelay = true;
-    //             }
-    //             else{
-    //                 if(this.m_fallingEdgeDelay){
-    //                     sum += 1;
-    //                     this.m_fallingEdgeDelay = false;
-    //                 }
-    //             }
-    //         }
-    //         else{
-    //             if((div & 0x0200) > 0){
-    //                 this.m_fallingEdgeDelay = true;
-    //             }
-    //             else{
-    //                 if(this.m_fallingEdgeDelay){
-    //                     sum += 1;
-    //                     this.m_fallingEdgeDelay = false;
-    //                 }
-    //             }
-    //         }
-
-    //         if(sum > 0x00FF){
-    //             this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
-    //             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
-    //         }
-    //         else{
-    //             this.m_mmu.write(this.TIMA, sum & 0x00FF);
-    //         }
-    //     }
-    //     this.m_mmu.write(this.DIV, (div >> 8) & 0x00FF);
-    //     this.m_mmu.write(this.DIV + 1, div & 0x00FF);
-    // }
-
     private checkForInterupts(): boolean {
         if(!this.IME){
             return false;
@@ -1272,14 +1232,6 @@ export class CPU {
     }
 
     private execute(instruction: number){
-        // if(this.counter > 0){
-        //     this.debug = true;
-        //     this.counter -= 1;
-        // }
-        // else{
-        //     this.debug = false;
-        // }
-
         if(this.m_PC[0] == 0x01DB){
             this.debug = true;
         }

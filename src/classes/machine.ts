@@ -2,12 +2,14 @@ import {CPU} from "./cpu"
 import {GPU} from "./gpu"
 import {MMU} from "./mmu"
 import { Timer } from "./timer";
+import { Keyboard } from "./keyboard";
 
 export class Machine {
     private m_cpu: CPU;
     private m_mmu: MMU;
     private m_gpu: GPU;
     private m_timer: Timer;
+    private m_keyboard: Keyboard;
     private m_inVBLANK: boolean;
     private m_frame;
 
@@ -20,11 +22,11 @@ export class Machine {
         this.m_cpu = new CPU(this.m_mmu);
         this.m_gpu = new GPU(this.m_mmu, this.m_frame);
         this.m_timer = new Timer(this.m_mmu);
+        this.m_keyboard = new Keyboard(this.m_mmu);
 
         this.m_inVBLANK = false;
-        this.m_cpu;
-        this.m_gpu;
-        this.m_inVBLANK;
+        
+        this.m_keyboard;
     }
 
     getFrame() {
