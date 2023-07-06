@@ -25,7 +25,7 @@ export class Machine {
         this.m_keyboard = new Keyboard(this.m_mmu);
 
         this.m_inVBLANK = false;
-        
+
         this.m_keyboard;
     }
 
@@ -38,6 +38,7 @@ export class Machine {
             this.m_cpu.step();
             this.m_gpu.step();
             this.m_timer.step();
+            this.m_keyboard.step();
         }
 
         this.m_inVBLANK = false;
@@ -46,9 +47,13 @@ export class Machine {
             this.m_cpu.step();
             this.m_gpu.step();
             this.m_timer.step();
+            this.m_keyboard.step();
         }
 
         this.m_inVBLANK = true;
+        console.log(this.m_mmu.read(0xFF00));
+        console.log(this.m_keyboard.m_jState1);
+        console.log(this.m_keyboard.m_jState2);
 
         return this.m_frame;
     }

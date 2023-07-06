@@ -1044,8 +1044,6 @@ export class CPU {
     ]
 
     public m_sysClock: number;
-    public m_jstate1: number;
-    public m_jstate2: number;
     public m_BIOSMapped: boolean;
 
     private m_PC;
@@ -1056,13 +1054,7 @@ export class CPU {
     private IME: boolean;
     private m_cbPrefix: boolean;
     private m_isHalted: boolean;
-    // private m_fallingEdgeDelay: boolean;
 
-    private readonly P1 = 0xFF00;
-    // private readonly DIV = 0xFF03;
-    // private readonly TIMA = 0xFF05;
-    // private readonly TMA = 0xFF06;
-    // private readonly TAC = 0xFF07;
     private readonly IF = 0xFF0F;
     private readonly IE = 0xFFFF;
 
@@ -1083,8 +1075,6 @@ export class CPU {
     constructor(
         private m_mmu: MMU
     ){
-        this.m_jstate1 = 0;
-        this.m_jstate2 = 0;
         this.m_BIOSMapped = true;
 
         this.m_PC = new Uint16Array([0]);
@@ -1096,27 +1086,9 @@ export class CPU {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
-        // this.m_fallingEdgeDelay = false;
     }
 
     public step(){
-        if(!(this.m_mmu.read(this.P1) & 0x10)){
-            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate1);
-        }
-        else{
-            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate2);
-        }
-
-        if(this.m_sysClock == 0){
-            this.getInput();
-            this.m_sysClock = 1000;
-        }
-        else{
-            this.m_sysClock -= 1;
-        }
-    
-        // this.updateTimer();
-
         // If an interrupt is pending, turn off halt mode
         if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
             this.m_isHalted = false;
@@ -1129,81 +1101,6 @@ export class CPU {
                 }
             }
             this.m_clock -= 1;
-        }
-    }
-
-    private getInput(){
-        if(false){ // Right key down event
-            this.m_jstate1 &= 0xFE;
-        }
-        else{
-            if(!(this.m_jstate1 & 0x01)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x01;
-        }
-        if(false){ // Left key down event
-            this.m_jstate1 &= 0xFD;
-        }
-        else{
-            if(!(this.m_jstate1 & 0x02)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x02;
-        }
-        if(false){ // Up key down event
-            this.m_jstate1 &= 0xFB;
-        }
-        else{
-            if(!(this.m_jstate1 & 0x04)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x04;
-        }
-        if(false){ // Down key down event
-            this.m_jstate1 &= 0xF7;
-        }
-        else{
-            if(!(this.m_jstate1 & 0x08)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x08;
-        }
-        if(false){ // S key down event
-            this.m_jstate2 &= 0xFE;
-        }
-        else{
-            if(!(this.m_jstate2 & 0x01)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x01;
-        }
-        if(false){ // A key down event
-            this.m_jstate2 &= 0xFD;
-        }
-        else{
-            if(!(this.m_jstate2 & 0x02)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x02;
-        }
-        if(false){ // RShift key down event
-            this.m_jstate2 &= 0xFB;
-        }
-        else{
-            if(!(this.m_jstate2 & 0x04)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x04;
-        }
-        if(false){ // Enter key down event
-            this.m_jstate2 &= 0xF7;
-        }
-        else{
-            if(!(this.m_jstate2 & 0x08)){
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x08;
         }
     }
 

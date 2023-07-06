@@ -39,14 +39,19 @@ var Machine = /** @class */ (function () {
             this.m_cpu.step();
             this.m_gpu.step();
             this.m_timer.step();
+            this.m_keyboard.step();
         }
         this.m_inVBLANK = false;
         while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK) {
             this.m_cpu.step();
             this.m_gpu.step();
             this.m_timer.step();
+            this.m_keyboard.step();
         }
         this.m_inVBLANK = true;
+        console.log(this.m_mmu.read(0xFF00));
+        console.log(this.m_keyboard.m_jState1);
+        console.log(this.m_keyboard.m_jState2);
         return this.m_frame;
     };
     return Machine;
@@ -1106,12 +1111,6 @@ var CPU = /** @class */ (function () {
             this.SET,
             this.SET
         ];
-        // private m_fallingEdgeDelay: boolean;
-        this.P1 = 0xFF00;
-        // private readonly DIV = 0xFF03;
-        // private readonly TIMA = 0xFF05;
-        // private readonly TMA = 0xFF06;
-        // private readonly TAC = 0xFF07;
         this.IF = 0xFF0F;
         this.IE = 0xFFFF;
         this.R = {
@@ -1126,8 +1125,6 @@ var CPU = /** @class */ (function () {
         };
         this.debug = false;
         this.counter = 1;
-        this.m_jstate1 = 0;
-        this.m_jstate2 = 0;
         this.m_BIOSMapped = true;
         this.m_PC = new Uint16Array([0]);
         this.m_SP = new Uint16Array([0]);
@@ -1137,23 +1134,8 @@ var CPU = /** @class */ (function () {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
-        // this.m_fallingEdgeDelay = false;
     }
     CPU.prototype.step = function () {
-        if (!(this.m_mmu.read(this.P1) & 0x10)) {
-            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate1);
-        }
-        else {
-            this.m_mmu.write(this.P1, this.m_mmu.read(this.P1) | this.m_jstate2);
-        }
-        if (this.m_sysClock == 0) {
-            this.getInput();
-            this.m_sysClock = 1000;
-        }
-        else {
-            this.m_sysClock -= 1;
-        }
-        // this.updateTimer();
         // If an interrupt is pending, turn off halt mode
         if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)) {
             this.m_isHalted = false;
@@ -1165,64 +1147,6 @@ var CPU = /** @class */ (function () {
                 }
             }
             this.m_clock -= 1;
-        }
-    };
-    CPU.prototype.getInput = function () {
-        if (false) {}
-        else {
-            if (!(this.m_jstate1 & 0x01)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x01;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate1 & 0x02)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x02;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate1 & 0x04)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x04;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate1 & 0x08)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate1 |= 0x08;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate2 & 0x01)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x01;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate2 & 0x02)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x02;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate2 & 0x04)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x04;
-        }
-        if (false) {}
-        else {
-            if (!(this.m_jstate2 & 0x08)) {
-                this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
-            }
-            this.m_jstate2 |= 0x08;
         }
     };
     CPU.prototype.checkForInterupts = function () {
@@ -2670,21 +2594,79 @@ var Keyboard = /** @class */ (function () {
     function Keyboard(m_mmu) {
         var _this = this;
         this.m_mmu = m_mmu;
+        this.P1 = 0xFF00;
+        this.IF = 0xFF0F;
         addEventListener("keydown", function (event) {
             _this.getKeyDown(event);
         });
         addEventListener("keyup", function (event) {
             _this.getKeyUp(event);
         });
-        this.m_mmu;
+        this.m_jState1 = 0xFF;
+        this.m_jState2 = 0xFF;
     }
+    Keyboard.prototype.step = function () {
+        if ((this.m_mmu.read(this.P1) & 0x10) == 0) {
+            this.m_mmu.write(this.P1, (this.m_mmu.read(this.P1) & 0xF0) + (this.m_jState1 & 0x0F));
+        }
+        else {
+            this.m_mmu.write(this.P1, (this.m_mmu.read(this.P1) & 0xF0) + (this.m_jState2 & 0x0F));
+        }
+    };
     Keyboard.prototype.getKeyDown = function (event) {
         if (!event.repeat) {
-            console.log('Keydown' + event.code);
+            if (event.code == "ArrowRight") {
+                this.m_jState1 &= 0xFE;
+            }
+            else if (event.code == "ArrowLeft") {
+                this.m_jState1 &= 0xFD;
+            }
+            else if (event.code == "ArrowUp") {
+                this.m_jState1 &= 0xFB;
+            }
+            else if (event.code == "ArrowDown") {
+                this.m_jState1 &= 0xF7;
+            }
+            else if (event.code == "KeyS") {
+                this.m_jState2 &= 0xFE;
+            }
+            else if (event.code == "KeyA") {
+                this.m_jState2 &= 0xFD;
+            }
+            else if (event.code == "ShiftRight") {
+                this.m_jState2 &= 0xFB;
+            }
+            else if (event.code == "Enter") {
+                this.m_jState2 &= 0xF7;
+            }
+            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x10);
         }
     };
     Keyboard.prototype.getKeyUp = function (event) {
-        console.log('Keyup' + event.code);
+        if (event.code == "ArrowRight") {
+            this.m_jState1 |= 0x01;
+        }
+        else if (event.code == "ArrowLeft") {
+            this.m_jState1 |= 0x02;
+        }
+        else if (event.code == "ArrowUp") {
+            this.m_jState1 |= 0x04;
+        }
+        else if (event.code == "ArrowDown") {
+            this.m_jState1 |= 0x08;
+        }
+        else if (event.code == "KeyS") {
+            this.m_jState2 |= 0x01;
+        }
+        else if (event.code == "KeyA") {
+            this.m_jState2 |= 0x02;
+        }
+        else if (event.code == "ShiftRight") {
+            this.m_jState2 |= 0x04;
+        }
+        else if (event.code == "Enter") {
+            this.m_jState2 |= 0x08;
+        }
     };
     return Keyboard;
 }());
