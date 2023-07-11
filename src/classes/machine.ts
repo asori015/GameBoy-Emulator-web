@@ -51,9 +51,6 @@ export class Machine {
         }
 
         this.m_inVBLANK = true;
-        console.log(this.m_mmu.read(0xFF00));
-        console.log(this.m_keyboard.m_jState1);
-        console.log(this.m_keyboard.m_jState2);
 
         return this.m_frame;
     }

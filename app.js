@@ -49,9 +49,6 @@ var Machine = /** @class */ (function () {
             this.m_keyboard.step();
         }
         this.m_inVBLANK = true;
-        console.log(this.m_mmu.read(0xFF00));
-        console.log(this.m_keyboard.m_jState1);
-        console.log(this.m_keyboard.m_jState2);
         return this.m_frame;
     };
     return Machine;
@@ -2278,9 +2275,15 @@ var MMU = /** @class */ (function () {
         this.file = file;
         this.m_BIOS = new Uint8Array(0x0100).fill(0);
         this.m_addrBus = new Uint8Array(0x10000).fill(0);
+        this.m_rom = new Uint8Array(0x800000).fill(0);
+        this.m_ram = new Uint8Array(0x020000).fill(0);
         this.m_isRomLoaded = false;
         this.m_isBIOSMapped = true;
         this.m_isGBC = false; // TODO
+        this.m_romSize = 0;
+        this.m_ramSize = 0;
+        this.m_cartridgeType = 0;
+        this.m_mbcValue = 0;
         var reader = new FileReader();
         reader.onload = function () { return _this.loadROM(reader.result); };
         reader.readAsArrayBuffer(this.file);
@@ -2292,44 +2295,55 @@ var MMU = /** @class */ (function () {
      * @return value at requested address
      */
     MMU.prototype.read = function (addr) {
-        // switch(addr >> 13){
-        //     case 0:
-        //         if(this.m_isBIOSMapped && addr < 0x0100){
-        //             return this.m_BIOS[addr]!;
+        switch (addr >> 13) {
+            case 0:
+                if (this.m_isBIOSMapped) {
+                    if (addr <= 0x0100) {
+                        if (addr == 0x100) {
+                            this.m_isBIOSMapped = false;
+                        }
+                        else {
+                            return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_DMG[addr];
+                        }
+                    }
+                    else if (this.m_isGBC && addr >= 0x0200 && addr < 0x0900) {
+                        return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_CGB[addr];
+                    }
+                }
+                return this.m_rom[addr];
+            case 1: // 0x0000 -> 0x3FFF
+                this.m_mbcValue;
+                return this.m_rom[addr];
+            case 2:
+                return this.m_rom[addr];
+            case 3: // 0x4000 -> 0x9FFF
+                return this.m_rom[addr];
+            case 4:
+                return this.m_addrBus[addr];
+            case 5:
+                return this.m_addrBus[addr];
+            case 6:
+                return this.m_addrBus[addr];
+            case 7:
+                return this.m_addrBus[addr];
+            default:
+                return 0xFF;
+        }
+        // this.m_isGBC;
+        // if(this.m_isBIOSMapped){
+        //     if(addr <= 0x100){
+        //         if(addr == 0x100){
+        //             this.m_isBIOSMapped = false;
         //         }
-        //         if(this.m_isBIOSMapped && this.m_isGBC && addr >= 0x0200 && addr < 0x0900){
-        //             return this.m_BIOS[addr - 0x0100]!;
+        //         else{
+        //             return <number> this.m_BIOS[addr];
         //         }
-        //     case 1: // 0x0000 -> 0x3FFF
-        //     case 2:
-        //     case 3: // 0x4000 -> 0x9FFF
-        //         break;
-        //     case 4:
-        //         break;
-        //     case 5:
-        //         break;
-        //     case 6:
-        //         break;
-        //     case 7:
-        //         break;
-        //     default:
-        //         return 0xFF;
+        //     }
+        //     return <number> this.m_addrBus[addr];
         // }
-        this.m_isGBC;
-        if (this.m_isBIOSMapped) {
-            if (addr <= 0x100) {
-                if (addr == 0x100) {
-                    this.m_isBIOSMapped = false;
-                }
-                else {
-                    return this.m_BIOS[addr];
-                }
-            }
-            return this.m_addrBus[addr];
-        }
-        else {
-            return this.m_addrBus[addr];
-        }
+        // else{
+        //     return <number> this.m_addrBus[addr];
+        // }
     };
     MMU.prototype.write = function (addr, val) {
         if (addr >= 0x8000) {
@@ -2351,8 +2365,15 @@ var MMU = /** @class */ (function () {
     };
     MMU.prototype.loadROM = function (buffer) {
         var view = new Uint8Array(buffer);
+        this.m_cartridgeType = view[0x0147];
+        this.m_romSize = view[0x0148];
+        this.m_ramSize = view[0x0149];
+        console.log(this.m_cartridgeType);
+        console.log(this.m_romSize);
+        console.log(this.m_ramSize);
+        this.m_ram;
         for (var i = 0; i < view.length; i++) {
-            this.m_addrBus[i] = view[i];
+            this.m_rom[i] = view[i];
         }
         this.m_isRomLoaded = true;
     };
