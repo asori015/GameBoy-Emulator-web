@@ -2281,6 +2281,7 @@ var MMU = /** @class */ (function () {
         this.m_isBIOSMapped = true;
         this.m_isGBC = false; // TODO
         this.m_ramEnabled = false;
+        this.m_mbc1BankMode = false;
         this.m_romSize = 0;
         this.m_ramSize = 0;
         this.m_cartridgeType = 0;
@@ -2288,6 +2289,7 @@ var MMU = /** @class */ (function () {
         this.m_romBank = 1;
         this.m_ramBank = 0;
         this.m_mbc3RtcReg = 0;
+        this.m_mbc3RtcLatch = 0;
         var reader = new FileReader();
         reader.onload = function () { return _this.loadROM(reader.result); };
         reader.readAsArrayBuffer(this.file);
@@ -2321,7 +2323,9 @@ var MMU = /** @class */ (function () {
                 }
             case 1: // 0x0000 -> 0x3FFF
                 if (this.m_mbcValue == 1) {
-                    // TODO
+                    if (this.m_mbc1BankMode) {
+                        return this.m_rom[addr | ((this.m_romBank & ~0x1F) << 14)];
+                    }
                 }
                 else {
                     return this.m_rom[addr];
@@ -2425,7 +2429,7 @@ var MMU = /** @class */ (function () {
                         }
                         break;
                 }
-                this.m_romBank %= (1 << (this.m_romSize + 1));
+                this.m_romBank %= this.m_romSize;
                 break;
             case 2: // 0x4000 -> 0x5fff
                 switch (this.m_mbcValue) {
@@ -2444,10 +2448,23 @@ var MMU = /** @class */ (function () {
                         this.m_ramBank = val & 0x0F;
                         break;
                 }
-                this.m_romBank %= (1 << (this.m_romSize + 1));
-                //this.m_ramBank %= Math.max(1, ) TODO
+                this.m_romBank %= this.m_romSize;
+                this.m_ramBank %= Math.max(1, this.m_ramSize);
                 break;
             case 3:
+                switch (this.m_mbcValue) {
+                    case 1: // Set ROM/RAM mode
+                        this.m_mbc1BankMode = (val & 0x01) != 0;
+                        break;
+                    case 3: // Latch RTC
+                        if ((this.m_mbc3RtcLatch & 0x01) == 0 && val == 0) {
+                            this.m_mbc3RtcLatch += 1;
+                        }
+                        else if ((this.m_mbc3RtcLatch & 1) != 0 && val == 1) {
+                            this.m_mbc3RtcLatch = (this.m_mbc3RtcLatch + 1) & 0x03;
+                        }
+                        break;
+                }
                 break;
             case 4:
             case 5:
@@ -2474,10 +2491,25 @@ var MMU = /** @class */ (function () {
         this.m_cartridgeType = view[0x0147];
         this.m_romSize = view[0x0148];
         this.m_ramSize = view[0x0149];
+        this.m_romSize = (1 << (this.m_romSize + 1));
+        switch (this.m_ramSize) {
+            case 2:
+                this.m_ramSize = 1;
+                break;
+            case 3:
+                this.m_ramSize = 4;
+                break;
+            case 4:
+                this.m_ramSize = 16;
+                break;
+            case 5:
+                this.m_ramSize = 8;
+                break;
+            default:
+                this.m_ramSize = 0;
+                break;
+        }
         console.log(this.m_cartridgeType);
-        console.log(this.m_romSize);
-        console.log(this.m_ramSize);
-        this.m_ram;
         for (var i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];
         }
