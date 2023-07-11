@@ -2280,10 +2280,14 @@ var MMU = /** @class */ (function () {
         this.m_isRomLoaded = false;
         this.m_isBIOSMapped = true;
         this.m_isGBC = false; // TODO
+        this.m_ramEnabled = false;
         this.m_romSize = 0;
         this.m_ramSize = 0;
         this.m_cartridgeType = 0;
         this.m_mbcValue = 0;
+        this.m_romBank = 1;
+        this.m_ramBank = 0;
+        this.m_mbc3RtcReg = 0;
         var reader = new FileReader();
         reader.onload = function () { return _this.loadROM(reader.result); };
         reader.readAsArrayBuffer(this.file);
@@ -2298,64 +2302,166 @@ var MMU = /** @class */ (function () {
         switch (addr >> 13) {
             case 0:
                 if (this.m_isBIOSMapped) {
-                    if (addr <= 0x0100) {
-                        if (addr == 0x100) {
-                            this.m_isBIOSMapped = false;
+                    if (addr == 0x0100) {
+                        this.m_isBIOSMapped = false;
+                    }
+                    else if (this.m_isGBC) {
+                        if (addr < 0x0100) {
+                            return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_CGB[addr];
                         }
-                        else {
+                        else if (addr >= 0x0200 && addr < 0x0900) {
+                            return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_CGB[addr - 0x0100];
+                        }
+                    }
+                    else {
+                        if (addr < 0x0100) {
                             return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_DMG[addr];
                         }
                     }
-                    else if (this.m_isGBC && addr >= 0x0200 && addr < 0x0900) {
-                        return _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_CGB[addr];
-                    }
                 }
-                return this.m_rom[addr];
             case 1: // 0x0000 -> 0x3FFF
-                this.m_mbcValue;
-                return this.m_rom[addr];
+                if (this.m_mbcValue == 1) {
+                    // TODO
+                }
+                else {
+                    return this.m_rom[addr];
+                }
             case 2:
-                return this.m_rom[addr];
-            case 3: // 0x4000 -> 0x9FFF
-                return this.m_rom[addr];
-            case 4:
+            case 3: // 0x4000 -> 0x7FFF
+                return this.m_rom[(addr & 0x3FFF) | (this.m_romBank << 14)];
+            case 4: // 0x8000 -> 0x9FFF
                 return this.m_addrBus[addr];
-            case 5:
-                return this.m_addrBus[addr];
+            case 5: // 0xA000 -> 0xBFFF
+                switch (this.m_mbcValue) {
+                    case 1:
+                        return 0xFF;
+                    case 2:
+                        return 0xFF;
+                    case 3:
+                        switch (this.m_mbc3RtcReg) {
+                            case 0:
+                                return this.m_ram[(this.m_ramBank << 13) | (addr & 0x1FFF)];
+                            case 8:
+                            case 9:
+                            case 10:
+                            case 11:
+                            case 12:
+                                return 0xFF;
+                        }
+                        return 0xFF;
+                    case 5:
+                        if (this.m_ramEnabled) {
+                            return this.m_ram[(this.m_ramBank << 13) | (addr & 0x1FFF)];
+                        }
+                }
+                return 0xFF;
             case 6:
-                return this.m_addrBus[addr];
-            case 7:
+            case 7: // 0xC000 -> 0xFFFF
                 return this.m_addrBus[addr];
             default:
                 return 0xFF;
         }
-        // this.m_isGBC;
-        // if(this.m_isBIOSMapped){
-        //     if(addr <= 0x100){
-        //         if(addr == 0x100){
-        //             this.m_isBIOSMapped = false;
-        //         }
-        //         else{
-        //             return <number> this.m_BIOS[addr];
-        //         }
-        //     }
-        //     return <number> this.m_addrBus[addr];
-        // }
-        // else{
-        //     return <number> this.m_addrBus[addr];
-        // }
     };
     MMU.prototype.write = function (addr, val) {
-        if (addr >= 0x8000) {
-            if (addr == 0xFF46) { // DMA transfer
-                addr = val << 8;
-                for (var i = 0; i < 160; i++) {
-                    this.m_addrBus[0xFE00 + i] = this.m_addrBus[addr + i];
+        switch (addr >> 13) {
+            case 0: // 0x0000->0x1fff
+                switch (this.m_mbcValue) {
+                    case 1:
+                    case 3:
+                    case 5: // Enable RAM if low nibble is 0x0A, else disable
+                        this.m_ramEnabled = (val & 0x0F) == 0x0A;
+                        break;
+                    case 2: // Enable/disable RAM if high address byte is even
+                        if (((addr >> 8) & 0x01) == 0) {
+                            this.m_ramEnabled = (val & 0x0F) == 0x0A;
+                        }
+                        else {
+                            val &= 0x0F;
+                            if (val == 0) {
+                                val = 1;
+                            }
+                            this.m_romBank = val;
+                        }
+                        break;
                 }
-            }
-            else {
-                this.m_addrBus[addr] = val;
-            }
+                break;
+            case 1: // 0x2000 -> 0x3fff
+                switch (this.m_mbcValue) {
+                    case 1: // Set ROM bank, or at least lower 5 bits
+                        val &= 0x1F;
+                        if (val == 0) {
+                            val = 1;
+                        }
+                        this.m_romBank &= ~0x1F;
+                        this.m_romBank |= val;
+                        break;
+                    case 2: // Set ROM bank, but only if high address byte is odd
+                        if (((addr >> 8) & 0x01) == 0) {
+                            this.m_ramEnabled = (val & 0x0F) == 0x0A;
+                        }
+                        else {
+                            val &= 0x0F;
+                            if (val == 0) {
+                                val = 1;
+                            }
+                            this.m_romBank = val;
+                        }
+                        break;
+                    case 3: // Set ROM bank
+                        val &= 0x7F;
+                        if (val == 0) {
+                            val = 1;
+                        }
+                        this.m_romBank = val;
+                        break;
+                    case 5: // Set low 8 bits of ROM bank (allow 0)
+                        if ((addr & 0x1000) == 0) {
+                            this.m_romBank &= ~0xFF;
+                            this.m_romBank |= val;
+                        }
+                        else {
+                            this.m_romBank &= 0xFF;
+                            this.m_romBank |= (val & 0x01) << 8;
+                        }
+                        break;
+                }
+                this.m_romBank %= (1 << (this.m_romSize + 1));
+                break;
+            case 2: // 0x4000 -> 0x5fff
+                switch (this.m_mbcValue) {
+                    case 1:
+                        break; //TODO
+                    case 3: // Write RAM bank if <= 3 or enable RTC registers
+                        if (val <= 0x03) {
+                            this.m_ramBank = val;
+                            this.m_mbc3RtcReg = 0;
+                        }
+                        else if (val >= 0x08 && val <= 0x0C) {
+                            this.m_mbc3RtcReg = val;
+                        }
+                        break;
+                    case 5: // Write RAM bank
+                        this.m_ramBank = val & 0x0F;
+                        break;
+                }
+                this.m_romBank %= (1 << (this.m_romSize + 1));
+                //this.m_ramBank %= Math.max(1, ) TODO
+                break;
+            case 3:
+                break;
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                if (addr == 0xFF46) { // DMA transfer
+                    addr = val << 8;
+                    for (var i = 0; i < 160; i++) {
+                        this.m_addrBus[0xFE00 + i] = this.m_addrBus[addr + i];
+                    }
+                }
+                else {
+                    this.m_addrBus[addr] = val;
+                }
         }
     };
     MMU.prototype.loadBIOS = function () {
