@@ -1959,19 +1959,10 @@ var GPU = /** @class */ (function () {
         this.TILE_MAP2 = 0x9C00;
         this.OAM = 0xFE00;
         this.IF = 0xFF0F;
-        // LCD Register
-        this.LCDC = 0xFF40;
         this.STAT = 0xFF41;
-        this.SCY = 0xFF42;
-        this.SCX = 0xFF43;
         this.LY = 0xFF44;
-        this.LYC = 0xFF45;
-        //private readonly DMA = 0xFF46;
-        this.BGP = 0xFF47;
         this.OBP0 = 0xFF48;
         this.OBP1 = 0xFF49;
-        this.WY = 0xFF4A;
-        this.WX = 0xFF4B;
         this.colorValues = [0xFFFF, 0x56B5, 0x29AA, 0x0000];
         this.state = {
             Mode0: 0,
@@ -1984,9 +1975,18 @@ var GPU = /** @class */ (function () {
         this.m_windowLineCounter = 0;
         this.m_bgDotVals = new Array(160).fill(0);
     }
+    // LCD Register
+    GPU.prototype.LCDC = function () { return this.m_mmu.read(0xFF40); };
+    GPU.prototype.SCY = function () { return this.m_mmu.read(0xFF42); };
+    GPU.prototype.SCX = function () { return this.m_mmu.read(0xFF43); };
+    GPU.prototype.LYC = function () { return this.m_mmu.read(0xFF45); };
+    //private readonly DMA = 0xFF46;
+    GPU.prototype.BGP = function () { return this.m_mmu.read(0xFF47); };
+    GPU.prototype.WY = function () { return this.m_mmu.read(0xFF4A); };
+    GPU.prototype.WX = function () { return this.m_mmu.read(0xFF4B); };
     GPU.prototype.step = function () {
         // If LCD is on
-        if ((this.m_mmu.read(this.LCDC) & 0x80) > 0) {
+        if ((this.LCDC() & 0x80) > 0) {
             switch (this.m_state) {
                 case this.state.Mode0: // H-Blank
                     if (this.m_clock >= 455) {
@@ -2049,7 +2049,7 @@ var GPU = /** @class */ (function () {
                 default:
                     break;
             }
-            if (this.m_mmu.read(this.LY) == this.m_mmu.read(this.LYC)) {
+            if (this.m_mmu.read(this.LY) == this.LYC()) {
                 if ((this.m_mmu.read(this.STAT) & 0x04) == 0) {
                     if ((this.m_mmu.read(this.STAT) & 0x40) > 0) {
                         this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
@@ -2065,32 +2065,32 @@ var GPU = /** @class */ (function () {
     };
     GPU.prototype.renderLine = function () {
         // clearLine();
-        if ((this.m_mmu.read(this.LCDC) & 0x01) > 0) {
+        if ((this.LCDC() & 0x01) > 0) {
             this.renderBackgroundLine();
+            if ((this.LCDC() & 0x20) > 0) {
+                this.renderWindowLine();
+            }
         }
-        if ((this.m_mmu.read(this.LCDC) & 0x20) > 0) {
-            this.renderWindowLine();
-        }
-        if ((this.m_mmu.read(this.LCDC) & 0x02) > 0) {
+        if ((this.LCDC() & 0x02) > 0) {
             this.renderObjectLine();
         }
     };
     GPU.prototype.renderBackgroundLine = function () {
-        var backgroundTileVRAM = (this.m_mmu.read(this.LCDC) & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
-        var backgroundTileMap = (this.m_mmu.read(this.LCDC) & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
-        var y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) & 0xFF;
+        var backgroundTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        var backgroundTileMap = (this.LCDC() & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        var y = (this.SCY() + this.m_mmu.read(this.LY)) & 0xFF;
         for (var i = 0; i <= 20; i++) {
-            var x = (this.m_mmu.read(this.SCX) + (i << 3)) & 0xFF;
+            var x = (this.SCX() + (i << 3)) & 0xFF;
             var tileIndex = ((y >> 3) * 32) + (x >> 3);
             var tileVal = this.m_mmu.read(backgroundTileMap + tileIndex);
-            if ((this.m_mmu.read(this.LCDC) & 0x10) == 0x00) {
+            if ((this.LCDC() & 0x10) == 0x00) {
                 tileVal = (tileVal << 24) >> 24;
             }
             var VRAM_Pointer = backgroundTileVRAM + (tileVal * 16);
             var lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
             var hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
             for (var j = 7; j >= 0; j--) {
-                var screenX_1 = j - (this.m_mmu.read(this.SCX) & 0x07) + (i << 3);
+                var screenX_1 = j - (this.SCX() & 0x07) + (i << 3);
                 if (screenX_1 < 0) {
                     break;
                 }
@@ -2100,19 +2100,20 @@ var GPU = /** @class */ (function () {
                 if (screenX_1 >= 160) {
                     continue;
                 }
-                var color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)];
+                var color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)];
                 this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX_1] = palid;
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX_1] = color;
             }
         }
     };
     GPU.prototype.renderWindowLine = function () {
-        var wx = this.m_mmu.read(this.WX);
-        var wy = this.m_mmu.read(this.WY);
+        var wx = this.WX();
+        var wy = this.WY();
         if (wx < 0 || wx > 166 || wy < 0 || wy > 143) {
             return;
         }
-        var windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        var windowTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        var windowTileMap = (this.LCDC() & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
         var y = this.m_windowLineCounter - wy;
         if (y < 0) {
             return;
@@ -2124,7 +2125,10 @@ var GPU = /** @class */ (function () {
                 continue;
             }
             var tileVal = this.m_mmu.read(tileMapAddr);
-            var VRAM_Pointer = this.VRAM_1 + (tileVal * 16);
+            if ((this.LCDC() & 0x10) == 0x00) {
+                tileVal = (tileVal << 24) >> 24;
+            }
+            var VRAM_Pointer = windowTileVRAM + (tileVal * 16);
             var lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
             var hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
             for (var j = 7; j >= 0; j--) {
@@ -2135,7 +2139,7 @@ var GPU = /** @class */ (function () {
                 if (screenX_2 < 0 || screenX_2 >= 160) {
                     continue;
                 }
-                var color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)];
+                var color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)];
                 this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX_2] = palid;
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX_2] = color;
             }
@@ -2148,7 +2152,7 @@ var GPU = /** @class */ (function () {
             var y = this.m_mmu.read(this.OAM + (i * 4)) - this.m_mmu.read(this.LY);
             var attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
             var VRAM_Pointer = 0;
-            if ((this.m_mmu.read(this.LCDC) & 0x04) > 0x00) {
+            if ((this.LCDC() & 0x04) > 0x00) {
                 if (y < 1 || y > 16) {
                     continue;
                 }
@@ -2248,8 +2252,8 @@ var GPU = /** @class */ (function () {
     };
     GPU.prototype.incrementLineCounters = function () {
         this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
-        var wx = this.m_mmu.read(this.WX);
-        var wy = this.m_mmu.read(this.WY);
+        var wx = this.WX();
+        var wy = this.WY();
         if (wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143) {
             this.m_windowLineCounter += 1;
         }
@@ -2510,6 +2514,12 @@ var MMU = /** @class */ (function () {
                 break;
         }
         console.log(this.m_cartridgeType);
+        if (this.m_cartridgeType == 3) {
+            this.m_mbcValue = 1;
+        }
+        if (this.m_cartridgeType == 19) {
+            this.m_mbcValue = 3;
+        }
         for (var i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];
         }

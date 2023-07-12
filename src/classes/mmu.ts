@@ -269,6 +269,13 @@ export class MMU {
 
         console.log(this.m_cartridgeType);
 
+        if(this.m_cartridgeType == 3){
+            this.m_mbcValue = 1;
+        }
+        if(this.m_cartridgeType == 19){
+            this.m_mbcValue = 3;
+        }
+
         for(let i = 0; i < view.length; i++){
             this.m_rom[i] = <number> view[i];
         }

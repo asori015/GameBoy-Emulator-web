@@ -9,18 +9,18 @@ export class GPU {
     private readonly IF = 0xFF0F;
 
     // LCD Register
-    private readonly LCDC = 0xFF40;
+    private LCDC() {return this.m_mmu.read(0xFF40);}
     private readonly STAT = 0xFF41;
-    private readonly SCY = 0xFF42;
-    private readonly SCX = 0xFF43;
+    private SCY() {return this.m_mmu.read(0xFF42);}
+    private SCX() {return this.m_mmu.read(0xFF43);}
     private readonly LY = 0xFF44;
-    private readonly LYC = 0xFF45;
+    private LYC() {return this.m_mmu.read(0xFF45);}
     //private readonly DMA = 0xFF46;
-    private readonly BGP = 0xFF47;
+    private BGP() {return this.m_mmu.read(0xFF47);}
     private readonly OBP0 = 0xFF48;
     private readonly OBP1 = 0xFF49;
-    private readonly WY = 0xFF4A;
-    private readonly WX = 0xFF4B;
+    private WY() {return this.m_mmu.read(0xFF4A);}
+    private WX() {return this.m_mmu.read(0xFF4B);}
 
     private m_state;
     private m_clock;
@@ -47,7 +47,7 @@ export class GPU {
 
     public step(){
         // If LCD is on
-        if((this.m_mmu.read(this.LCDC) & 0x80) > 0){
+        if((this.LCDC() & 0x80) > 0){
             switch(this.m_state){
                 case this.state.Mode0: // H-Blank
                     if(this.m_clock >= 455){
@@ -111,7 +111,7 @@ export class GPU {
                     break;
             }
 
-            if(this.m_mmu.read(this.LY) == this.m_mmu.read(this.LYC)){
+            if(this.m_mmu.read(this.LY) == this.LYC()){
                 if((this.m_mmu.read(this.STAT) & 0x04) == 0){
                     if((this.m_mmu.read(this.STAT) & 0x40) > 0){
                         this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
@@ -129,28 +129,29 @@ export class GPU {
 
     private renderLine(): void{
         // clearLine();
-        if((this.m_mmu.read(this.LCDC) & 0x01) > 0){
+        if((this.LCDC() & 0x01) > 0){
             this.renderBackgroundLine();
+
+            if((this.LCDC() & 0x20) > 0){
+                this.renderWindowLine();
+            }
         }
-        if((this.m_mmu.read(this.LCDC) & 0x20) > 0){
-            this.renderWindowLine();
-        }
-        if((this.m_mmu.read(this.LCDC) & 0x02) > 0){
+        if((this.LCDC() & 0x02) > 0){
             this.renderObjectLine();
         }
     }
 
     private renderBackgroundLine(): void{
-        let backgroundTileVRAM = (this.m_mmu.read(this.LCDC) & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
-        let backgroundTileMap = (this.m_mmu.read(this.LCDC) & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
-        let y = (this.m_mmu.read(this.SCY) + this.m_mmu.read(this.LY)) & 0xFF;
+        let backgroundTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        let backgroundTileMap = (this.LCDC() & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let y = (this.SCY() + this.m_mmu.read(this.LY)) & 0xFF;
 
         for(let i = 0; i <= 20; i++){
-            let x = (this.m_mmu.read(this.SCX) + (i << 3)) & 0xFF;
+            let x = (this.SCX() + (i << 3)) & 0xFF;
             
             let tileIndex = ((y >> 3) * 32) + (x >> 3);
             let tileVal = this.m_mmu.read(backgroundTileMap + tileIndex);
-            if((this.m_mmu.read(this.LCDC) & 0x10) == 0x00){
+            if((this.LCDC() & 0x10) == 0x00){
                 tileVal = (tileVal << 24) >> 24;
             }
 
@@ -160,7 +161,7 @@ export class GPU {
             let hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
 
             for(let j = 7; j >= 0; j--){
-                let screenX = j - (this.m_mmu.read(this.SCX) & 0x07) + (i << 3);
+                let screenX = j - (this.SCX() & 0x07) + (i << 3);
                 if (screenX < 0) {
                     break;
                 }
@@ -172,7 +173,7 @@ export class GPU {
                     continue;
                 }
 
-                let color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)]!;
+                let color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)]!;
                 this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
 
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
@@ -181,13 +182,14 @@ export class GPU {
     }
 
     private renderWindowLine(): void{
-        let wx = this.m_mmu.read(this.WX);
-        let wy = this.m_mmu.read(this.WY);
+        let wx = this.WX();
+        let wy = this.WY();
         if(wx < 0 || wx > 166 || wy < 0 || wy > 143){
             return;
         }
 
-        let windowTileMap = (this.m_mmu.read(this.LCDC) & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let windowTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        let windowTileMap = (this.LCDC() & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
         let y = this.m_windowLineCounter - wy;
 
         if(y < 0){
@@ -202,7 +204,10 @@ export class GPU {
             }
 
             let tileVal = this.m_mmu.read(tileMapAddr);
-            let VRAM_Pointer = this.VRAM_1 + (tileVal * 16);
+            if((this.LCDC() & 0x10) == 0x00){
+                tileVal = (tileVal << 24) >> 24;
+            }
+            let VRAM_Pointer = windowTileVRAM + (tileVal * 16);
 
             let lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
             let hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
@@ -217,7 +222,7 @@ export class GPU {
                     continue;
                 }
 
-                let color = this.colorValues[(this.m_mmu.read(this.BGP) & (0x03 << (palid * 2))) >> (palid * 2)]!;
+                let color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)]!;
                 this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
 
                 this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
@@ -233,7 +238,7 @@ export class GPU {
             let attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
             let VRAM_Pointer = 0;
 
-            if((this.m_mmu.read(this.LCDC) & 0x04) > 0x00){
+            if((this.LCDC() & 0x04) > 0x00){
                 if(y < 1 || y > 16){
                     continue;
                 }
@@ -343,8 +348,8 @@ export class GPU {
 
     private incrementLineCounters(): void{
         this.m_mmu.write(this.LY, this.m_mmu.read(this.LY) + 1);
-        let wx = this.m_mmu.read(this.WX);
-        let wy = this.m_mmu.read(this.WY);
+        let wx = this.WX();
+        let wy = this.WY();
         if(wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143){
             this.m_windowLineCounter += 1;
         }
