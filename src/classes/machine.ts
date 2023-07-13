@@ -12,6 +12,7 @@ export class Machine {
     private m_keyboard: Keyboard;
     private m_inVBLANK: boolean;
     private m_frame;
+    private frameCounter: number;
 
     constructor(
         readonly m_file: File,
@@ -25,8 +26,7 @@ export class Machine {
         this.m_keyboard = new Keyboard(this.m_mmu);
 
         this.m_inVBLANK = false;
-
-        this.m_keyboard;
+        this.frameCounter = 0;
     }
 
     getFrame() {
@@ -48,6 +48,14 @@ export class Machine {
             this.m_gpu.step();
             this.m_timer.step();
             this.m_keyboard.step();
+        }
+
+        if(this.frameCounter >= 59){
+            this.frameCounter = 0;
+            this.m_mmu.saveROM();
+        }
+        else{
+            this.frameCounter += 1;
         }
 
         this.m_inVBLANK = true;

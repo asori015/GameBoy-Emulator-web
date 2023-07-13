@@ -54,7 +54,7 @@ function loadRemoteFile(url: string){
     
     xmlhttp.onload = () => {
         let blob = xmlhttp.response;
-        let file = new File([blob], "foo.txt", {type: "text/plain"});
+        let file = new File([blob], url.substring(36), {type: "text/plain"});
         
         machine = new Machine(file);
         setInterval(wrapper, 1000/60);

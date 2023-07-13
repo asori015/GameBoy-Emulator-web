@@ -29,7 +29,7 @@ var Machine = /** @class */ (function () {
         this.m_timer = new _timer__WEBPACK_IMPORTED_MODULE_3__.Timer(this.m_mmu);
         this.m_keyboard = new _keyboard__WEBPACK_IMPORTED_MODULE_4__.Keyboard(this.m_mmu);
         this.m_inVBLANK = false;
-        this.m_keyboard;
+        this.frameCounter = 0;
     }
     Machine.prototype.getFrame = function () {
         while (!this.m_mmu.m_isRomLoaded) {
@@ -47,6 +47,13 @@ var Machine = /** @class */ (function () {
             this.m_gpu.step();
             this.m_timer.step();
             this.m_keyboard.step();
+        }
+        if (this.frameCounter >= 59) {
+            this.frameCounter = 0;
+            this.m_mmu.saveROM();
+        }
+        else {
+            this.frameCounter += 1;
         }
         this.m_inVBLANK = true;
         return this.m_frame;
@@ -2523,7 +2530,16 @@ var MMU = /** @class */ (function () {
         for (var i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];
         }
+        var externalRam = JSON.parse(localStorage.getItem(this.file.name));
+        if (externalRam != null) {
+            for (var i = 0; i < externalRam.length; i++) {
+                this.m_ram[i] = externalRam[i];
+            }
+        }
         this.m_isRomLoaded = true;
+    };
+    MMU.prototype.saveROM = function () {
+        localStorage.setItem(this.file.name, JSON.stringify(this.m_ram));
     };
     return MMU;
 }());
@@ -2950,7 +2966,7 @@ function loadRemoteFile(url) {
     xmlhttp.responseType = "blob";
     xmlhttp.onload = function () {
         var blob = xmlhttp.response;
-        var file = new File([blob], "foo.txt", { type: "text/plain" });
+        var file = new File([blob], url.substring(36), { type: "text/plain" });
         machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(file);
         setInterval(wrapper, 1000 / 60);
     };
