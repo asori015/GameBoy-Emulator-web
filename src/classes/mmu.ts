@@ -121,7 +121,7 @@ export class MMU {
 
     public write(addr: number, val: number){
         switch(addr >> 13){
-            case 0: // 0x0000->0x1fff
+            case 0: // 0x0000->0x1FFF
                 switch(this.m_mbcValue){
                     case 1:
                     case 3:
@@ -142,7 +142,7 @@ export class MMU {
                         break;
                 }
                 break;
-            case 1: // 0x2000 -> 0x3fff
+            case 1: // 0x2000 -> 0x3FFF
                 switch(this.m_mbcValue){
                     case 1: // Set ROM bank, or at least lower 5 bits
                         val &= 0x1F;
@@ -184,7 +184,7 @@ export class MMU {
                 }
                 this.m_romBank %= this.m_romSize;
                 break;
-            case 2: // 0x4000 -> 0x5fff
+            case 2: // 0x4000 -> 0x5FFF
                 switch(this.m_mbcValue){
                     case 1:
                         break; //TODO
@@ -204,7 +204,7 @@ export class MMU {
                 this.m_romBank %= this.m_romSize;
                 this.m_ramBank %= Math.max(1, this.m_ramSize);
                 break;
-            case 3:
+            case 3: // 0x6000 -> 0x7FFF
                 switch(this.m_mbcValue){
                     case 1: // Set ROM/RAM mode
                         this.m_mbc1BankMode = (val & 0x01) != 0;
@@ -219,10 +219,39 @@ export class MMU {
                         break;
                 }
                 break;
-            case 4:
-            case 5:
+            case 4: // 0x8000 -> 0x9FFF
+                this.m_addrBus[addr] = val;
+                break;
+            case 5: // 0xA000 -> 0xBFFF
+                switch(this.m_mbcValue){
+                    case 1:
+                    case 5: // Just write RAM if it's there
+                        if(this.m_ramEnabled){
+                            let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
+                            let ramAddr = addr + (erb << 13);
+                            this.m_ram[ramAddr] = val;
+                        }
+                        break;
+                    case 2: // Write low 4 bits of "RAM"
+                        if(this.m_ramEnabled){
+                            this.m_ram[addr & 0x01FF] = val & 0x0F;
+                        }
+                        break;
+                    case 3:
+                        switch(this.m_mbc3RtcReg){
+                            case 0:
+                                this.m_ram[(this.m_ramBank << 13) + (addr & 0x1FFF)] = val;
+                                break;
+                            case 8:
+                                // seconds = val % 60; 
+                                break;
+                        }
+                    
+                }
+                this.m_addrBus[addr] = val;
+                break;
             case 6:
-            case 7:
+            case 7: // 0xC000 -> 0xFFFF
                 if(addr == 0xFF46){ // DMA transfer
                     addr = val << 8;
                     for(let i = 0; i < 160; i++){

@@ -14,6 +14,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mmu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var _timer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
 /* harmony import */ var _keyboard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(7);
+/* harmony import */ var _audio__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(8);
+
 
 
 
@@ -28,6 +30,7 @@ var Machine = /** @class */ (function () {
         this.m_gpu = new _gpu__WEBPACK_IMPORTED_MODULE_1__.GPU(this.m_mmu, this.m_frame);
         this.m_timer = new _timer__WEBPACK_IMPORTED_MODULE_3__.Timer(this.m_mmu);
         this.m_keyboard = new _keyboard__WEBPACK_IMPORTED_MODULE_4__.Keyboard(this.m_mmu);
+        this.m_audio = new _audio__WEBPACK_IMPORTED_MODULE_5__.Audio(this.m_mmu);
         this.m_inVBLANK = false;
         this.frameCounter = 0;
     }
@@ -40,6 +43,7 @@ var Machine = /** @class */ (function () {
             this.m_gpu.step();
             this.m_timer.step();
             this.m_keyboard.step();
+            this.m_audio.step();
         }
         this.m_inVBLANK = false;
         while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK) {
@@ -47,10 +51,11 @@ var Machine = /** @class */ (function () {
             this.m_gpu.step();
             this.m_timer.step();
             this.m_keyboard.step();
+            this.m_audio.step();
         }
         if (this.frameCounter >= 59) {
             this.frameCounter = 0;
-            this.m_mmu.saveROM();
+            //this.m_mmu.saveROM();
         }
         else {
             this.frameCounter += 1;
@@ -2379,7 +2384,7 @@ var MMU = /** @class */ (function () {
     };
     MMU.prototype.write = function (addr, val) {
         switch (addr >> 13) {
-            case 0: // 0x0000->0x1fff
+            case 0: // 0x0000->0x1FFF
                 switch (this.m_mbcValue) {
                     case 1:
                     case 3:
@@ -2400,7 +2405,7 @@ var MMU = /** @class */ (function () {
                         break;
                 }
                 break;
-            case 1: // 0x2000 -> 0x3fff
+            case 1: // 0x2000 -> 0x3FFF
                 switch (this.m_mbcValue) {
                     case 1: // Set ROM bank, or at least lower 5 bits
                         val &= 0x1F;
@@ -2442,7 +2447,7 @@ var MMU = /** @class */ (function () {
                 }
                 this.m_romBank %= this.m_romSize;
                 break;
-            case 2: // 0x4000 -> 0x5fff
+            case 2: // 0x4000 -> 0x5FFF
                 switch (this.m_mbcValue) {
                     case 1:
                         break; //TODO
@@ -2462,7 +2467,7 @@ var MMU = /** @class */ (function () {
                 this.m_romBank %= this.m_romSize;
                 this.m_ramBank %= Math.max(1, this.m_ramSize);
                 break;
-            case 3:
+            case 3: // 0x6000 -> 0x7FFF
                 switch (this.m_mbcValue) {
                     case 1: // Set ROM/RAM mode
                         this.m_mbc1BankMode = (val & 0x01) != 0;
@@ -2477,10 +2482,38 @@ var MMU = /** @class */ (function () {
                         break;
                 }
                 break;
-            case 4:
-            case 5:
+            case 4: // 0x8000 -> 0x9FFF
+                this.m_addrBus[addr] = val;
+                break;
+            case 5: // 0xA000 -> 0xBFFF
+                switch (this.m_mbcValue) {
+                    case 1:
+                    case 5: // Just write RAM if it's there
+                        if (this.m_ramEnabled) {
+                            var erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
+                            var ramAddr = addr + (erb << 13);
+                            this.m_ram[ramAddr] = val;
+                        }
+                        break;
+                    case 2: // Write low 4 bits of "RAM"
+                        if (this.m_ramEnabled) {
+                            this.m_ram[addr & 0x01FF] = val & 0x0F;
+                        }
+                        break;
+                    case 3:
+                        switch (this.m_mbc3RtcReg) {
+                            case 0:
+                                this.m_ram[(this.m_ramBank << 13) + (addr & 0x1FFF)] = val;
+                                break;
+                            case 8:
+                                // seconds = val % 60; 
+                                break;
+                        }
+                }
+                this.m_addrBus[addr] = val;
+                break;
             case 6:
-            case 7:
+            case 7: // 0xC000 -> 0xFFFF
                 if (addr == 0xFF46) { // DMA transfer
                     addr = val << 8;
                     for (var i = 0; i < 160; i++) {
@@ -2854,6 +2887,39 @@ var Keyboard = /** @class */ (function () {
         }
     };
     return Keyboard;
+}());
+
+
+
+/***/ }),
+/* 8 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Audio: () => (/* binding */ Audio)
+/* harmony export */ });
+var Audio = /** @class */ (function () {
+    function Audio(m_mmu) {
+        this.m_mmu = m_mmu;
+        // this.fallingEdgeDelay = false;
+        // this.pendingOverflow = false;
+    }
+    Audio.prototype.step = function () {
+        this.m_mmu;
+        // if(this.pendingOverflow){
+        //     this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
+        //     this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
+        //     this.pendingOverflow = false;
+        // }
+        // // Increment DIV
+        // let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV - 1);
+        // div += 1;
+        // this.m_mmu.write(this.DIV, div >> 8);
+        // this.m_mmu.write(this.DIV - 1, div);
+        // this.updateEdge(div);
+    };
+    return Audio;
 }());
 
 
