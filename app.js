@@ -2563,16 +2563,16 @@ var MMU = /** @class */ (function () {
         for (var i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];
         }
-        var externalRam = JSON.parse(localStorage.getItem(this.file.name));
+        var externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.file.name)));
         if (externalRam != null) {
-            for (var i = 0; i < externalRam.length; i++) {
+            for (var i = 0; i < this.m_ram.length && i < externalRam.length; i++) {
                 this.m_ram[i] = externalRam[i];
             }
         }
         this.m_isRomLoaded = true;
     };
     MMU.prototype.saveROM = function () {
-        localStorage.setItem(this.file.name, JSON.stringify(this.m_ram));
+        localStorage.setItem(this.file.name, JSON.stringify(Array.from(this.m_ram)));
     };
     return MMU;
 }());

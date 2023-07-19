@@ -57,7 +57,7 @@ export class Machine {
 
         if(this.frameCounter >= 59){
             this.frameCounter = 0;
-            //this.m_mmu.saveROM();
+            //this.m_mmu.saveRAM();
         }
         else{
             this.frameCounter += 1;

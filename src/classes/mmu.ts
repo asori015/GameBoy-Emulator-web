@@ -309,17 +309,17 @@ export class MMU {
             this.m_rom[i] = <number> view[i];
         }
 
-        const externalRam = JSON.parse(localStorage.getItem(this.file.name)!);
+        const externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.file.name)!));
         if(externalRam != null){
-            for(let i = 0; i < externalRam.length; i++){
-                this.m_ram[i] = externalRam[i];
+            for(let i = 0; i < this.m_ram.length && i < externalRam.length; i++){
+                this.m_ram[i] = externalRam[i]!;
             }
         }
 
         this.m_isRomLoaded = true;
     }
 
-    public saveROM(){
-        localStorage.setItem(this.file.name, JSON.stringify(this.m_ram));
+    public saveRAM(){
+        localStorage.setItem(this.file.name, JSON.stringify(Array.from(this.m_ram)));
     }
 }
