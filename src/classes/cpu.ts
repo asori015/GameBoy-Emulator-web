@@ -6,8 +6,8 @@ export class CPU {
             return 4;
         },
         () => { // LD BC,d16
-            this.m_registers[this.R.C] = this.m_mmu.read(++this.m_PC[0]);
-            this.m_registers[this.R.B] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.C] = this.m_mmu.read(++this.m_PC[0]!);
+            this.m_registers[this.R.B] = this.m_mmu.read(++this.m_PC[0]!);
             return 12;
         },
         () => { // LD (BC),A
@@ -19,21 +19,21 @@ export class CPU {
             return 8;
         },
         () => { // INC B
-            this.m_registers[this.R.B] += 1;
+            this.m_registers[this.R.B]! += 1;
             this.setZ(this.m_registers[this.R.B] == 0x00);
             this.setH((this.m_registers[this.R.B]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC B
-            this.m_registers[this.R.B] -= 1;
+            this.m_registers[this.R.B]! -= 1;
             this.setZ(this.m_registers[this.R.B] == 0x00);
             this.setH((this.m_registers[this.R.B]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD B,d8
-            this.m_registers[this.R.B] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.B] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         () => { // RLCA
@@ -45,7 +45,7 @@ export class CPU {
             return 4;
         },
         () => { // LD (a16),SP
-            let addr = this.m_mmu.read(++this.m_PC[0]) + (this.m_mmu.read(++this.m_PC[0]) << 8);
+            let addr = this.m_mmu.read(++this.m_PC[0]!) + (this.m_mmu.read(++this.m_PC[0]!) << 8);
             this.m_mmu.write(addr, this.m_SP[0]! & 0x00FF);
             this.m_mmu.write(addr + 1, (this.m_SP[0]! & 0xFF00) >> 8);
             return 20;
@@ -67,21 +67,21 @@ export class CPU {
             return 8;
         },
         () => { // INC C
-            this.m_registers[this.R.C] += 1;
+            this.m_registers[this.R.C]! += 1;
             this.setZ(this.m_registers[this.R.C] == 0x00);
             this.setH((this.m_registers[this.R.C]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC C
-            this.m_registers[this.R.C] -= 1;
+            this.m_registers[this.R.C]! -= 1;
             this.setZ(this.m_registers[this.R.C] == 0x00);
             this.setH((this.m_registers[this.R.C]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD C,d8
-            this.m_registers[this.R.C] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.C] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         () => { // RRCA
@@ -94,8 +94,8 @@ export class CPU {
         },
         this.STOP,
         () => { // LD DE,d16
-            this.m_registers[this.R.E] = this.m_mmu.read(++this.m_PC[0]);
-            this.m_registers[this.R.D] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.E] = this.m_mmu.read(++this.m_PC[0]!);
+            this.m_registers[this.R.D] = this.m_mmu.read(++this.m_PC[0]!);
             return 12;
         },
         () => { // LD (DE),A
@@ -107,21 +107,21 @@ export class CPU {
             return 8;
         },
         () => { // INC D
-            this.m_registers[this.R.D] += 1;
+            this.m_registers[this.R.D]! += 1;
             this.setZ(this.m_registers[this.R.D]! == 0x00);
             this.setH((this.m_registers[this.R.D]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC D
-            this.m_registers[this.R.D] -= 1;
+            this.m_registers[this.R.D]! -= 1;
             this.setZ(this.m_registers[this.R.D] == 0x00);
             this.setH((this.m_registers[this.R.D]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD D,d8
-            this.m_registers[this.R.D] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.D] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         this.RL,
@@ -143,28 +143,28 @@ export class CPU {
             return 8;
         },
         () => { // INC E
-            this.m_registers[this.R.E] += 1;
+            this.m_registers[this.R.E]! += 1;
             this.setZ(this.m_registers[this.R.E] == 0x00);
             this.setH((this.m_registers[this.R.E]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC E
-            this.m_registers[this.R.E] -= 1;
+            this.m_registers[this.R.E]! -= 1;
             this.setZ(this.m_registers[this.R.E] == 0x00);
             this.setH((this.m_registers[this.R.E]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD E,d8
-            this.m_registers[this.R.E] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.E] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         this.RR,
         this.JR,
         () => { // LD HL,d16
-            this.m_registers[this.R.L] = this.m_mmu.read(++this.m_PC[0]);
-            this.m_registers[this.R.H] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.L] = this.m_mmu.read(++this.m_PC[0]!);
+            this.m_registers[this.R.H] = this.m_mmu.read(++this.m_PC[0]!);
             return 12;
         },
         () => { // LD (HL+),A
@@ -177,21 +177,21 @@ export class CPU {
             return 8;
         },
         () => { // INC H
-            this.m_registers[this.R.H] += 1;
+            this.m_registers[this.R.H]! += 1;
             this.setZ(this.m_registers[this.R.H] == 0x00);
             this.setH((this.m_registers[this.R.H]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC H
-            this.m_registers[this.R.H] -= 1;
+            this.m_registers[this.R.H]! -= 1;
             this.setZ(this.m_registers[this.R.H] == 0x00);
             this.setH((this.m_registers[this.R.H]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD H,d8
-            this.m_registers[this.R.H] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.H] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         this.DAA,
@@ -214,21 +214,21 @@ export class CPU {
             return 8;
         },
         () => { // INC L
-            this.m_registers[this.R.L] += 1;
+            this.m_registers[this.R.L]! += 1;
             this.setZ(this.m_registers[this.R.L] == 0x00);
             this.setH((this.m_registers[this.R.L]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC L
-            this.m_registers[this.R.L] -= 1;
+            this.m_registers[this.R.L]! -= 1;
             this.setZ(this.m_registers[this.R.L] == 0x00);
             this.setH((this.m_registers[this.R.L]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD L,d8
-            this.m_registers[this.R.L] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.L] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         () => { // CPL
@@ -239,7 +239,7 @@ export class CPU {
         },
         this.JR,
         () => { // LD SP,d16
-            this.m_SP[0] = this.m_mmu.read(++this.m_PC[0]) + (this.m_mmu.read(++this.m_PC[0]) << 8);
+            this.m_SP[0] = this.m_mmu.read(++this.m_PC[0]!) + (this.m_mmu.read(++this.m_PC[0]!) << 8);
             return 12;
         },
         () => { // LD (HL-),A
@@ -248,7 +248,7 @@ export class CPU {
             return 8;
         },
         () => { // INC SP
-            this.m_SP[0] += 1;
+            this.m_SP[0]! += 1;
             return 8;
         },
         () => { // INC (HL)
@@ -266,7 +266,7 @@ export class CPU {
             return 12;
         },
         () => { // LD (HL),d8
-            this.m_mmu.write(this.getHL(), this.m_mmu.read(++this.m_PC[0]));
+            this.m_mmu.write(this.getHL(), this.m_mmu.read(++this.m_PC[0]!));
             return 8;
         },
         () => { // SCF
@@ -290,25 +290,25 @@ export class CPU {
             return 8;
         },
         () => { // DEC SP
-            this.m_SP[0] -= 1;
+            this.m_SP[0]! -= 1;
             return 8;
         },
         () => { // INC A
-            this.m_registers[this.R.A] += 1;
+            this.m_registers[this.R.A]! += 1;
             this.setZ(this.m_registers[this.R.A] == 0x00);
             this.setH((this.m_registers[this.R.A]! & 0x0F) == 0x00);
             this.setN(false);
             return 4;
         },
         () => { // DEC A
-            this.m_registers[this.R.A] -= 1;
+            this.m_registers[this.R.A]! -= 1;
             this.setZ(this.m_registers[this.R.A] == 0x00);
             this.setH((this.m_registers[this.R.A]! & 0x0F) == 0x0F);
             this.setN(true);
             return 4;
         },
         () => { // LD A,d8
-            this.m_registers[this.R.A] = this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.A] = this.m_mmu.read(++this.m_PC[0]!);
             return 8;
         },
         () => { // CCF
@@ -639,16 +639,16 @@ export class CPU {
         this.CP,
         this.RET,
         () => { // POP BC
-            this.m_registers[this.R.C] = this.m_mmu.read(this.m_SP[0]++);
-            this.m_registers[this.R.B] = this.m_mmu.read(this.m_SP[0]++);
+            this.m_registers[this.R.C] = this.m_mmu.read(this.m_SP[0]!++);
+            this.m_registers[this.R.B] = this.m_mmu.read(this.m_SP[0]!++);
             return 12;
         },
         this.JP,
         this.JP,
         this.CALL,
         () => { // PUSH BC
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.B]!);
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.C]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.B]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.C]!);
             return 16;
         },
         this.ADD,
@@ -658,7 +658,7 @@ export class CPU {
         this.JP,
         () => { // PREFIX CB
             this.m_cbPrefix = true;
-            let x = this.m_instructionMethods2[this.m_mmu.read(++this.m_PC[0])]!.call(this);
+            let x = this.m_instructionMethods2[this.m_mmu.read(++this.m_PC[0]!)]!.call(this);
             this.m_cbPrefix = false;
             return x;
         },
@@ -668,16 +668,16 @@ export class CPU {
         this.RST,
         this.RET,
         () => { // POP DE
-            this.m_registers[this.R.E] = this.m_mmu.read(this.m_SP[0]++);
-            this.m_registers[this.R.D] = this.m_mmu.read(this.m_SP[0]++);
+            this.m_registers[this.R.E] = this.m_mmu.read(this.m_SP[0]!++);
+            this.m_registers[this.R.D] = this.m_mmu.read(this.m_SP[0]!++);
             return 12;
         },
         this.JP,
         this.opcode00,
         this.CALL,
         () => { // PUSH DE
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.D]!);
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.E]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.D]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.E]!);
             return 16;
         },
         this.SUB,
@@ -691,12 +691,12 @@ export class CPU {
         this.SUB,
         this.RST,
         () => { // LD (a8),A
-            this.m_mmu.write(0xFF00 +this.m_mmu.read(++this.m_PC[0]), this.m_registers[this.R.A]!);
+            this.m_mmu.write(0xFF00 +this.m_mmu.read(++this.m_PC[0]!), this.m_registers[this.R.A]!);
             return 12;
         },
         () => { // POP HL
-            this.m_registers[this.R.L] = this.m_mmu.read(this.m_SP[0]++);
-            this.m_registers[this.R.H] = this.m_mmu.read(this.m_SP[0]++);
+            this.m_registers[this.R.L] = this.m_mmu.read(this.m_SP[0]!++);
+            this.m_registers[this.R.H] = this.m_mmu.read(this.m_SP[0]!++);
             return 12;
         },
         () => { // LD (C),A
@@ -706,16 +706,16 @@ export class CPU {
         this.opcode00,
         this.opcode00,
         () => { // PUSH HL
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.H]!);
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.L]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.H]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.L]!);
             return 16;
         },
         this.AND,
         this.RST,
         () => { // ADD SP,r8
-            let nVal = this.m_mmu.read(++this.m_PC[0]) << 24 >> 24;
+            let nVal = this.m_mmu.read(++this.m_PC[0]!) << 24 >> 24;
             let rVal = this.m_SP[0]!;
-            this.m_SP[0] += nVal;
+            this.m_SP[0]! += nVal;
             this.setZ(false);
             this.setN(false);
             this.setH(((this.m_SP[0]! ^ rVal ^ nVal) & 0x0010) == 0x0010);
@@ -724,7 +724,7 @@ export class CPU {
         },
         this.JP,
         () => { // LD (a16),A
-            this.m_mmu.write(this.m_mmu.read(++this.m_PC[0]) + (this.m_mmu.read(++this.m_PC[0]) << 8), this.m_registers[this.R.A]!);
+            this.m_mmu.write(this.m_mmu.read(++this.m_PC[0]!) + (this.m_mmu.read(++this.m_PC[0]!) << 8), this.m_registers[this.R.A]!);
             return 16;
         },
         this.opcode00,
@@ -733,12 +733,12 @@ export class CPU {
         this.XOR,
         this.RST,
         () => { // LD A,(a8)
-            this.m_registers[this.R.A] = this.m_mmu.read(0xFF00 + this.m_mmu.read(++this.m_PC[0]));
+            this.m_registers[this.R.A] = this.m_mmu.read(0xFF00 + this.m_mmu.read(++this.m_PC[0]!));
             return 12;
         },
         () => { // POP AF
-            this.m_registers[this.R.F] = this.m_mmu.read(this.m_SP[0]++) & 0xF0;
-            this.m_registers[this.R.A] = this.m_mmu.read(this.m_SP[0]++);
+            this.m_registers[this.R.F] = this.m_mmu.read(this.m_SP[0]!++) & 0xF0;
+            this.m_registers[this.R.A] = this.m_mmu.read(this.m_SP[0]!++);
             return 12;
         },
         () => { // LD A,(C)
@@ -751,14 +751,14 @@ export class CPU {
         },
         this.opcode00,
         () => { // PUSH AF
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.A]!);
-            this.m_mmu.write(--this.m_SP[0], this.m_registers[this.R.F]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.A]!);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_registers[this.R.F]!);
             return 16;
         },
         this.OR,
         this.RST,
         () => { // LD HL,SP+r8
-            let val = (this.m_mmu.read(++this.m_PC[0]) << 24 >> 24);
+            let val = (this.m_mmu.read(++this.m_PC[0]!) << 24 >> 24);
             this.setHL(this.m_SP[0]! + val);
             this.setZ(false);
             this.setN(false);
@@ -771,7 +771,7 @@ export class CPU {
             return 8;
         },
         () => { // LD A,(a16)
-            this.m_registers[this.R.A] = this.m_mmu.read(this.m_mmu.read(++this.m_PC[0]) + (this.m_mmu.read(++this.m_PC[0]) << 8));
+            this.m_registers[this.R.A] = this.m_mmu.read(this.m_mmu.read(++this.m_PC[0]!) + (this.m_mmu.read(++this.m_PC[0]!) << 8));
             return 16;
         },
         () => { // EI
@@ -1118,8 +1118,8 @@ export class CPU {
             
             this.IME = false;
             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
-            this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! >> 8);
-            this.m_mmu.write(--this.m_SP[0], this.m_PC[0]! & 0x00FF);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! >> 8);
+            this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! & 0x00FF);
             this.m_PC[0] = 0x0040 + (i * 8);
             this.m_clock = 4;
             return true;
@@ -1155,7 +1155,7 @@ export class CPU {
         }
 
         this.m_clock = this.m_instructionMethods1[instruction]!.call(this);
-        this.m_PC[0] += 1;
+        this.m_PC[0]! += 1;
     }
 
     private JP(): number{
@@ -1168,8 +1168,8 @@ export class CPU {
             return 4;
         }
         else{
-            let lVal = this.m_mmu.read(++this.m_PC[0]);
-            let hVal = this.m_mmu.read(++this.m_PC[0]);
+            let lVal = this.m_mmu.read(++this.m_PC[0]!);
+            let hVal = this.m_mmu.read(++this.m_PC[0]!);
 
             if(reg2 == 0x02){
                 switch(reg1){
@@ -1198,7 +1198,7 @@ export class CPU {
     private JR(): number{
         let instruction = this.m_mmu.read(this.m_PC[0]!);
         let reg1 = (instruction & 0b00111000) >> 3;
-        let nVal = this.m_mmu.read(++this.m_PC[0])
+        let nVal = this.m_mmu.read(++this.m_PC[0]!)
 
         if(reg1 != 0x03){
             switch(reg1){
@@ -1219,7 +1219,7 @@ export class CPU {
             }
         }
 
-        this.m_PC[0] += (nVal << 24 >> 24);
+        this.m_PC[0]! += (nVal << 24 >> 24);
         return 12;
     }
 
@@ -1239,7 +1239,7 @@ export class CPU {
 
         // Get the value being used for the calculation with Register A
         if(op == 0x03){
-            nVal = this.m_mmu.read(++this.m_PC[0]);
+            nVal = this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
@@ -1263,7 +1263,7 @@ export class CPU {
         this.setH(((rVal & 0x0F) + (nVal & 0x0F) + carry) > 0x0F);
         // Calculate if Full-Carry flag needs to be set
         this.setC((rVal + nVal + carry) > 0xFF);
-        return 4;
+        return this.m_clock;
     }
 
     private SUB(): number{
@@ -1280,7 +1280,7 @@ export class CPU {
         }
 
         if(op == 0x03){
-            nVal = this.m_mmu.read(++this.m_PC[0]);
+            nVal = this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
@@ -1304,7 +1304,7 @@ export class CPU {
         this.setZ(this.m_registers[this.R.A] == 0);
         // Set N flag to 1
         this.setN(true);
-        return 4;
+        return this.m_clock;
     }
 
     private AND(): number{
@@ -1313,27 +1313,27 @@ export class CPU {
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
-            this.m_registers[this.R.A] &= this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.A]! &= this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
             if(reg2 == 0x06){
-                this.m_registers[this.R.A] &= this.m_mmu.read(this.getHL());
+                this.m_registers[this.R.A]! &= this.m_mmu.read(this.getHL());
                 this.m_clock = 8;
             }
             else{
-                this.m_registers[this.R.A] &= this.m_registers[reg2]!;
+                this.m_registers[this.R.A]! &= this.m_registers[reg2]!;
                 this.m_clock = 4;
             }
         }
-
+ 
         // Calculate if Zero flag needs to be set
         this.setZ(this.m_registers[this.R.A] == 0);
         // Set C and N flags to 0, H flag to 1
         this.setC(false);
         this.setH(true);
         this.setN(false);
-        return 4;
+        return this.m_clock;
     }
 
     private XOR(): number{
@@ -1342,16 +1342,16 @@ export class CPU {
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
-            this.m_registers[this.R.A] ^= this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.A]! ^= this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
             if(reg2 == 0x06){
-                this.m_registers[this.R.A] ^= this.m_mmu.read(this.getHL());
+                this.m_registers[this.R.A]! ^= this.m_mmu.read(this.getHL());
                 this.m_clock = 8;
             }
             else{
-                this.m_registers[this.R.A] ^= this.m_registers[reg2]!;
+                this.m_registers[this.R.A]! ^= this.m_registers[reg2]!;
                 this.m_clock = 4;
             }
         }
@@ -1362,7 +1362,7 @@ export class CPU {
         this.setC(false);
         this.setH(false);
         this.setN(false);
-        return 4;
+        return this.m_clock;
     }
 
     private OR(): number{
@@ -1371,16 +1371,16 @@ export class CPU {
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
-            this.m_registers[this.R.A] |= this.m_mmu.read(++this.m_PC[0]);
+            this.m_registers[this.R.A]! |= this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
             if(reg2 == 0x06){
-                this.m_registers[this.R.A] |= this.m_mmu.read(this.getHL());
+                this.m_registers[this.R.A]! |= this.m_mmu.read(this.getHL());
                 this.m_clock = 8;
             }
             else{
-                this.m_registers[this.R.A] |= this.m_registers[reg2]!;
+                this.m_registers[this.R.A]! |= this.m_registers[reg2]!;
                 this.m_clock = 4;
             }
         }
@@ -1402,7 +1402,7 @@ export class CPU {
         let reg2 = instruction & 0b00000111;
 
         if(op == 0x03){
-            nVal = this.m_mmu.read(++this.m_PC[0]);
+            nVal = this.m_mmu.read(++this.m_PC[0]!);
             this.m_clock = 8;
         }
         else{
@@ -1424,7 +1424,7 @@ export class CPU {
         this.setZ(nVal == rVal);
         // Set N flag to 1
         this.setN(true);
-        return 4;
+        return this.m_clock;
     }
 
     private RLC(): number{
@@ -1463,7 +1463,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private RRC(): number{
@@ -1502,7 +1502,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 4;
+        return this.m_clock;
     }
 
     private RL(): number{
@@ -1541,7 +1541,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private RR(): number{
@@ -1580,7 +1580,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private SLA(): number{
@@ -1613,7 +1613,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private SRA(): number{
@@ -1648,7 +1648,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private SWAP(): number{
@@ -1678,7 +1678,7 @@ export class CPU {
         this.setC(false);
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private SRL(): number{
@@ -1713,7 +1713,7 @@ export class CPU {
         // Set H and N flags to 0
         this.setH(false);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private BIT(): number{
@@ -1736,7 +1736,7 @@ export class CPU {
         // Set H flag to 1, N flag to 0
         this.setH(true);
         this.setN(false);
-        return 8;
+        return this.m_clock;
     }
 
     private RES(): number{
@@ -1750,10 +1750,10 @@ export class CPU {
             this.m_clock = 16;
         }
         else{
-            this.m_registers[reg2] &= (mask & 0xFF);
+            this.m_registers[reg2]! &= (mask & 0xFF);
             this.m_clock = 8;
         }
-        return 8;
+        return this.m_clock;
     }
 
     private SET(): number{
@@ -1767,10 +1767,10 @@ export class CPU {
             this.m_clock = 16;
         }
         else{
-            this.m_registers[reg2] |= (mask & 0xFF);
+            this.m_registers[reg2]! |= (mask & 0xFF);
             this.m_clock = 8;
         }
-        return 8;
+        return this.m_clock;
     }
 
     private CALL(): number{
@@ -1778,8 +1778,8 @@ export class CPU {
         let reg1 = (instruction & 0b00111000) >> 3;
         let reg2 = instruction & 0b00000111;
 
-        let lAddr = this.m_mmu.read(++this.m_PC[0]);
-        let hAddr = this.m_mmu.read(++this.m_PC[0]);
+        let lAddr = this.m_mmu.read(++this.m_PC[0]!);
+        let hAddr = this.m_mmu.read(++this.m_PC[0]!);
 
         if(reg2 == 0x04){
             switch(reg1){
@@ -1800,9 +1800,9 @@ export class CPU {
             }
         }
 
-        this.m_PC[0] += 1;
-        this.m_mmu.write(--this.m_SP[0], (0xFF00 & this.m_PC[0]!) >> 8);
-        this.m_mmu.write(--this.m_SP[0], 0x00FF & this.m_PC[0]!);
+        this.m_PC[0]! += 1;
+        this.m_mmu.write(--this.m_SP[0]!, (0xFF00 & this.m_PC[0]!) >> 8);
+        this.m_mmu.write(--this.m_SP[0]!, 0x00FF & this.m_PC[0]!);
         this.m_PC[0] = (hAddr << 8) + lAddr - 1;
         return 24;
     }
@@ -1839,19 +1839,19 @@ export class CPU {
             this.m_clock = 16;
         }
 
-        let lAddr = this.m_mmu.read(this.m_SP[0]++);
-        let hAddr = this.m_mmu.read(this.m_SP[0]++);
+        let lAddr = this.m_mmu.read(this.m_SP[0]!++);
+        let hAddr = this.m_mmu.read(this.m_SP[0]!++);
         this.m_PC[0] = (hAddr << 8) + lAddr - 1;
-        return 16;
+        return this.m_clock;
     }
 
     private RST(): number{
         let instruction = this.m_mmu.read(this.m_PC[0]!);
         let reg1 = (instruction & 0b00111000) >> 3;
 
-        this.m_PC[0] += 1;
-        this.m_mmu.write(--this.m_SP[0], (0xFF00 & this.m_PC[0]!) >> 8);
-        this.m_mmu.write(--this.m_SP[0], 0x00FF & this.m_PC[0]!);
+        this.m_PC[0]! += 1;
+        this.m_mmu.write(--this.m_SP[0]!, (0xFF00 & this.m_PC[0]!) >> 8);
+        this.m_mmu.write(--this.m_SP[0]!, 0x00FF & this.m_PC[0]!);
         this.m_PC[0] = (reg1 * 8) - 1;
 
         return 16;
@@ -1958,37 +1958,37 @@ export class CPU {
 
     private setC(val: boolean){
         if(val){
-            this.m_registers[this.R.F] |= 0b00010000;
+            this.m_registers[this.R.F]! |= 0b00010000;
         }
         else{
-            this.m_registers[this.R.F] &= 0b11101111;
+            this.m_registers[this.R.F]! &= 0b11101111;
         }
     }
 
     private setH(val: boolean){
         if(val){
-            this.m_registers[this.R.F] |= 0b00100000;
+            this.m_registers[this.R.F]! |= 0b00100000;
         }
         else{
-            this.m_registers[this.R.F] &= 0b11011111;
+            this.m_registers[this.R.F]! &= 0b11011111;
         }
     }
 
     private setN(val: boolean){
         if(val){
-            this.m_registers[this.R.F] |= 0b01000000;
+            this.m_registers[this.R.F]! |= 0b01000000;
         }
         else{
-            this.m_registers[this.R.F] &= 0b10111111;
+            this.m_registers[this.R.F]! &= 0b10111111;
         }
     }
 
     private setZ(val: boolean){
         if(val){
-            this.m_registers[this.R.F] |= 0b10000000;
+            this.m_registers[this.R.F]! |= 0b10000000;
         }
         else{
-            this.m_registers[this.R.F] &= 0b01111111;
+            this.m_registers[this.R.F]! &= 0b01111111;
         }
     }
 }

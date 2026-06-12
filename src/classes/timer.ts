@@ -9,8 +9,8 @@ export class Timer {
 
     private readonly DIV_BIT = [7, 1, 3, 5];
 
-    private fallingEdgeDelay = false;
-    private pendingOverflow = false;
+    private fallingEdgeDelay;
+    private pendingOverflow;
 
     constructor(
         private readonly m_mmu: MMU,
