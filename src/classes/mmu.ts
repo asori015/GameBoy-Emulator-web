@@ -74,14 +74,10 @@ export class MMU {
                     }
                 }
             case 1: // 0x0000 -> 0x3FFF
-                if(this.m_mbcValue == 1){
-                    if(this.m_mbc1BankMode){
-                        return this.m_rom[addr | ((this.m_romBank & ~0x1F) << 14)]!;
-                    }
+                if(this.m_mbcValue == 1 && this.m_mbc1BankMode){
+                    return this.m_rom[addr | ((this.m_romBank & ~0x1F) << 14)]!;
                 }
-                else{
-                    return this.m_rom[addr]!;
-                }
+                return this.m_rom[addr]!;
             case 2:
             case 3: // 0x4000 -> 0x7FFF
                 return this.m_rom[(addr & 0x3FFF) | (this.m_romBank << 14)]!;

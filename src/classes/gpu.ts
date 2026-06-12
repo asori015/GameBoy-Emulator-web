@@ -285,7 +285,7 @@ export class GPU {
             }
 
             for(let j = 0; j < 8; j++){
-                if(x >= 0 || x < 160){
+                if(x >= 0 && x < 160){
                     let color = 0;
                     let pallete = 0;
 
