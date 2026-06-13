@@ -26,7 +26,7 @@ export class GPU {
     private m_clock;
     private m_windowLineCounter;
     private readonly colorValues = [0xFFFF, 0x56B5, 0x29AA, 0x0000];
-    private m_bgDotVals;
+    private m_bgDotVals: Uint8Array;
 
     private readonly state = {
         Mode0: 0,
@@ -42,7 +42,7 @@ export class GPU {
         this.m_state = this.state.Mode2;
         this.m_clock = 0;
         this.m_windowLineCounter = 0;
-        this.m_bgDotVals = new Array(160).fill(0);
+        this.m_bgDotVals = new Uint8Array(160 * 144);
     }
 
     public step(){

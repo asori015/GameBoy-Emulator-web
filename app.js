@@ -1989,7 +1989,7 @@ class GPU {
         this.m_state = this.state.Mode2;
         this.m_clock = 0;
         this.m_windowLineCounter = 0;
-        this.m_bgDotVals = new Array(160).fill(0);
+        this.m_bgDotVals = new Uint8Array(160 * 144);
     }
     step() {
         // If LCD is on
