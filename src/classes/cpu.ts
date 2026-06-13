@@ -1069,9 +1069,6 @@ export class CPU {
         L: 5
     }
 
-    private debug = false;
-    private counter = 1;
-    
     constructor(
         private m_mmu: MMU
     ){
@@ -1089,19 +1086,23 @@ export class CPU {
     }
 
     public step(){
-        // If an interrupt is pending, turn off halt mode
-        if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
-            this.m_isHalted = false;
-        }
-    
-        if(!this.m_isHalted){
-            if(this.m_clock == 0){
-                if(!this.checkForInterupts()){
-                    this.execute(this.m_mmu.read(this.m_PC[0]!));
-                }
+        // A pending interrupt wakes the CPU from HALT. This only matters while
+        // halted, so we avoid reading IE/IF on every cycle of normal execution.
+        if(this.m_isHalted){
+            if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
+                this.m_isHalted = false;
             }
-            this.m_clock -= 1;
+            else{
+                return;
+            }
         }
+
+        if(this.m_clock == 0){
+            if(!this.checkForInterupts()){
+                this.execute(this.m_mmu.read(this.m_PC[0]!));
+            }
+        }
+        this.m_clock -= 1;
     }
 
     private checkForInterupts(): boolean {
@@ -1109,15 +1110,17 @@ export class CPU {
             return false;
         }
 
+        let ifReg = this.m_mmu.read(this.IF);
+        let ieReg = this.m_mmu.read(this.IE);
         let mask = 0x01;
         for(let i = 0; i < 5; i++){
-            if((this.m_mmu.read(this.IF) & this.m_mmu.read(this.IE) & mask) == 0x00){
+            if((ifReg & ieReg & mask) == 0x00){
                 mask = mask << 1;
                 continue;
             }
-            
+
             this.IME = false;
-            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
+            this.m_mmu.write(this.IF, ifReg & (0xFF - mask));
             this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! >> 8);
             this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! & 0x00FF);
             this.m_PC[0] = 0x0040 + (i * 8);
@@ -1129,31 +1132,6 @@ export class CPU {
     }
 
     private execute(instruction: number){
-        if(this.m_PC[0] == 0x01DB){
-            this.debug = true;
-        }
-
-        if(this.m_mmu.read(0xFF44) == 140){
-            if(this.counter == 0){
-                this.debug = false;
-            }
-            this.counter -= 1;
-        }
-
-        if(this.debug){
-            // console.log('PC: 0x' + this.m_PC[0]!.toString(16))
-            // console.log('inst: 0x' + instruction.toString(16))
-            // console.log("A:" + this.m_registers[this.R.A]!.toString(16) + " F:" + this.m_registers[this.R.F]!.toString(16))
-            // console.log("B:" + this.m_registers[this.R.B]!.toString(16) + " C:" + this.m_registers[this.R.C]!.toString(16))
-            // console.log("D:" + this.m_registers[this.R.D]!.toString(16) + " E:" + this.m_registers[this.R.E]!.toString(16))
-            // console.log("H:" + this.m_registers[this.R.H]!.toString(16) + " L:" + this.m_registers[this.R.L]!.toString(16))
-            // console.log('SP: 0x' + this.m_SP[0]!.toString(16));
-            // console.log('')
-            // console.log(this.m_mmu.read(0xFF44).toString(16))
-            // console.log(this.m_mmu.read(0xFF45).toString(16))
-            //this.counter -= 1;
-        }
-
         this.m_clock = this.m_instructionMethods1[instruction]!.call(this);
         this.m_PC[0]! += 1;
     }
