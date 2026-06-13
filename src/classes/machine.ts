@@ -13,13 +13,13 @@ export class Machine {
     private m_keyboard: Keyboard;
     private m_audio: Audio;
     private m_inVBLANK: boolean;
-    private m_frame;
+    private m_frame: Uint16Array;
     private frameCounter: number;
 
     constructor(
         readonly m_file: File,
     ){
-        this.m_frame = new Array(160 * 144).fill(0);
+        this.m_frame = new Uint16Array(160 * 144);
 
         this.m_mmu = new MMU(m_file);
         this.m_cpu = new CPU(this.m_mmu);

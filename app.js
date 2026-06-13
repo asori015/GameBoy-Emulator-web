@@ -24,7 +24,7 @@ __webpack_require__.r(__webpack_exports__);
 class Machine {
     constructor(m_file) {
         this.m_file = m_file;
-        this.m_frame = new Array(160 * 144).fill(0);
+        this.m_frame = new Uint16Array(160 * 144);
         this.m_mmu = new _mmu__WEBPACK_IMPORTED_MODULE_2__.MMU(m_file);
         this.m_cpu = new _cpu__WEBPACK_IMPORTED_MODULE_0__.CPU(this.m_mmu);
         this.m_gpu = new _gpu__WEBPACK_IMPORTED_MODULE_1__.GPU(this.m_mmu, this.m_frame);

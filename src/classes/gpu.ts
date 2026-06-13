@@ -37,7 +37,7 @@ export class GPU {
 
     constructor(
         private readonly m_mmu: MMU,
-        private readonly m_frame: number[]
+        private readonly m_frame: Uint16Array
     ){
         this.m_state = this.state.Mode2;
         this.m_clock = 0;
