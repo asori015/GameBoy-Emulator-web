@@ -62,7 +62,7 @@ export class Audio {
             this.frequencyCounter1 = 0x0800 - 0;
 
             if(this.frequencyCounter2 || this.frequencyCounter3 || this.frequencyCounter4 || this.m_mmu.read(0x0000)){
-                console.log('junk');
+                // console.log('junk');
             }
         }
 

@@ -2083,21 +2083,28 @@ class GPU {
         }
     }
     renderBackgroundLine() {
-        let backgroundTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
-        let backgroundTileMap = (this.LCDC() & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
-        let y = (this.SCY() + this.m_mmu.read(this.LY)) & 0xFF;
+        // LCD registers are stable for the whole scanline, so read them once.
+        let lcdc = this.LCDC();
+        let scx = this.SCX();
+        let scy = this.SCY();
+        let bgp = this.BGP();
+        let ly = this.m_mmu.read(this.LY);
+        let rowBase = ly * 160;
+        let backgroundTileVRAM = (lcdc & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        let backgroundTileMap = (lcdc & 0x08) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let y = (scy + ly) & 0xFF;
         for (let i = 0; i <= 20; i++) {
-            let x = (this.SCX() + (i << 3)) & 0xFF;
+            let x = (scx + (i << 3)) & 0xFF;
             let tileIndex = ((y >> 3) * 32) + (x >> 3);
             let tileVal = this.m_mmu.read(backgroundTileMap + tileIndex);
-            if ((this.LCDC() & 0x10) == 0x00) {
+            if ((lcdc & 0x10) == 0x00) {
                 tileVal = (tileVal << 24) >> 24;
             }
             let VRAM_Pointer = backgroundTileVRAM + (tileVal * 16);
             let lBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2));
             let hBits = this.m_mmu.read(VRAM_Pointer + ((y & 0x07) * 2) + 1);
             for (let j = 7; j >= 0; j--) {
-                let screenX = j - (this.SCX() & 0x07) + (i << 3);
+                let screenX = j - (scx & 0x07) + (i << 3);
                 if (screenX < 0) {
                     break;
                 }
@@ -2107,9 +2114,9 @@ class GPU {
                 if (screenX >= 160) {
                     continue;
                 }
-                let color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)];
-                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
-                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
+                let color = this.colorValues[(bgp & (0x03 << (palid * 2))) >> (palid * 2)];
+                this.m_bgDotVals[rowBase + screenX] = palid;
+                this.m_frame[rowBase + screenX] = color;
             }
         }
     }
@@ -2119,12 +2126,16 @@ class GPU {
         if (wx < 0 || wx > 166 || wy < 0 || wy > 143) {
             return;
         }
-        let windowTileVRAM = (this.LCDC() & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
-        let windowTileMap = (this.LCDC() & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
+        let lcdc = this.LCDC();
+        let windowTileVRAM = (lcdc & 0x10) > 0x00 ? this.VRAM_1 : this.VRAM_2;
+        let windowTileMap = (lcdc & 0x40) > 0x00 ? this.TILE_MAP2 : this.TILE_MAP1;
         let y = this.m_windowLineCounter - wy;
         if (y < 0) {
             return;
         }
+        // LCD registers are stable for the whole scanline, so read them once.
+        let bgp = this.BGP();
+        let rowBase = this.m_mmu.read(this.LY) * 160;
         for (let i = 0; i <= 20; i++) {
             let tileIndex = ((y >> 3) * 32) + i;
             let tileMapAddr = windowTileMap + tileIndex;
@@ -2132,7 +2143,7 @@ class GPU {
                 continue;
             }
             let tileVal = this.m_mmu.read(tileMapAddr);
-            if ((this.LCDC() & 0x10) == 0x00) {
+            if ((lcdc & 0x10) == 0x00) {
                 tileVal = (tileVal << 24) >> 24;
             }
             let VRAM_Pointer = windowTileVRAM + (tileVal * 16);
@@ -2146,20 +2157,26 @@ class GPU {
                 if (screenX < 0 || screenX >= 160) {
                     continue;
                 }
-                let color = this.colorValues[(this.BGP() & (0x03 << (palid * 2))) >> (palid * 2)];
-                this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + screenX] = palid;
-                this.m_frame[(this.m_mmu.read(this.LY) * 160) + screenX] = color;
+                let color = this.colorValues[(bgp & (0x03 << (palid * 2))) >> (palid * 2)];
+                this.m_bgDotVals[rowBase + screenX] = palid;
+                this.m_frame[rowBase + screenX] = color;
             }
         }
     }
     renderObjectLine() {
+        // LCD registers are stable for the whole scanline, so read them once.
+        let lcdc = this.LCDC();
+        let ly = this.m_mmu.read(this.LY);
+        let rowBase = ly * 160;
         let yCount = 0;
         for (let i = 0; i < 40; i++) {
             let x = this.m_mmu.read(this.OAM + (i * 4) + 1) - 8;
-            let y = this.m_mmu.read(this.OAM + (i * 4)) - this.m_mmu.read(this.LY);
+            let y = this.m_mmu.read(this.OAM + (i * 4)) - ly;
             let attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
             let VRAM_Pointer = 0;
-            if ((this.LCDC() & 0x04) > 0x00) {
+            // Object palette is fixed per sprite; resolve it once here.
+            let palData = this.m_mmu.read((attributes & 0x10) ? this.OBP1 : this.OBP0);
+            if ((lcdc & 0x04) > 0x00) {
                 if (y < 1 || y > 16) {
                     continue;
                 }
@@ -2204,24 +2221,17 @@ class GPU {
             for (let j = 0; j < 8; j++) {
                 if (x >= 0 && x < 160) {
                     let color = 0;
-                    let pallete = 0;
-                    if (attributes & 0x10) {
-                        pallete = this.OBP1;
-                    }
-                    else {
-                        pallete = this.OBP0;
-                    }
                     if (hBits & mask) {
                         if (lBits & mask) {
-                            color = this.colorValues[(this.m_mmu.read(pallete) & 0xC0) >> 6];
+                            color = this.colorValues[(palData & 0xC0) >> 6];
                         }
                         else {
-                            color = this.colorValues[(this.m_mmu.read(pallete) & 0x30) >> 4];
+                            color = this.colorValues[(palData & 0x30) >> 4];
                         }
                     }
                     else {
                         if (lBits & mask) {
-                            color = this.colorValues[(this.m_mmu.read(pallete) & 0x0C) >> 2];
+                            color = this.colorValues[(palData & 0x0C) >> 2];
                         }
                         else {
                             if (attributes & 0x20) {
@@ -2235,12 +2245,12 @@ class GPU {
                         }
                     }
                     if ((attributes & 0x80) > 0x00) {
-                        if (this.m_bgDotVals[(this.m_mmu.read(this.LY) * 160) + x] == 0) {
-                            this.m_frame[(this.m_mmu.read(this.LY) * 160) + x] = color;
+                        if (this.m_bgDotVals[rowBase + x] == 0) {
+                            this.m_frame[rowBase + x] = color;
                         }
                     }
                     else {
-                        this.m_frame[(this.m_mmu.read(this.LY) * 160) + x] = color;
+                        this.m_frame[rowBase + x] = color;
                     }
                 }
                 if ((attributes & 0x20) > 0x00) {
@@ -2903,7 +2913,7 @@ class Audio {
         if (--this.frequencyCounter1 <= 0) {
             this.frequencyCounter1 = 0x0800 - 0;
             if (this.frequencyCounter2 || this.frequencyCounter3 || this.frequencyCounter4 || this.m_mmu.read(0x0000)) {
-                console.log('junk');
+                // console.log('junk');
             }
         }
         /*
