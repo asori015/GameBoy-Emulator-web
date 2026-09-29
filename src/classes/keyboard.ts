@@ -10,13 +10,16 @@ export class Keyboard{
     constructor(
         private m_mmu: MMU,
     ){
-        addEventListener("keydown", (event) => {
-            this.getKeyDown(event);
-        });
+        // Only register key listeners in the browser
+        if(typeof addEventListener == "function"){
+            addEventListener("keydown", (event) => {
+                this.getKeyDown(event);
+            });
 
-        addEventListener("keyup", (event) => {
-            this.getKeyUp(event);
-        });
+            addEventListener("keyup", (event) => {
+                this.getKeyUp(event);
+            });
+        }
 
         this.m_jState1 = 0xFF;
         this.m_jState2 = 0xFF;

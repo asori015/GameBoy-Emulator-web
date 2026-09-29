@@ -63,6 +63,9 @@ class Machine {
         this.m_inVBLANK = true;
         return this.m_frame;
     }
+    getSerialOutput() {
+        return this.m_mmu.getSerialOutput();
+    }
 }
 
 
@@ -1129,8 +1132,6 @@ class CPU {
             H: 4,
             L: 5
         };
-        this.debug = false;
-        this.counter = 1;
         this.m_BIOSMapped = true;
         this.m_PC = new Uint16Array([0]);
         this.m_SP = new Uint16Array([0]);
@@ -1142,31 +1143,37 @@ class CPU {
         this.m_isHalted = false;
     }
     step() {
-        // If an interrupt is pending, turn off halt mode
-        if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)) {
-            this.m_isHalted = false;
-        }
-        if (!this.m_isHalted) {
-            if (this.m_clock == 0) {
-                if (!this.checkForInterupts()) {
-                    this.execute(this.m_mmu.read(this.m_PC[0]));
-                }
+        // A pending interrupt wakes the CPU from HALT. This only matters while
+        // halted, so we avoid reading IE/IF on every cycle of normal execution.
+        if (this.m_isHalted) {
+            if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)) {
+                this.m_isHalted = false;
             }
-            this.m_clock -= 1;
+            else {
+                return;
+            }
         }
+        if (this.m_clock == 0) {
+            if (!this.checkForInterupts()) {
+                this.execute(this.m_mmu.read(this.m_PC[0]));
+            }
+        }
+        this.m_clock -= 1;
     }
     checkForInterupts() {
         if (!this.IME) {
             return false;
         }
+        let ifReg = this.m_mmu.read(this.IF);
+        let ieReg = this.m_mmu.read(this.IE);
         let mask = 0x01;
         for (let i = 0; i < 5; i++) {
-            if ((this.m_mmu.read(this.IF) & this.m_mmu.read(this.IE) & mask) == 0x00) {
+            if ((ifReg & ieReg & mask) == 0x00) {
                 mask = mask << 1;
                 continue;
             }
             this.IME = false;
-            this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) & (0xFF - mask));
+            this.m_mmu.write(this.IF, ifReg & (0xFF - mask));
             this.m_mmu.write(--this.m_SP[0], this.m_PC[0] >> 8);
             this.m_mmu.write(--this.m_SP[0], this.m_PC[0] & 0x00FF);
             this.m_PC[0] = 0x0040 + (i * 8);
@@ -1176,28 +1183,6 @@ class CPU {
         return false;
     }
     execute(instruction) {
-        if (this.m_PC[0] == 0x01DB) {
-            this.debug = true;
-        }
-        if (this.m_mmu.read(0xFF44) == 140) {
-            if (this.counter == 0) {
-                this.debug = false;
-            }
-            this.counter -= 1;
-        }
-        if (this.debug) {
-            // console.log('PC: 0x' + this.m_PC[0]!.toString(16))
-            // console.log('inst: 0x' + instruction.toString(16))
-            // console.log("A:" + this.m_registers[this.R.A]!.toString(16) + " F:" + this.m_registers[this.R.F]!.toString(16))
-            // console.log("B:" + this.m_registers[this.R.B]!.toString(16) + " C:" + this.m_registers[this.R.C]!.toString(16))
-            // console.log("D:" + this.m_registers[this.R.D]!.toString(16) + " E:" + this.m_registers[this.R.E]!.toString(16))
-            // console.log("H:" + this.m_registers[this.R.H]!.toString(16) + " L:" + this.m_registers[this.R.L]!.toString(16))
-            // console.log('SP: 0x' + this.m_SP[0]!.toString(16));
-            // console.log('')
-            // console.log(this.m_mmu.read(0xFF44).toString(16))
-            // console.log(this.m_mmu.read(0xFF45).toString(16))
-            //this.counter -= 1;
-        }
         this.m_clock = this.m_instructionMethods1[instruction].call(this);
         this.m_PC[0] += 1;
     }
@@ -2289,8 +2274,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _bootroms__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 
 class MMU {
-    constructor(file) {
-        this.file = file;
+    constructor(rom) {
         this.m_BIOS = new Uint8Array(0x0100).fill(0);
         this.m_addrBus = new Uint8Array(0x10000).fill(0);
         this.m_rom = new Uint8Array(0x800000).fill(0);
@@ -2308,10 +2292,26 @@ class MMU {
         this.m_ramBank = 0;
         this.m_mbc3RtcReg = 0;
         this.m_mbc3RtcLatch = 0;
-        let reader = new FileReader();
-        reader.onload = () => this.loadROM(reader.result);
-        reader.readAsArrayBuffer(this.file);
+        this.m_serialOutput = "";
+        // Raw bytes load synchronously, checked first since File isn't defined in Node
+        if (rom instanceof Uint8Array) {
+            this.m_saveKey = null;
+            this.loadROM(rom);
+        }
+        else {
+            this.m_saveKey = rom.name;
+            let reader = new FileReader();
+            reader.onload = () => this.loadROM(new Uint8Array(reader.result));
+            reader.readAsArrayBuffer(rom);
+        }
         this.loadBIOS();
+    }
+    /**
+     * Get characters sent over the serial port
+     * @return serial output as a string
+     */
+    getSerialOutput() {
+        return this.m_serialOutput;
     }
     /**
      * Read from RAM at requested address
@@ -2519,6 +2519,10 @@ class MMU {
                     }
                 }
                 else {
+                    // Record byte from SB when a serial transfer starts
+                    if (addr == 0xFF02 && (val & 0x81) == 0x81) {
+                        this.recordSerial(this.m_addrBus[0xFF01]);
+                    }
                     this.m_addrBus[addr] = val;
                 }
         }
@@ -2528,8 +2532,7 @@ class MMU {
             this.m_BIOS[i] = _bootroms__WEBPACK_IMPORTED_MODULE_0__.BootROMS.BIOS_DMG[i];
         }
     }
-    loadROM(buffer) {
-        const view = new Uint8Array(buffer);
+    loadROM(view) {
         this.m_cartridgeType = view[0x0147];
         this.m_romSize = view[0x0148];
         this.m_ramSize = view[0x0149];
@@ -2561,8 +2564,8 @@ class MMU {
         for (let i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];
         }
-        const externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.file.name)));
-        if (externalRam != null) {
+        if (this.m_saveKey != null && typeof localStorage != "undefined") {
+            const externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.m_saveKey)));
             for (let i = 0; i < this.m_ram.length && i < externalRam.length; i++) {
                 this.m_ram[i] = externalRam[i];
             }
@@ -2570,7 +2573,16 @@ class MMU {
         this.m_isRomLoaded = true;
     }
     saveRAM() {
-        localStorage.setItem(this.file.name, JSON.stringify(Array.from(this.m_ram)));
+        if (this.m_saveKey != null && typeof localStorage != "undefined") {
+            localStorage.setItem(this.m_saveKey, JSON.stringify(Array.from(this.m_ram)));
+        }
+    }
+    recordSerial(byte) {
+        this.m_serialOutput += String.fromCharCode(byte);
+        // Cap buffer size
+        if (this.m_serialOutput.length > 0x10000) {
+            this.m_serialOutput = this.m_serialOutput.slice(-0x8000);
+        }
     }
 }
 
@@ -2802,12 +2814,15 @@ class Keyboard {
         this.m_mmu = m_mmu;
         this.P1 = 0xFF00;
         this.IF = 0xFF0F;
-        addEventListener("keydown", (event) => {
-            this.getKeyDown(event);
-        });
-        addEventListener("keyup", (event) => {
-            this.getKeyUp(event);
-        });
+        // Only register key listeners in the browser
+        if (typeof addEventListener == "function") {
+            addEventListener("keydown", (event) => {
+                this.getKeyDown(event);
+            });
+            addEventListener("keyup", (event) => {
+                this.getKeyUp(event);
+            });
+        }
         this.m_jState1 = 0xFF;
         this.m_jState2 = 0xFF;
     }

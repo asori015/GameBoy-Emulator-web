@@ -18,9 +18,11 @@ export class MMU {
     private m_isGBC: boolean;
     private m_ramEnabled: boolean;
     private m_mbc1BankMode: boolean;
+    private readonly m_saveKey: string | null;
+    private m_serialOutput: string;
 
     constructor(
-        private readonly file: File,
+        rom: File | Uint8Array,
     ){
         this.m_BIOS = new Uint8Array(0x0100).fill(0);
         this.m_addrBus = new Uint8Array(0x10000).fill(0);
@@ -39,12 +41,29 @@ export class MMU {
         this.m_ramBank = 0;
         this.m_mbc3RtcReg = 0;
         this.m_mbc3RtcLatch = 0;
-        
-        let reader = new FileReader();
-        reader.onload = () => this.loadROM(<ArrayBuffer> reader.result);
-        reader.readAsArrayBuffer(this.file);
+        this.m_serialOutput = "";
+
+        // Raw bytes load synchronously, checked first since File isn't defined in Node
+        if(rom instanceof Uint8Array){
+            this.m_saveKey = null;
+            this.loadROM(rom);
+        }
+        else{
+            this.m_saveKey = rom.name;
+            let reader = new FileReader();
+            reader.onload = () => this.loadROM(new Uint8Array(<ArrayBuffer> reader.result));
+            reader.readAsArrayBuffer(rom);
+        }
 
         this.loadBIOS();
+    }
+
+    /**
+     * Get characters sent over the serial port
+     * @return serial output as a string
+     */
+    public getSerialOutput(): string{
+        return this.m_serialOutput;
     }
 
     /**
@@ -255,6 +274,10 @@ export class MMU {
                     }
                 }
                 else{
+                    // Record byte from SB when a serial transfer starts
+                    if(addr == 0xFF02 && (val & 0x81) == 0x81){
+                        this.recordSerial(this.m_addrBus[0xFF01]!);
+                    }
                     this.m_addrBus[addr] = val;
                 }
         }
@@ -266,8 +289,7 @@ export class MMU {
         }
     }
 
-    private loadROM(buffer: ArrayBuffer){
-        const view = new Uint8Array(buffer);
+    private loadROM(view: Uint8Array){
 
         this.m_cartridgeType = <number> view[0x0147];
         this.m_romSize = <number> view[0x0148];
@@ -305,8 +327,8 @@ export class MMU {
             this.m_rom[i] = <number> view[i];
         }
 
-        const externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.file.name)!));
-        if(externalRam != null){
+        if(this.m_saveKey != null && typeof localStorage != "undefined"){
+            const externalRam = new Uint8Array(JSON.parse(localStorage.getItem(this.m_saveKey)!));
             for(let i = 0; i < this.m_ram.length && i < externalRam.length; i++){
                 this.m_ram[i] = externalRam[i]!;
             }
@@ -316,6 +338,16 @@ export class MMU {
     }
 
     public saveRAM(){
-        localStorage.setItem(this.file.name, JSON.stringify(Array.from(this.m_ram)));
+        if(this.m_saveKey != null && typeof localStorage != "undefined"){
+            localStorage.setItem(this.m_saveKey, JSON.stringify(Array.from(this.m_ram)));
+        }
+    }
+
+    private recordSerial(byte: number){
+        this.m_serialOutput += String.fromCharCode(byte);
+        // Cap buffer size
+        if(this.m_serialOutput.length > 0x10000){
+            this.m_serialOutput = this.m_serialOutput.slice(-0x8000);
+        }
     }
 }

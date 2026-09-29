@@ -17,7 +17,7 @@ export class Machine {
     private frameCounter: number;
 
     constructor(
-        readonly m_file: File,
+        readonly m_file: File | Uint8Array,
     ){
         this.m_frame = new Uint16Array(160 * 144);
 
@@ -66,5 +66,9 @@ export class Machine {
         this.m_inVBLANK = true;
 
         return this.m_frame;
+    }
+
+    getSerialOutput(): string{
+        return this.m_mmu.getSerialOutput();
     }
 }
