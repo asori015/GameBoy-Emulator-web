@@ -6,7 +6,7 @@ blarggMemoryTests("Blargg mem_timing-2", [
     "02-write_timing.gb",
     "03-modify_timing.gb",
 ], [
-    // These hang without reporting, like mem_timing
+    // Memory reads and writes happen at the wrong cycle within an instruction
     "01-read_timing.gb",
     "02-write_timing.gb",
     "03-modify_timing.gb",

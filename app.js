@@ -359,7 +359,7 @@ class CPU {
             },
             () => {
                 this.m_mmu.write(this.getHL(), this.m_mmu.read(++this.m_PC[0]));
-                return 8;
+                return 12;
             },
             () => {
                 this.setN(false);
@@ -1435,7 +1435,7 @@ class CPU {
         this.setC(false);
         this.setH(false);
         this.setN(false);
-        return 4;
+        return this.m_clock;
     }
     CP() {
         let rVal = this.m_registers[this.R.A];

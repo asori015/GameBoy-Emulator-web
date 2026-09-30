@@ -12,7 +12,7 @@ const roms = [
 
 // Tests that fail on the current emulator, run with it.fails until fixed
 const knownFailures = new Set<string>([
-    "instr_timing/instr_timing.gb",
+    // Memory reads and writes happen at the wrong cycle within an instruction
     "mem_timing/01-read_timing.gb",
     "mem_timing/02-write_timing.gb",
     "mem_timing/03-modify_timing.gb",
