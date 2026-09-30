@@ -71,4 +71,8 @@ export class Machine {
     getSerialOutput(): string{
         return this.m_mmu.getSerialOutput();
     }
+
+    getRegisters(): Uint8Array{
+        return this.m_cpu.getRegisters();
+    }
 }

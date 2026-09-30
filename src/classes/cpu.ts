@@ -1085,6 +1085,14 @@ export class CPU {
         this.m_isHalted = false;
     }
 
+    /**
+     * Get a copy of the 8-bit registers
+     * @return registers in order B, C, D, E, H, L, F, A
+     */
+    public getRegisters(): Uint8Array{
+        return new Uint8Array(this.m_registers);
+    }
+
     public step(){
         // A pending interrupt wakes the CPU from HALT. This only matters while
         // halted, so we avoid reading IE/IF on every cycle of normal execution.
