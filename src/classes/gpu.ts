@@ -27,6 +27,8 @@ export class GPU {
     private m_windowLineCounter;
     private readonly colorValues = [0xFFFF, 0x56B5, 0x29AA, 0x0000];
     private m_bgDotVals: Uint8Array;
+    private m_objColors: Uint16Array;
+    private m_objFlags: Uint8Array;
 
     private readonly state = {
         Mode0: 0,
@@ -43,6 +45,8 @@ export class GPU {
         this.m_clock = 0;
         this.m_windowLineCounter = 0;
         this.m_bgDotVals = new Uint8Array(160 * 144);
+        this.m_objColors = new Uint16Array(160);
+        this.m_objFlags = new Uint8Array(160);
     }
 
     /**
@@ -253,42 +257,60 @@ export class GPU {
         let ly = this.m_mmu.read(this.LY);
         let rowBase = ly * 160;
 
-        let yCount = 0;
-        for(let i = 0; i < 40; i++){
-            let x = this.m_mmu.read(this.OAM + (i * 4) + 1) - 8;
+        // Select the first 10 objects on this line in OAM order
+        let selected = [];
+        for(let i = 0; i < 40 && selected.length < 10; i++){
             let y = this.m_mmu.read(this.OAM + (i * 4)) - ly;
-            let attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
-            let VRAM_Pointer = 0;
-
-            // Object palette is fixed per sprite; resolve it once here.
-            let palData = this.m_mmu.read((attributes & 0x10) ? this.OBP1 : this.OBP0);
-
             if((lcdc & 0x04) > 0x00){
                 if(y < 1 || y > 16){
                     continue;
-                }
-                if(y < 9){
-                    if(attributes & 0x40){
-                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) & 0xFE) * 16);
-                    }
-                    else{
-                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) | 0x01) * 16);
-                    }
-                }
-                else{
-                    if(attributes & 0x40){
-                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) | 0x01) * 16);
-                    }
-                    else{
-                        VRAM_Pointer = this.VRAM_1 + ((this.m_mmu.read(this.OAM + (i * 4) + 2) & 0xFE) * 16);
-                    }
                 }
             }
             else{
                 if(y < 9 || y > 16){
                     continue;
                 }
-                VRAM_Pointer = this.VRAM_1 + (this.m_mmu.read(this.OAM + (i * 4) + 2) * 16);
+            }
+            selected.push(i);
+        }
+
+        // Lower X has priority, then lower OAM index
+        selected.sort((a, b) => {
+            let diff = this.m_mmu.read(this.OAM + (a * 4) + 1) - this.m_mmu.read(this.OAM + (b * 4) + 1);
+            return diff != 0 ? diff : a - b;
+        });
+
+        // Each pixel goes to the highest priority object with an opaque pixel there
+        // Flags: 0 = no object, 1 = in front of background, 2 = behind background
+        this.m_objFlags.fill(0);
+        for(let i of selected){
+            let x = this.m_mmu.read(this.OAM + (i * 4) + 1) - 8;
+            let y = this.m_mmu.read(this.OAM + (i * 4)) - ly;
+            let tile = this.m_mmu.read(this.OAM + (i * 4) + 2);
+            let attributes = this.m_mmu.read(this.OAM + (i * 4) + 3);
+            let palData = this.m_mmu.read((attributes & 0x10) ? this.OBP1 : this.OBP0);
+            let VRAM_Pointer = 0;
+
+            if((lcdc & 0x04) > 0x00){
+                if(y < 9){
+                    if(attributes & 0x40){
+                        VRAM_Pointer = this.VRAM_1 + ((tile & 0xFE) * 16);
+                    }
+                    else{
+                        VRAM_Pointer = this.VRAM_1 + ((tile | 0x01) * 16);
+                    }
+                }
+                else{
+                    if(attributes & 0x40){
+                        VRAM_Pointer = this.VRAM_1 + ((tile | 0x01) * 16);
+                    }
+                    else{
+                        VRAM_Pointer = this.VRAM_1 + ((tile & 0xFE) * 16);
+                    }
+                }
+            }
+            else{
+                VRAM_Pointer = this.VRAM_1 + (tile * 16);
             }
 
             if(attributes & 0x40){
@@ -300,49 +322,14 @@ export class GPU {
 
             let lBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2));
             let hBits = this.m_mmu.read(VRAM_Pointer + ((y % 8) * 2) + 1);
-            let mask = 0;
-
-            if((attributes & 0x20) > 0x00){
-                mask = 0x01;
-            }
-            else{
-                mask = 0x80;
-            }
+            let mask = (attributes & 0x20) > 0x00 ? 0x01 : 0x80;
 
             for(let j = 0; j < 8; j++){
-                if(x >= 0 && x < 160){
-                    let color = 0;
-
-                    if(hBits & mask){
-                        if(lBits & mask){
-                            color = this.colorValues[(palData & 0xC0) >> 6]!;
-                        }
-                        else{
-                            color = this.colorValues[(palData & 0x30) >> 4]!;
-                        }
-                    }
-                    else{
-                        if(lBits & mask){
-                            color = this.colorValues[(palData & 0x0C) >> 2]!;
-                        }
-                        else{
-                            if(attributes & 0x20){
-                                mask = mask << 1;
-                            }
-                            else{
-                                mask = mask >> 1;
-                            }
-                            x += 1;
-                            continue;
-                        }
-                    }
-                    if((attributes & 0x80) > 0x00){
-                        if(this.m_bgDotVals[rowBase + x] == 0){
-                            this.m_frame[rowBase + x] = color;
-                        }
-                    }
-                    else{
-                        this.m_frame[rowBase + x] = color;
+                if(x >= 0 && x < 160 && this.m_objFlags[x] == 0){
+                    let colorId = ((hBits & mask) ? 2 : 0) | ((lBits & mask) ? 1 : 0);
+                    if(colorId != 0){
+                        this.m_objColors[x] = this.colorValues[(palData >> (colorId * 2)) & 0x03]!;
+                        this.m_objFlags[x] = (attributes & 0x80) > 0x00 ? 2 : 1;
                     }
                 }
 
@@ -352,13 +339,15 @@ export class GPU {
                 else{
                     mask = mask >> 1;
                 }
-
                 x += 1;
             }
+        }
 
-            yCount += 1;
-            if(yCount == 10){
-                break;
+        // Objects behind the background only show over background color 0
+        for(let x = 0; x < 160; x++){
+            let flag = this.m_objFlags[x];
+            if(flag == 1 || (flag == 2 && this.m_bgDotVals[rowBase + x] == 0)){
+                this.m_frame[rowBase + x] = this.m_objColors[x]!;
             }
         }
     }

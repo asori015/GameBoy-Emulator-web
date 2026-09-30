@@ -6,8 +6,7 @@ import {framesPerSecond, loadReference, loadROM, runUntilScreenMatches, writeScr
 const maxFrames = 10 * framesPerSecond;
 
 // Compares against img/reference-dmg.png from https://github.com/mattcurrie/dmg-acid2
-// Known failure: right mole visible, objects at the same X should be prioritized by OAM order
-it.fails("dmg-acid2", async () => {
+it("dmg-acid2", async () => {
     let machine = new Machine(loadROM("dmg-acid2/dmg-acid2.gb"));
     let result = await runUntilScreenMatches(machine, loadReference("dmg-acid2/reference-dmg.png"), maxFrames);
 
