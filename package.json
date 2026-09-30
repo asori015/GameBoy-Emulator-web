@@ -2,6 +2,8 @@
   "devDependencies": {
     "ts-loader": "^9.4.3",
     "typescript": "^5.1.3",
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7",
     "webpack": "^5.86.0",
     "webpack-cli": "^5.1.4"
   },
@@ -107,7 +109,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run --silent=passed-only",
+    "fetch-test-roms": "node scripts/fetch-test-roms.mjs"
   },
   "author": "",
   "license": "ISC"
