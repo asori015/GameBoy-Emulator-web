@@ -2380,7 +2380,10 @@ class MMU {
                             return this.m_ram[(erb << 13) | (addr & 0x1FFF)];
                         }
                         return 0xFF;
-                    case 2:
+                    case 2: // Built-in 512 x 4-bit RAM, upper bits read as 1
+                        if (this.m_ramEnabled) {
+                            return 0xF0 | (this.m_ram[addr & 0x01FF] & 0x0F);
+                        }
                         return 0xFF;
                     case 3:
                         switch (this.m_mbc3RtcReg) {
@@ -2395,7 +2398,7 @@ class MMU {
                         }
                         return 0xFF;
                     case 5:
-                        if (this.m_ramEnabled) {
+                        if (this.m_ramEnabled && this.m_ramSize > 0) {
                             return this.m_ram[(this.m_ramBank << 13) | (addr & 0x1FFF)];
                         }
                 }
@@ -2412,9 +2415,11 @@ class MMU {
             case 0: // 0x0000->0x1FFF
                 switch (this.m_mbcValue) {
                     case 1:
-                    case 3:
-                    case 5: // Enable RAM if low nibble is 0x0A, else disable
+                    case 3: // Enable RAM if low nibble is 0x0A, else disable
                         this.m_ramEnabled = (val & 0x0F) == 0x0A;
+                        break;
+                    case 5: // Enable RAM only if the value is exactly 0x0A
+                        this.m_ramEnabled = val == 0x0A;
                         break;
                     case 2: // Enable/disable RAM if high address byte is even
                         if (((addr >> 8) & 0x01) == 0) {
@@ -2429,6 +2434,7 @@ class MMU {
                         }
                         break;
                 }
+                this.m_romBank %= this.m_romSize;
                 break;
             case 1: // 0x2000 -> 0x3FFF
                 switch (this.m_mbcValue) {
@@ -2474,8 +2480,10 @@ class MMU {
                 break;
             case 2: // 0x4000 -> 0x5FFF
                 switch (this.m_mbcValue) {
-                    case 1:
-                        break; //TODO
+                    case 1: // Set upper 2 bits of ROM bank, also used as the RAM bank in mode 1
+                        this.m_romBank = (this.m_romBank & 0x1F) | ((val & 0x03) << 5);
+                        this.m_ramBank = val & 0x03;
+                        break;
                     case 3: // Write RAM bank if <= 3 or enable RTC registers
                         if (val <= 0x03) {
                             this.m_ramBank = val;
@@ -2512,12 +2520,16 @@ class MMU {
                 break;
             case 5: // 0xA000 -> 0xBFFF
                 switch (this.m_mbcValue) {
-                    case 1:
-                    case 5: // Just write RAM if it's there
+                    case 1: // Just write RAM if it's there
                         if (this.m_ramEnabled) {
                             let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
                             let ramAddr = (addr & 0x1FFF) + (erb << 13);
                             this.m_ram[ramAddr] = val;
+                        }
+                        break;
+                    case 5: // Write RAM in the selected bank if it's there
+                        if (this.m_ramEnabled && this.m_ramSize > 0) {
+                            this.m_ram[(this.m_ramBank << 13) | (addr & 0x1FFF)] = val;
                         }
                         break;
                     case 2: // Write low 4 bits of "RAM"
@@ -2585,8 +2597,14 @@ class MMU {
         if (this.m_cartridgeType >= 1 && this.m_cartridgeType <= 3) { // MBC1, MBC1+RAM, MBC1+RAM+BATTERY
             this.m_mbcValue = 1;
         }
-        if (this.m_cartridgeType == 19) {
+        if (this.m_cartridgeType == 0x05 || this.m_cartridgeType == 0x06) { // MBC2, MBC2+BATTERY
+            this.m_mbcValue = 2;
+        }
+        if (this.m_cartridgeType >= 0x0F && this.m_cartridgeType <= 0x13) { // MBC3 with or without timer, RAM, battery
             this.m_mbcValue = 3;
+        }
+        if (this.m_cartridgeType >= 0x19 && this.m_cartridgeType <= 0x1E) { // MBC5 with or without RAM, battery, rumble
+            this.m_mbcValue = 5;
         }
         for (let i = 0; i < view.length; i++) {
             this.m_rom[i] = view[i];

@@ -10,11 +10,4 @@ mooneyeTests("Mooneye MBC2", [
     "rom_2Mb.gb",
     "rom_512kb.gb",
 ], [
-    // MBC2 isn't mapped to a cartridge type yet
-    "bits_ramg.gb",
-    "bits_romb.gb",
-    "ram.gb",
-    "rom_1Mb.gb",
-    "rom_2Mb.gb",
-    "rom_512kb.gb",
 ], "emulator-only/mbc2", 20);

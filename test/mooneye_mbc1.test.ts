@@ -16,10 +16,6 @@ mooneyeTests("Mooneye MBC1", [
     "rom_512kb.gb",
     "rom_8Mb.gb",
 ], [
-    // These need the second bank register at 0x4000-0x5FFF, which isn't implemented for MBC1
-    "bits_bank2.gb",
+    // MBC1M multicart cartridges wire the bank bits differently, which isn't emulated
     "multicart_rom_8Mb.gb",
-    "ram_256kb.gb",
-    "rom_16Mb.gb",
-    "rom_8Mb.gb",
 ], "emulator-only/mbc1", 20);
