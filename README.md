@@ -47,7 +47,7 @@ The test suite runs test ROMs through the emulator in Node, with no browser:
 
 - [Blargg's test ROMs](https://github.com/retrio/gb-test-roms) pass when they report "Passed" or
   result code 0. `cpu_instrs`, `instr_timing` and `mem_timing` report over the emulated serial port,
-  `oam_bug` and `mem_timing-2` report in cartridge RAM at `$A000`, and `halt_bug` only prints to the
+  `oam_bug`, `mem_timing-2` and `dmg_sound` report in cartridge RAM at `$A000`, and `halt_bug` only prints to the
   screen, which is read back as text from the background tile map.
 - [Mooneye's acceptance tests](https://github.com/Gekkio/mooneye-test-suite) report their result
   in the CPU registers.
@@ -61,6 +61,7 @@ The test ROMs should be placed in `test/roms/` as follows, then run `npm test`:
 - `test/roms/blargg/mem_timing/` — the files from `mem_timing/individual/`
 - `test/roms/blargg/mem_timing-2/` — the files from `mem_timing-2/rom_singles/`
 - `test/roms/blargg/oam_bug/` — the files from `oam_bug/rom_singles/`
+- `test/roms/blargg/dmg_sound/` — the files from `dmg_sound/rom_singles/`
 - `test/roms/blargg/halt_bug/` — `halt_bug.gb`
 - `test/roms/mooneye/acceptance/` and `test/roms/mooneye/emulator-only/` — those folders from a Mooneye release
 - `test/roms/dmg-acid2/` — `dmg-acid2.gb` from the dmg-acid2 release and `img/reference-dmg.png`
