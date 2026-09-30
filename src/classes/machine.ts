@@ -38,21 +38,13 @@ export class Machine {
         }
 
         while(this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK){
-            this.m_cpu.step();
-            this.m_gpu.step();
-            this.m_timer.step();
-            this.m_keyboard.step();
-            this.m_audio.step();
+            this.tick();
         }
 
         this.m_inVBLANK = false;
 
         while(this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK){
-            this.m_cpu.step();
-            this.m_gpu.step();
-            this.m_timer.step();
-            this.m_keyboard.step();
-            this.m_audio.step();
+            this.tick();
         }
 
         if(this.frameCounter >= 59){
@@ -74,5 +66,14 @@ export class Machine {
 
     getRegisters(): Uint8Array{
         return this.m_cpu.getRegisters();
+    }
+
+    // Run one instruction, then advance the other components by the cycles it used
+    private tick(): void{
+        let cycles = this.m_cpu.step();
+        this.m_gpu.step(cycles);
+        this.m_timer.step(cycles);
+        this.m_keyboard.step();
+        this.m_audio.step(cycles);
     }
 }

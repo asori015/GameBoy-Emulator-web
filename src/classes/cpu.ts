@@ -1093,7 +1093,11 @@ export class CPU {
         return new Uint8Array(this.m_registers);
     }
 
-    public step(){
+    /**
+     * Execute one instruction, service an interrupt, or idle while halted
+     * @return T-cycles used
+     */
+    public step(): number{
         // A pending interrupt wakes the CPU from HALT. This only matters while
         // halted, so we avoid reading IE/IF on every cycle of normal execution.
         if(this.m_isHalted){
@@ -1101,16 +1105,15 @@ export class CPU {
                 this.m_isHalted = false;
             }
             else{
-                return;
+                return 4; // Idle one machine cycle
             }
         }
 
-        if(this.m_clock == 0){
-            if(!this.checkForInterupts()){
-                this.execute(this.m_mmu.read(this.m_PC[0]!));
-            }
+        if(this.checkForInterupts()){
+            return 20; // Interrupt dispatch
         }
-        this.m_clock -= 1;
+
+        return this.execute(this.m_mmu.read(this.m_PC[0]!));
     }
 
     private checkForInterupts(): boolean {
@@ -1132,16 +1135,16 @@ export class CPU {
             this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! >> 8);
             this.m_mmu.write(--this.m_SP[0]!, this.m_PC[0]! & 0x00FF);
             this.m_PC[0] = 0x0040 + (i * 8);
-            this.m_clock = 4;
             return true;
         }
 
         return false;
     }
 
-    private execute(instruction: number){
-        this.m_clock = this.m_instructionMethods1[instruction]!.call(this);
+    private execute(instruction: number): number{
+        let cycles: number = this.m_instructionMethods1[instruction]!.call(this);
         this.m_PC[0]! += 1;
+        return cycles;
     }
 
     private JP(): number{

@@ -39,19 +39,11 @@ class Machine {
             return this.m_frame;
         }
         while (this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK) {
-            this.m_cpu.step();
-            this.m_gpu.step();
-            this.m_timer.step();
-            this.m_keyboard.step();
-            this.m_audio.step();
+            this.tick();
         }
         this.m_inVBLANK = false;
         while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK) {
-            this.m_cpu.step();
-            this.m_gpu.step();
-            this.m_timer.step();
-            this.m_keyboard.step();
-            this.m_audio.step();
+            this.tick();
         }
         if (this.frameCounter >= 59) {
             this.frameCounter = 0;
@@ -68,6 +60,14 @@ class Machine {
     }
     getRegisters() {
         return this.m_cpu.getRegisters();
+    }
+    // Run one instruction, then advance the other components by the cycles it used
+    tick() {
+        let cycles = this.m_cpu.step();
+        this.m_gpu.step(cycles);
+        this.m_timer.step(cycles);
+        this.m_keyboard.step();
+        this.m_audio.step(cycles);
     }
 }
 
@@ -1152,6 +1152,10 @@ class CPU {
     getRegisters() {
         return new Uint8Array(this.m_registers);
     }
+    /**
+     * Execute one instruction, service an interrupt, or idle while halted
+     * @return T-cycles used
+     */
     step() {
         // A pending interrupt wakes the CPU from HALT. This only matters while
         // halted, so we avoid reading IE/IF on every cycle of normal execution.
@@ -1160,15 +1164,13 @@ class CPU {
                 this.m_isHalted = false;
             }
             else {
-                return;
+                return 4; // Idle one machine cycle
             }
         }
-        if (this.m_clock == 0) {
-            if (!this.checkForInterupts()) {
-                this.execute(this.m_mmu.read(this.m_PC[0]));
-            }
+        if (this.checkForInterupts()) {
+            return 20; // Interrupt dispatch
         }
-        this.m_clock -= 1;
+        return this.execute(this.m_mmu.read(this.m_PC[0]));
     }
     checkForInterupts() {
         if (!this.IME) {
@@ -1187,14 +1189,14 @@ class CPU {
             this.m_mmu.write(--this.m_SP[0], this.m_PC[0] >> 8);
             this.m_mmu.write(--this.m_SP[0], this.m_PC[0] & 0x00FF);
             this.m_PC[0] = 0x0040 + (i * 8);
-            this.m_clock = 4;
             return true;
         }
         return false;
     }
     execute(instruction) {
-        this.m_clock = this.m_instructionMethods1[instruction].call(this);
+        let cycles = this.m_instructionMethods1[instruction].call(this);
         this.m_PC[0] += 1;
+        return cycles;
     }
     JP() {
         let instruction = this.m_mmu.read(this.m_PC[0]);
@@ -1986,12 +1988,17 @@ class GPU {
         this.m_windowLineCounter = 0;
         this.m_bgDotVals = new Uint8Array(160 * 144);
     }
-    step() {
+    /**
+     * Advance the PPU by the cycles the last instruction used
+     * @param cycles T-cycles to advance
+     */
+    step(cycles) {
         // If LCD is on
         if ((this.LCDC() & 0x80) > 0) {
+            this.m_clock += cycles;
             switch (this.m_state) {
                 case this.state.Mode0: // H-Blank
-                    if (this.m_clock >= 455) {
+                    if (this.m_clock >= 456) {
                         if (this.m_mmu.read(this.LY) >= 143) {
                             this.m_state = this.state.Mode1; // Transition into Mode 1
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
@@ -2012,11 +2019,11 @@ class GPU {
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
                             }
                         }
-                        this.m_clock = -1;
+                        this.m_clock -= 456; // Carry extra cycles into the next line
                     }
                     break;
                 case this.state.Mode1: // V-Blank
-                    if (this.m_clock >= 455) {
+                    if (this.m_clock >= 456) {
                         this.incrementLineCounters();
                         if (this.m_mmu.read(this.LY) == 0x9A) {
                             this.m_state = this.state.Mode2; // Transition into Mode 2
@@ -2028,7 +2035,7 @@ class GPU {
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
                             }
                         }
-                        this.m_clock = -1;
+                        this.m_clock -= 456; // Carry extra cycles into the next line
                     }
                     break;
                 case this.state.Mode2: // OAM Scan
@@ -2062,7 +2069,6 @@ class GPU {
             else {
                 this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFB);
             }
-            this.m_clock += 1;
         }
     }
     renderLine() {
@@ -2777,7 +2783,17 @@ class Timer {
         this.fallingEdgeDelay = false;
         this.pendingOverflow = false;
     }
-    step() {
+    /**
+     * Advance the timer by the cycles the last instruction used
+     * @param cycles T-cycles to advance
+     */
+    step(cycles) {
+        // One cycle at a time, since TIMA can tick faster than an instruction
+        for (let i = 0; i < cycles; i++) {
+            this.tickOnce();
+        }
+    }
+    tickOnce() {
         if (this.pendingOverflow) {
             this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
@@ -2919,8 +2935,10 @@ class Audio {
         this.frequencyCounter3 = 0;
         this.frequencyCounter4 = 0;
     }
-    step() {
-        this.incrementTimer();
+    step(cycles) {
+        for (let i = 0; i < cycles; i++) {
+            this.incrementTimer();
+        }
         // if(this.pendingOverflow){
         //     this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
         //     this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);
@@ -3100,8 +3118,16 @@ ctx.canvas.height = height;
 const myImageData = ctx.createImageData(width, height);
 // 32-bit buffer for pixel data decoded into RGBA
 const buf32 = new Uint32Array(myImageData.data.buffer);
-function wrapper() {
-    let frame = machine.getFrame();
+// DMG frame length in ms (~59.7 Hz)
+const frameMs = 1000 / 59.7;
+// Most emulated frames to run per animation frame when catching up
+const maxCatchup = 5;
+let rafHandle = 0;
+let lastTime = 0;
+let accumulator = 0;
+let latestFrame = null;
+// Decode the frame buffer into RGBA and draw it to the canvas
+function paint(frame) {
     for (let i = 0; i < width * height; i++) {
         let pixel = frame[i];
         let r = colorMap[(pixel & 0x001F)];
@@ -3112,11 +3138,38 @@ function wrapper() {
     }
     ctx.putImageData(myImageData, 0, 0);
 }
+// Run emulated frames for the real time that has passed, then paint once
+function loop(now) {
+    accumulator += now - lastTime;
+    lastTime = now;
+    let steps = 0;
+    while (accumulator >= frameMs && steps < maxCatchup) {
+        latestFrame = machine.getFrame();
+        accumulator -= frameMs;
+        steps += 1;
+    }
+    // Drop the backlog instead of running fast after a stall
+    if (steps == maxCatchup) {
+        accumulator = 0;
+    }
+    if (latestFrame != null && steps > 0) {
+        paint(latestFrame);
+    }
+    rafHandle = requestAnimationFrame(loop);
+}
+// Start the loop, or reset its timing when a new ROM is loaded
+function start() {
+    accumulator = 0;
+    lastTime = performance.now();
+    if (rafHandle == 0) {
+        rafHandle = requestAnimationFrame(loop);
+    }
+}
 const fileSelector = document.getElementById('file-selector');
 fileSelector.addEventListener('change', (e) => {
     let files = e.target.files;
     machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(files[0]);
-    setInterval(wrapper, 1000 / 60);
+    start();
 });
 function loadRemoteFile(url) {
     let xmlhttp = new XMLHttpRequest();
@@ -3126,7 +3179,7 @@ function loadRemoteFile(url) {
         let blob = xmlhttp.response;
         let file = new File([blob], url.substring(36), { type: "text/plain" });
         machine = new _classes_machine__WEBPACK_IMPORTED_MODULE_0__.Machine(file);
-        setInterval(wrapper, 1000 / 60);
+        start();
     };
     xmlhttp.send();
 }

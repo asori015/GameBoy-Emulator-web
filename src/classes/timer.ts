@@ -19,7 +19,18 @@ export class Timer {
         this.pendingOverflow = false;
     }
 
-    public step(): void{
+    /**
+     * Advance the timer by the cycles the last instruction used
+     * @param cycles T-cycles to advance
+     */
+    public step(cycles: number): void{
+        // One cycle at a time, since TIMA can tick faster than an instruction
+        for(let i = 0; i < cycles; i++){
+            this.tickOnce();
+        }
+    }
+
+    private tickOnce(): void{
         if(this.pendingOverflow){
             this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);

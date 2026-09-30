@@ -38,9 +38,11 @@ export class Audio {
         this.frequencyCounter4 = 0;
     }
 
-    public step(): void{
-        this.incrementTimer();
-        
+    public step(cycles: number): void{
+        for(let i = 0; i < cycles; i++){
+            this.incrementTimer();
+        }
+
         // if(this.pendingOverflow){
         //     this.m_mmu.write(this.TIMA, this.m_mmu.read(this.TMA));
         //     this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x04);

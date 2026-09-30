@@ -45,12 +45,18 @@ export class GPU {
         this.m_bgDotVals = new Uint8Array(160 * 144);
     }
 
-    public step(){
+    /**
+     * Advance the PPU by the cycles the last instruction used
+     * @param cycles T-cycles to advance
+     */
+    public step(cycles: number){
         // If LCD is on
         if((this.LCDC() & 0x80) > 0){
+            this.m_clock += cycles;
+
             switch(this.m_state){
                 case this.state.Mode0: // H-Blank
-                    if(this.m_clock >= 455){
+                    if(this.m_clock >= 456){
                         if(this.m_mmu.read(this.LY) >= 143){
                             this.m_state = this.state.Mode1; // Transition into Mode 1
                             this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
@@ -71,11 +77,11 @@ export class GPU {
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02); 
                             }
                         }
-                        this.m_clock = -1;
+                        this.m_clock -= 456; // Carry extra cycles into the next line
                     }
                     break;
                 case this.state.Mode1: // V-Blank
-                    if(this.m_clock >= 455){
+                    if(this.m_clock >= 456){
                         this.incrementLineCounters();
                         if(this.m_mmu.read(this.LY) == 0x9A){
                             this.m_state = this.state.Mode2; // Transition into Mode 2
@@ -87,7 +93,7 @@ export class GPU {
                                 this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);  
                             }
                         }
-                        this.m_clock = -1;
+                        this.m_clock -= 456; // Carry extra cycles into the next line
                     }
                     break;
                 case this.state.Mode2: // OAM Scan
@@ -122,8 +128,6 @@ export class GPU {
             else{
                 this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFB);
             }
-
-            this.m_clock += 1;
         }
     }
 

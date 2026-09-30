@@ -15,7 +15,6 @@ mooneyeTests("Mooneye interrupts", [
     "reti_intr_timing.gb",
     "interrupts/ie_push.gb",
 ], [
-    "di_timing-GS.gb",
     "ei_sequence.gb",
     "ei_timing.gb",
     "halt_ime0_nointr_timing.gb",
