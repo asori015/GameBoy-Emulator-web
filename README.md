@@ -49,6 +49,8 @@ The test suite runs test ROMs through the emulator in Node, with no browser:
   `mem_timing`) report their result over the emulated serial port, and pass when they print "Passed".
 - [Mooneye's acceptance tests](https://github.com/Gekkio/mooneye-test-suite) report their result
   in the CPU registers.
+- [dmg-acid2](https://github.com/mattcurrie/dmg-acid2) draws a test image, which is compared against
+  its reference screenshot. When it doesn't match, the actual screen is written to `test/output/`.
 
 The test ROMs should be placed in `test/roms/` as follows, then run `npm test`:
 
@@ -56,6 +58,8 @@ The test ROMs should be placed in `test/roms/` as follows, then run `npm test`:
 - `test/roms/blargg/instr_timing/` — `instr_timing.gb`
 - `test/roms/blargg/mem_timing/` — the files from `mem_timing/individual/`
 - `test/roms/mooneye/acceptance/` — the `acceptance/` folder from a Mooneye release
+- `test/roms/dmg-acid2/` — `dmg-acid2.gb` from the dmg-acid2 release and `img/reference-dmg.png`
+  from the dmg-acid2 repo
 
 Tests that fail on the current emulator are listed as known failures and are expected to fail.
 When a fix makes one pass, Vitest reports it so it can be removed from the list.
