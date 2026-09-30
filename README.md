@@ -43,14 +43,21 @@ npx serve .
 
 ## Running tests
 
-The test suite runs [Blargg's `cpu_instrs` test ROMs](https://github.com/retrio/gb-test-roms)
-through the emulator in Node, with no browser. Each ROM reports its result over the
-emulated serial port, and a test passes when the ROM prints "Passed".
+The test suite runs test ROMs through the emulator in Node, with no browser:
 
-The test ROMs should be placed in `test/roms/blargg/cpu_instrs/` then run:
+- [Blargg's test ROMs](https://github.com/retrio/gb-test-roms) (`cpu_instrs`, `instr_timing`,
+  `mem_timing`) report their result over the emulated serial port, and pass when they print "Passed".
+- [Mooneye's acceptance tests](https://github.com/Gekkio/mooneye-test-suite) report their result
+  in the CPU registers.
 
-```bash
-npm test
-```
+The test ROMs should be placed in `test/roms/` as follows, then run `npm test`:
+
+- `test/roms/blargg/cpu_instrs/` — the files from `cpu_instrs/individual/`
+- `test/roms/blargg/instr_timing/` — `instr_timing.gb`
+- `test/roms/blargg/mem_timing/` — the files from `mem_timing/individual/`
+- `test/roms/mooneye/acceptance/` — the `acceptance/` folder from a Mooneye release
+
+Tests that fail on the current emulator are listed as known failures and are expected to fail.
+When a fix makes one pass, Vitest reports it so it can be removed from the list.
 
 Requires Node.js 18 or newer.

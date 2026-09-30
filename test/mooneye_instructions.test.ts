@@ -1,0 +1,35 @@
+import {mooneyeTests} from "./harness";
+
+// Mooneye acceptance tests for instruction timing
+mooneyeTests("Mooneye instruction timing", [
+    "add_sp_e_timing.gb",
+    "call_cc_timing.gb",
+    "call_cc_timing2.gb",
+    "call_timing.gb",
+    "call_timing2.gb",
+    "jp_cc_timing.gb",
+    "jp_timing.gb",
+    "ld_hl_sp_e_timing.gb",
+    "pop_timing.gb",
+    "push_timing.gb",
+    "ret_cc_timing.gb",
+    "ret_timing.gb",
+    "reti_timing.gb",
+    "rst_timing.gb",
+    "instr/daa.gb",
+], [
+    "add_sp_e_timing.gb",
+    "call_cc_timing.gb",
+    "call_cc_timing2.gb",
+    "call_timing.gb",
+    "call_timing2.gb",
+    "jp_cc_timing.gb",
+    "jp_timing.gb",
+    "ld_hl_sp_e_timing.gb",
+    "pop_timing.gb",
+    "push_timing.gb",
+    "ret_cc_timing.gb",
+    "ret_timing.gb",
+    "reti_timing.gb",
+    "rst_timing.gb",
+]);
