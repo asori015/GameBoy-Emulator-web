@@ -17,9 +17,18 @@ const myImageData = ctx.createImageData(width, height);
 // 32-bit buffer for pixel data decoded into RGBA
 const buf32 = new Uint32Array(myImageData.data.buffer);
 
-function wrapper(){
-    let frame = machine.getFrame();
+// DMG frame length in ms (~59.7 Hz)
+const frameMs = 1000 / 59.7;
+// Most emulated frames to run per animation frame when catching up
+const maxCatchup = 5;
 
+let rafHandle = 0;
+let lastTime = 0;
+let accumulator = 0;
+let latestFrame: Uint16Array | null = null;
+
+// Decode the frame buffer into RGBA and draw it to the canvas
+function paint(frame: Uint16Array){
     for(let i = 0; i < width * height; i++){
         let pixel = frame[i]!;
         let r = colorMap[(pixel & 0x001F)]!;
@@ -32,11 +41,43 @@ function wrapper(){
     ctx.putImageData(myImageData, 0, 0);
 }
 
+// Run emulated frames for the real time that has passed, then paint once
+function loop(now: number){
+    accumulator += now - lastTime;
+    lastTime = now;
+
+    let steps = 0;
+    while(accumulator >= frameMs && steps < maxCatchup){
+        latestFrame = machine.getFrame();
+        accumulator -= frameMs;
+        steps += 1;
+    }
+    // Drop the backlog instead of running fast after a stall
+    if(steps == maxCatchup){
+        accumulator = 0;
+    }
+
+    if(latestFrame != null && steps > 0){
+        paint(latestFrame);
+    }
+
+    rafHandle = requestAnimationFrame(loop);
+}
+
+// Start the loop, or reset its timing when a new ROM is loaded
+function start(){
+    accumulator = 0;
+    lastTime = performance.now();
+    if(rafHandle == 0){
+        rafHandle = requestAnimationFrame(loop);
+    }
+}
+
 const fileSelector = <HTMLInputElement> document.getElementById('file-selector');
 fileSelector.addEventListener('change', (e) => {
     let files = (e.target as HTMLInputElement).files!;
     machine = new Machine(files[0]!);
-    setInterval(wrapper, 1000/60);
+    start();
 });
 
 function loadRemoteFile(url: string){
@@ -49,7 +90,7 @@ function loadRemoteFile(url: string){
         let file = new File([blob], url.substring(36), {type: "text/plain"});
         
         machine = new Machine(file);
-        setInterval(wrapper, 1000/60);
+        start();
     };
 
     xmlhttp.send();
