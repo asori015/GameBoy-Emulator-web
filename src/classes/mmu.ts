@@ -104,7 +104,11 @@ export class MMU {
                 return this.m_addrBus[addr]!;
             case 5: // 0xA000 -> 0xBFFF
                 switch(this.m_mbcValue){
-                    case 1:
+                    case 1: // Read RAM if it's enabled and there
+                        if(this.m_ramEnabled && this.m_ramSize > 0){
+                            let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
+                            return this.m_ram[(erb << 13) | (addr & 0x1FFF)]!;
+                        }
                         return 0xFF;
                     case 2:
                         return 0xFF;
@@ -243,7 +247,7 @@ export class MMU {
                     case 5: // Just write RAM if it's there
                         if(this.m_ramEnabled){
                             let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
-                            let ramAddr = addr + (erb << 13);
+                            let ramAddr = (addr & 0x1FFF) + (erb << 13);
                             this.m_ram[ramAddr] = val;
                         }
                         break;
@@ -316,7 +320,7 @@ export class MMU {
 
         console.log(this.m_cartridgeType);
 
-        if(this.m_cartridgeType == 3){
+        if(this.m_cartridgeType >= 1 && this.m_cartridgeType <= 3){ // MBC1, MBC1+RAM, MBC1+RAM+BATTERY
             this.m_mbcValue = 1;
         }
         if(this.m_cartridgeType == 19){

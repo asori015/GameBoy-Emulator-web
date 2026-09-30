@@ -15,6 +15,7 @@ export class Machine {
     private m_inVBLANK: boolean;
     private m_frame: Uint16Array;
     private frameCounter: number;
+    private readonly cyclesPerFrame = 70224;
 
     constructor(
         readonly m_file: File | Uint8Array,
@@ -37,14 +38,15 @@ export class Machine {
             return this.m_frame;
         }
 
-        while(this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK){
-            this.tick();
+        let cycles = 0;
+        while(this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK && !this.frameTimedOut(cycles)){
+            cycles += this.tick();
         }
 
         this.m_inVBLANK = false;
 
-        while(this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK){
-            this.tick();
+        while(this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK && !this.frameTimedOut(cycles)){
+            cycles += this.tick();
         }
 
         if(this.frameCounter >= 59){
@@ -69,11 +71,17 @@ export class Machine {
     }
 
     // Run one instruction, then advance the other components by the cycles it used
-    private tick(): void{
+    private tick(): number{
         let cycles = this.m_cpu.step();
         this.m_gpu.step(cycles);
         this.m_timer.step(cycles);
         this.m_keyboard.step();
         this.m_audio.step(cycles);
+        return cycles;
+    }
+
+    // LY stops advancing while the LCD is off, so end the frame after a frame's worth of cycles
+    private frameTimedOut(cycles: number): boolean{
+        return cycles >= this.cyclesPerFrame && (this.m_mmu.read(0xFF40) & 0x80) == 0;
     }
 }

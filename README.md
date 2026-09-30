@@ -57,7 +57,7 @@ The test ROMs should be placed in `test/roms/` as follows, then run `npm test`:
 - `test/roms/blargg/cpu_instrs/` — the files from `cpu_instrs/individual/`
 - `test/roms/blargg/instr_timing/` — `instr_timing.gb`
 - `test/roms/blargg/mem_timing/` — the files from `mem_timing/individual/`
-- `test/roms/mooneye/acceptance/` — the `acceptance/` folder from a Mooneye release
+- `test/roms/mooneye/acceptance/` and `test/roms/mooneye/emulator-only/` — those folders from a Mooneye release
 - `test/roms/dmg-acid2/` — `dmg-acid2.gb` from the dmg-acid2 release and `img/reference-dmg.png`
   from the dmg-acid2 repo
 

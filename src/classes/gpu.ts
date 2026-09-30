@@ -136,13 +136,15 @@ export class GPU {
     }
 
     private renderLine(): void{
-        // clearLine();
         if((this.LCDC() & 0x01) > 0){
             this.renderBackgroundLine();
 
             if((this.LCDC() & 0x20) > 0){
                 this.renderWindowLine();
             }
+        }
+        else{
+            this.clearLine();
         }
         if((this.LCDC() & 0x02) > 0){
             this.renderObjectLine();
@@ -361,7 +363,10 @@ export class GPU {
         }
     }
 
-    // private clearLine(): void{
-
-    // }
+    // Background and window disabled, draw line white
+    private clearLine(): void{
+        let rowBase = this.m_mmu.read(this.LY) * 160;
+        this.m_frame.fill(this.colorValues[0]!, rowBase, rowBase + 160);
+        this.m_bgDotVals.fill(0, rowBase, rowBase + 160);
+    }
 }

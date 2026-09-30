@@ -102,26 +102,27 @@ export function formatRegisters(registers: Uint8Array): string{
 }
 
 /**
- * Define one test per Mooneye acceptance ROM, running known failures with it.fails
+ * Define one test per Mooneye ROM, running known failures with it.fails
  * @param name Test group name
- * @param roms ROM paths relative to test/roms/mooneye/acceptance
+ * @param roms ROM paths relative to test/roms/mooneye/<folder>
  * @param knownFailures ROMs that fail on the current emulator
+ * @param folder Mooneye suite folder, e.g. acceptance or emulator-only/mbc1
+ * @param seconds Emulated seconds to wait for a result
  */
-export function mooneyeTests(name: string, roms: string[], knownFailures: string[]){
+export function mooneyeTests(name: string, roms: string[], knownFailures: string[], folder: string = "acceptance", seconds: number = 10){
     for(let rom of knownFailures){
         if(!roms.includes(rom)){
             throw new Error("Known failure isn't in the ROM list: " + rom);
         }
     }
 
-    // Frame limit per ROM (10 emulated seconds)
-    let maxFrames = 10 * framesPerSecond;
+    let maxFrames = seconds * framesPerSecond;
 
     describe(name, () => {
         for(let rom of roms){
             let test = knownFailures.includes(rom) ? it.fails : it;
             test(rom, async () => {
-                let machine = new Machine(loadROM("mooneye/acceptance/" + rom));
+                let machine = new Machine(loadROM("mooneye/" + folder + "/" + rom));
                 let result = await runUntilRegisterResult(machine, maxFrames);
 
                 expect(result.finished, "No result after " + result.frames + " frames, registers: " + formatRegisters(result.registers)).toBe(true);

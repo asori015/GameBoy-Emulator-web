@@ -24,6 +24,7 @@ __webpack_require__.r(__webpack_exports__);
 class Machine {
     constructor(m_file) {
         this.m_file = m_file;
+        this.cyclesPerFrame = 70224;
         this.m_frame = new Uint16Array(160 * 144);
         this.m_mmu = new _mmu__WEBPACK_IMPORTED_MODULE_2__.MMU(m_file);
         this.m_cpu = new _cpu__WEBPACK_IMPORTED_MODULE_0__.CPU(this.m_mmu);
@@ -38,12 +39,13 @@ class Machine {
         while (!this.m_mmu.m_isRomLoaded) {
             return this.m_frame;
         }
-        while (this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK) {
-            this.tick();
+        let cycles = 0;
+        while (this.m_mmu.read(0xFF44) >= 0x90 && this.m_inVBLANK && !this.frameTimedOut(cycles)) {
+            cycles += this.tick();
         }
         this.m_inVBLANK = false;
-        while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK) {
-            this.tick();
+        while (this.m_mmu.read(0xFF44) < 0x90 && !this.m_inVBLANK && !this.frameTimedOut(cycles)) {
+            cycles += this.tick();
         }
         if (this.frameCounter >= 59) {
             this.frameCounter = 0;
@@ -68,6 +70,11 @@ class Machine {
         this.m_timer.step(cycles);
         this.m_keyboard.step();
         this.m_audio.step(cycles);
+        return cycles;
+    }
+    // LY stops advancing while the LCD is off, so end the frame after a frame's worth of cycles
+    frameTimedOut(cycles) {
+        return cycles >= this.cyclesPerFrame && (this.m_mmu.read(0xFF40) & 0x80) == 0;
     }
 }
 
@@ -2074,12 +2081,17 @@ class GPU {
         }
     }
     renderLine() {
-        // clearLine();
         if ((this.LCDC() & 0x01) > 0) {
             this.renderBackgroundLine();
             if ((this.LCDC() & 0x20) > 0) {
                 this.renderWindowLine();
             }
+        }
+        else {
+            // Background and window disabled, the line is blank white
+            let rowBase = this.m_mmu.read(this.LY) * 160;
+            this.m_frame.fill(this.colorValues[0], rowBase, rowBase + 160);
+            this.m_bgDotVals.fill(0, rowBase, rowBase + 160);
         }
         if ((this.LCDC() & 0x02) > 0) {
             this.renderObjectLine();
@@ -2356,7 +2368,11 @@ class MMU {
                 return this.m_addrBus[addr];
             case 5: // 0xA000 -> 0xBFFF
                 switch (this.m_mbcValue) {
-                    case 1:
+                    case 1: // Read RAM if it's enabled and there
+                        if (this.m_ramEnabled && this.m_ramSize > 0) {
+                            let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
+                            return this.m_ram[(erb << 13) | (addr & 0x1FFF)];
+                        }
                         return 0xFF;
                     case 2:
                         return 0xFF;
@@ -2494,7 +2510,7 @@ class MMU {
                     case 5: // Just write RAM if it's there
                         if (this.m_ramEnabled) {
                             let erb = this.m_mbc1BankMode ? this.m_ramBank : 0;
-                            let ramAddr = addr + (erb << 13);
+                            let ramAddr = (addr & 0x1FFF) + (erb << 13);
                             this.m_ram[ramAddr] = val;
                         }
                         break;
@@ -2560,7 +2576,7 @@ class MMU {
                 break;
         }
         console.log(this.m_cartridgeType);
-        if (this.m_cartridgeType == 3) {
+        if (this.m_cartridgeType >= 1 && this.m_cartridgeType <= 3) { // MBC1, MBC1+RAM, MBC1+RAM+BATTERY
             this.m_mbcValue = 1;
         }
         if (this.m_cartridgeType == 19) {
