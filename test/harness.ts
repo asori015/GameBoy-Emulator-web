@@ -16,7 +16,7 @@ const shadeColors = [0xFFFF, 0x56B5, 0x29AA, 0x0000];
 // Emulated frames per second (DMG runs at ~59.7)
 export const framesPerSecond = 60;
 
-export interface SerialResult {
+export interface TextResult {
     output: string;
     frames: number;
     finished: boolean;
@@ -41,10 +41,45 @@ export function loadROM(relativePath: string): Uint8Array{
  * @param maxFrames Frame limit before giving up
  * @return serial output, frames run, and whether a result was reported
  */
-export async function runUntilSerialResult(machine: Machine, maxFrames: number): Promise<SerialResult>{
+export function runUntilSerialResult(machine: Machine, maxFrames: number): Promise<TextResult>{
+    return runUntilTextResult(machine, maxFrames, () => machine.getSerialOutput());
+}
+
+/**
+ * Run until text on screen reports "Passed" or "Failed", or maxFrames elapse
+ * @param machine Machine with a test ROM loaded
+ * @param maxFrames Frame limit before giving up
+ * @return screen text, frames run, and whether a result was reported
+ */
+export function runUntilScreenResult(machine: Machine, maxFrames: number): Promise<TextResult>{
+    return runUntilTextResult(machine, maxFrames, () => readScreenText(machine));
+}
+
+/**
+ * Read the background tile map as text, for tests whose font uses tile numbers equal to ASCII codes
+ * @param machine Machine with a test ROM loaded
+ * @return the 32 tile map rows as lines, starting from the top of the screen
+ */
+export function readScreenText(machine: Machine): string{
+    let map = (machine.readMemory(0xFF40) & 0x08) > 0x00 ? 0x9C00 : 0x9800;
+    let firstRow = machine.readMemory(0xFF42) >> 3;
+    let lines = [];
+    for(let i = 0; i < 32; i++){
+        let row = (firstRow + i) % 32;
+        let line = "";
+        for(let col = 0; col < 32; col++){
+            let tile = machine.readMemory(map + (row * 32) + col);
+            line += (tile >= 0x20 && tile < 0x7F) ? String.fromCharCode(tile) : " ";
+        }
+        lines.push(line.replace(/\s+$/, ""));
+    }
+    return lines.join("\n").replace(/\s+$/, "");
+}
+
+async function runUntilTextResult(machine: Machine, maxFrames: number, readText: () => string): Promise<TextResult>{
     for(let frame = 1; frame <= maxFrames; frame++){
         machine.getFrame();
-        let output = machine.getSerialOutput();
+        let output = readText();
         if(output.includes("Passed") || output.includes("Failed")){
             return {output, frames: frame, finished: true};
         }
@@ -53,7 +88,85 @@ export async function runUntilSerialResult(machine: Machine, maxFrames: number):
             await yieldToEventLoop();
         }
     }
-    return {output: machine.getSerialOutput(), frames: maxFrames, finished: false};
+    return {output: readText(), frames: maxFrames, finished: false};
+}
+
+export interface MemoryResult {
+    passed: boolean;
+    finished: boolean;
+    frames: number;
+    code: number;
+    output: string;
+}
+
+/**
+ * Run until a Blargg test reports its result in cartridge RAM at $A000, or maxFrames elapse
+ * @param machine Machine with a test ROM loaded
+ * @param maxFrames Frame limit before giving up
+ * @return whether it passed, whether it reported a result, frames run, result code, and text output
+ */
+export async function runUntilMemoryResult(machine: Machine, maxFrames: number): Promise<MemoryResult>{
+    for(let frame = 1; frame <= maxFrames; frame++){
+        machine.getFrame();
+        // $A001-$A003 hold a signature once the result data is valid, $A000 is 0x80 while running
+        if(hasMemorySignature(machine) && machine.readMemory(0xA000) != 0x80){
+            let code = machine.readMemory(0xA000);
+            return {passed: code == 0, finished: true, frames: frame, code, output: readMemoryText(machine)};
+        }
+        if(frame % framesBetweenYields == 0){
+            await yieldToEventLoop();
+        }
+    }
+    let output = hasMemorySignature(machine) ? readMemoryText(machine) : "";
+    return {passed: false, finished: false, frames: maxFrames, code: machine.readMemory(0xA000), output};
+}
+
+function hasMemorySignature(machine: Machine): boolean{
+    return machine.readMemory(0xA001) == 0xDE && machine.readMemory(0xA002) == 0xB0 && machine.readMemory(0xA003) == 0x61;
+}
+
+// Text output is a zero-terminated string starting at $A004
+function readMemoryText(machine: Machine): string{
+    let text = "";
+    for(let addr = 0xA004; addr < 0xC000; addr++){
+        let value = machine.readMemory(addr);
+        if(value == 0){
+            break;
+        }
+        text += String.fromCharCode(value);
+    }
+    return text;
+}
+
+/**
+ * Define one test per Blargg ROM that reports through cartridge RAM, running known failures with it.fails
+ * @param name Test group name
+ * @param roms ROM file names in test/roms/blargg/<folder>
+ * @param knownFailures ROMs that fail on the current emulator
+ * @param folder Folder in test/roms/blargg
+ * @param seconds Emulated seconds to wait for a result
+ */
+export function blarggMemoryTests(name: string, roms: string[], knownFailures: string[], folder: string, seconds: number = 20){
+    for(let rom of knownFailures){
+        if(!roms.includes(rom)){
+            throw new Error("Known failure isn't in the ROM list: " + rom);
+        }
+    }
+
+    let maxFrames = seconds * framesPerSecond;
+
+    describe(name, () => {
+        for(let rom of roms){
+            let test = knownFailures.includes(rom) ? it.fails : it;
+            test(rom, async () => {
+                let machine = new Machine(loadROM("blargg/" + folder + "/" + rom));
+                let result = await runUntilMemoryResult(machine, maxFrames);
+
+                expect(result.finished, "No result after " + result.frames + " frames, output so far:\n" + result.output).toBe(true);
+                expect(result.passed, "Result code " + result.code + ", output:\n" + result.output).toBe(true);
+            }, 120000);
+        }
+    });
 }
 
 export interface RegisterResult {
