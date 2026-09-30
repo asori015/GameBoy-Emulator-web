@@ -111,7 +111,7 @@ export class GPU {
                         // Transition into H-Blank
                         this.m_state = this.state.Mode0; // Transition into Mode 0
                         this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
-                        if((this.m_mmu.read(this.STAT) & 0x80) > 0){ // Check if STAT interrupt enabled, request interrupt
+                        if((this.m_mmu.read(this.STAT) & 0x08) > 0){ // Check if STAT interrupt enabled, request interrupt
                             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);  
                         }
                         this.renderLine();

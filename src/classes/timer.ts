@@ -11,12 +11,14 @@ export class Timer {
 
     private fallingEdgeDelay;
     private pendingOverflow;
+    private m_divLow: number;
 
     constructor(
         private readonly m_mmu: MMU,
     ){
         this.fallingEdgeDelay = false;
         this.pendingOverflow = false;
+        this.m_divLow = 0;
     }
 
     /**
@@ -38,10 +40,11 @@ export class Timer {
         }
 
         // Increment DIV
-        let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV - 1);
+        // Only the upper byte of the divider is visible at DIV
+        let div = (this.m_mmu.read(this.DIV) << 8) + this.m_divLow;
         div += 1;
         this.m_mmu.write(this.DIV, div >> 8);
-        this.m_mmu.write(this.DIV - 1, div);
+        this.m_divLow = div & 0xFF;
 
         this.updateEdge(div);
     }

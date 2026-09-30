@@ -626,7 +626,13 @@ class CPU {
                 return 8;
             },
             () => {
-                this.m_isHalted = true;
+                // With IME off and an interrupt pending, HALT doesn't halt and the next byte is read twice
+                if (!this.IME && (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF) & 0x1F) != 0) {
+                    this.m_haltBug = true;
+                }
+                else {
+                    this.m_isHalted = true;
+                }
                 return 4;
             },
             () => {
@@ -839,6 +845,7 @@ class CPU {
             },
             () => {
                 this.IME = false;
+                this.m_eiDelay = 0;
                 return 4;
             },
             this.opcode00,
@@ -867,7 +874,7 @@ class CPU {
                 return 16;
             },
             () => {
-                this.IME = true;
+                this.m_eiDelay = 2; // IME is set after the next instruction
                 return 4;
             },
             this.opcode00,
@@ -1154,6 +1161,8 @@ class CPU {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
+        this.m_eiDelay = 0;
+        this.m_haltBug = false;
     }
     /**
      * Get a copy of the 8-bit registers
@@ -1170,17 +1179,29 @@ class CPU {
         // A pending interrupt wakes the CPU from HALT. This only matters while
         // halted, so we avoid reading IE/IF on every cycle of normal execution.
         if (this.m_isHalted) {
-            if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)) {
+            if (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF) & 0x1F) {
                 this.m_isHalted = false;
             }
             else {
                 return 4; // Idle one machine cycle
             }
         }
+        if (this.m_eiDelay > 0) {
+            this.m_eiDelay -= 1;
+            if (this.m_eiDelay == 0) {
+                this.IME = true;
+            }
+        }
         if (this.checkForInterupts()) {
             return 20; // Interrupt dispatch
         }
-        return this.execute(this.m_mmu.read(this.m_PC[0]));
+        let instruction = this.m_mmu.read(this.m_PC[0]);
+        // HALT bug: PC doesn't advance past this opcode, so its first operand read repeats it
+        if (this.m_haltBug) {
+            this.m_haltBug = false;
+            this.m_PC[0] -= 1;
+        }
+        return this.execute(instruction);
     }
     checkForInterupts() {
         if (!this.IME) {
@@ -2061,7 +2082,7 @@ class GPU {
                         // Transition into H-Blank
                         this.m_state = this.state.Mode0; // Transition into Mode 0
                         this.m_mmu.write(this.STAT, this.m_mmu.read(this.STAT) & 0xFC); // Set mode on STAT register
-                        if ((this.m_mmu.read(this.STAT) & 0x80) > 0) { // Check if STAT interrupt enabled, request interrupt
+                        if ((this.m_mmu.read(this.STAT) & 0x08) > 0) { // Check if STAT interrupt enabled, request interrupt
                             this.m_mmu.write(this.IF, this.m_mmu.read(this.IF) | 0x02);
                         }
                         this.renderLine();
@@ -2298,6 +2319,17 @@ __webpack_require__.r(__webpack_exports__);
 
 class MMU {
     constructor(rom) {
+        // Bits of 0xFF00-0xFF7F that always read as 1 on DMG (unused bits, write-only bits, unmapped registers)
+        this.ioReadMasks = [
+            0xC0, 0x00, 0x7E, 0xFF, 0x00, 0x00, 0x00, 0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xE0,
+            0x80, 0x3F, 0x00, 0xFF, 0xBF, 0xFF, 0x3F, 0x00, 0xFF, 0xBF, 0x7F, 0xFF, 0x9F, 0xFF, 0xBF, 0xFF,
+            0xFF, 0x00, 0x00, 0xBF, 0x00, 0x00, 0x70, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // 0xFF70
+        ];
         this.m_BIOS = new Uint8Array(0x0100).fill(0);
         this.m_addrBus = new Uint8Array(0x10000).fill(0);
         this.m_rom = new Uint8Array(0x800000).fill(0);
@@ -2405,6 +2437,9 @@ class MMU {
                 return 0xFF;
             case 6:
             case 7: // 0xC000 -> 0xFFFF
+                if (addr >= 0xFF00 && addr < 0xFF80) {
+                    return this.m_addrBus[addr] | this.ioReadMasks[addr - 0xFF00];
+                }
                 return this.m_addrBus[addr];
             default:
                 return 0xFF;
@@ -2551,10 +2586,11 @@ class MMU {
                 break;
             case 6:
             case 7: // 0xC000 -> 0xFFFF
-                if (addr == 0xFF46) { // DMA transfer
-                    addr = val << 8;
+                if (addr == 0xFF46) { // DMA transfer, the register reads back the last value written
+                    this.m_addrBus[addr] = val;
+                    let source = val << 8;
                     for (let i = 0; i < 160; i++) {
-                        this.m_addrBus[0xFE00 + i] = this.m_addrBus[addr + i];
+                        this.m_addrBus[0xFE00 + i] = this.read(source + i);
                     }
                 }
                 else {
@@ -2811,6 +2847,7 @@ class Timer {
         this.DIV_BIT = [7, 1, 3, 5];
         this.fallingEdgeDelay = false;
         this.pendingOverflow = false;
+        this.m_divLow = 0;
     }
     /**
      * Advance the timer by the cycles the last instruction used
@@ -2829,10 +2866,11 @@ class Timer {
             this.pendingOverflow = false;
         }
         // Increment DIV
-        let div = (this.m_mmu.read(this.DIV) << 8) + this.m_mmu.read(this.DIV - 1);
+        // Only the upper byte of the divider is visible at DIV
+        let div = (this.m_mmu.read(this.DIV) << 8) + this.m_divLow;
         div += 1;
         this.m_mmu.write(this.DIV, div >> 8);
-        this.m_mmu.write(this.DIV - 1, div);
+        this.m_divLow = div & 0xFF;
         this.updateEdge(div);
     }
     updateEdge(div) {

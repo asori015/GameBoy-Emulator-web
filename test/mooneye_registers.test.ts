@@ -9,7 +9,6 @@ mooneyeTests("Mooneye registers", [
     "boot_hwio-dmgABCmgb.gb",
     "boot_regs-dmgABC.gb",
 ], [
-    "bits/unused_hwio-GS.gb",
     "boot_div-dmgABCmgb.gb",
     "boot_hwio-dmgABCmgb.gb",
 ]);

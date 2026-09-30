@@ -16,7 +16,6 @@ mooneyeTests("Mooneye PPU", [
     "ppu/vblank_stat_intr-GS.gb",
 ], [
     "ppu/hblank_ly_scx_timing-GS.gb",
-    "ppu/intr_2_0_timing.gb",
     "ppu/intr_2_mode0_timing.gb",
     "ppu/intr_2_mode0_timing_sprites.gb",
     "ppu/intr_2_mode3_timing.gb",

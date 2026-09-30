@@ -534,7 +534,13 @@ export class CPU {
             return 8;
         },
         () => { // HALT
-            this.m_isHalted = true;
+            // With IME off and an interrupt pending, HALT doesn't halt and the next byte is read twice
+            if(!this.IME && (this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF) & 0x1F) != 0){
+                this.m_haltBug = true;
+            }
+            else{
+                this.m_isHalted = true;
+            }
             return 4;
         },
         () => { // LD (HL),A
@@ -747,6 +753,7 @@ export class CPU {
         },
         () => { // DI
             this.IME = false;
+            this.m_eiDelay = 0;
             return 4;
         },
         this.opcode00,
@@ -775,7 +782,7 @@ export class CPU {
             return 16;
         },
         () => { // EI
-            this.IME = true;
+            this.m_eiDelay = 2; // IME is set after the next instruction
             return 4;
         },
         this.opcode00,
@@ -1054,6 +1061,8 @@ export class CPU {
     private IME: boolean;
     private m_cbPrefix: boolean;
     private m_isHalted: boolean;
+    private m_eiDelay: number;
+    private m_haltBug: boolean;
 
     private readonly IF = 0xFF0F;
     private readonly IE = 0xFFFF;
@@ -1083,6 +1092,8 @@ export class CPU {
         this.IME = false;
         this.m_cbPrefix = false;
         this.m_isHalted = false;
+        this.m_eiDelay = 0;
+        this.m_haltBug = false;
     }
 
     /**
@@ -1101,7 +1112,7 @@ export class CPU {
         // A pending interrupt wakes the CPU from HALT. This only matters while
         // halted, so we avoid reading IE/IF on every cycle of normal execution.
         if(this.m_isHalted){
-            if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF)){
+            if(this.m_mmu.read(this.IE) & this.m_mmu.read(this.IF) & 0x1F){
                 this.m_isHalted = false;
             }
             else{
@@ -1109,11 +1120,24 @@ export class CPU {
             }
         }
 
+        if(this.m_eiDelay > 0){
+            this.m_eiDelay -= 1;
+            if(this.m_eiDelay == 0){
+                this.IME = true;
+            }
+        }
+
         if(this.checkForInterupts()){
             return 20; // Interrupt dispatch
         }
 
-        return this.execute(this.m_mmu.read(this.m_PC[0]!));
+        let instruction = this.m_mmu.read(this.m_PC[0]!);
+        // HALT bug: PC doesn't advance past this opcode, so its first operand read repeats it
+        if(this.m_haltBug){
+            this.m_haltBug = false;
+            this.m_PC[0]! -= 1;
+        }
+        return this.execute(instruction);
     }
 
     private checkForInterupts(): boolean {
