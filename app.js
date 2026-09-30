@@ -63,6 +63,9 @@ class Machine {
     getRegisters() {
         return this.m_cpu.getRegisters();
     }
+    readMemory(addr) {
+        return this.m_mmu.read(addr);
+    }
     // Run one instruction, then advance the other components by the cycles it used
     tick() {
         let cycles = this.m_cpu.step();
@@ -2088,10 +2091,7 @@ class GPU {
             }
         }
         else {
-            // Background and window disabled, the line is blank white
-            let rowBase = this.m_mmu.read(this.LY) * 160;
-            this.m_frame.fill(this.colorValues[0], rowBase, rowBase + 160);
-            this.m_bgDotVals.fill(0, rowBase, rowBase + 160);
+            this.clearLine();
         }
         if ((this.LCDC() & 0x02) > 0) {
             this.renderObjectLine();
@@ -2276,6 +2276,12 @@ class GPU {
         if (wx >= 0 && wx <= 166 && wy >= 0 && wy <= 143) {
             this.m_windowLineCounter += 1;
         }
+    }
+    // Background and window disabled, draw line white
+    clearLine() {
+        let rowBase = this.m_mmu.read(this.LY) * 160;
+        this.m_frame.fill(this.colorValues[0], rowBase, rowBase + 160);
+        this.m_bgDotVals.fill(0, rowBase, rowBase + 160);
     }
 }
 

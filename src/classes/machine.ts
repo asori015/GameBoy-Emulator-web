@@ -70,6 +70,10 @@ export class Machine {
         return this.m_cpu.getRegisters();
     }
 
+    readMemory(addr: number): number{
+        return this.m_mmu.read(addr);
+    }
+
     // Run one instruction, then advance the other components by the cycles it used
     private tick(): number{
         let cycles = this.m_cpu.step();
