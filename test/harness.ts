@@ -22,7 +22,7 @@ export interface SerialResult {
 export function loadROM(relativePath: string): Uint8Array{
     let path = join(romDir, relativePath);
     if(!existsSync(path)){
-        throw new Error("Missing test ROM: " + path + "\nRun `npm run fetch-test-roms` first.");
+        throw new Error("Missing test ROM: " + path + "\nDownload Blargg's test ROMs from https://github.com/retrio/gb-test-roms");
     }
     return new Uint8Array(readFileSync(path));
 }

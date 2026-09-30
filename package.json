@@ -109,8 +109,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "vitest run --silent=passed-only",
-    "fetch-test-roms": "node scripts/fetch-test-roms.mjs"
+    "test": "vitest run --silent=passed-only"
   },
   "author": "",
   "license": "ISC"
